@@ -1,16 +1,14 @@
 package moe.caffeine.fridgehero.ui.navigation.bar.bottom
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,8 +17,11 @@ fun BottomBar(tabBarItems: List<TabBarItem>, navController: NavController) {
     var selectedTabIndex by rememberSaveable {
         mutableStateOf(0)
     }
+    var componentHeight by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
     BottomAppBar(
-        modifier = Modifier.navigationBarsPadding(),
+        modifier = Modifier
+            .navigationBarsPadding()
         ) {
         tabBarItems.forEachIndexed { index, tabBarItem ->
             NavigationBarItem(
@@ -38,8 +39,11 @@ fun BottomBar(tabBarItems: List<TabBarItem>, navController: NavController) {
                         }
                     }) {
                         Icon(
-                            imageVector = if (selectedTabIndex == index)
-                            {tabBarItem.selectedIcon} else {tabBarItem.unselectedIcon},
+                            imageVector = if (selectedTabIndex == index) {
+                                tabBarItem.selectedIcon
+                            } else {
+                                tabBarItem.unselectedIcon
+                            },
                             contentDescription = tabBarItem.title
                         )
                     }

@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.home
+package moe.caffeine.fridgehero.screen.home
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search

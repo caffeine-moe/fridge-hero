@@ -12,16 +12,11 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.ConstraintSet
 import androidx.navigation.compose.rememberNavController
-import moe.caffeine.fridgehero.home.Home
 import moe.caffeine.fridgehero.ui.navigation.bar.bottom.BottomBar
 import moe.caffeine.fridgehero.ui.navigation.bar.bottom.BottomNavGraph
 import moe.caffeine.fridgehero.ui.navigation.bar.bottom.TabBarItem
-import moe.caffeine.fridgehero.ui.navigation.bar.top.TopBar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -32,6 +27,7 @@ fun MainScreen() {
 
     val tabBarItems = listOf(homeTab, myFridgeTab, settingsTab)
     val navController = rememberNavController()
+    val barHeight = 80.dp
     Surface(
         modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -42,7 +38,7 @@ fun MainScreen() {
                 },
             ) {
 
-                        BottomNavGraph(tabBarItems,navController, this.)
+                        BottomNavGraph(tabBarItems,navController, barHeight)
                     }
         }
 }

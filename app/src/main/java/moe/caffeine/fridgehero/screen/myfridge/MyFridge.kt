@@ -1,24 +1,29 @@
-package moe.caffeine.fridgehero.myfridge
+package moe.caffeine.fridgehero.screen.myfridge
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import moe.caffeine.fridgehero.screen.scanner.ScannerActivity
 
 @Composable
-fun MyFridge() {
+fun MyFridge(barHeight : Dp) {
+    val context = LocalContext.current
     Scaffold(
-        modifier = Modifier.navigationBarsPadding(),
+        modifier = Modifier.padding(bottom = barHeight),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { },
+                onClick = {
+                    val intent = Intent(context, ScannerActivity::class.java)
+                    context.startActivity(intent)
+                }
             ) {
                 Icon(Icons.Filled.Add, "Floating action button.")
             }

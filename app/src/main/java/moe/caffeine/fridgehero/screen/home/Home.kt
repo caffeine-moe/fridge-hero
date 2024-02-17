@@ -1,21 +1,20 @@
-package moe.caffeine.fridgehero.home
+package moe.caffeine.fridgehero.screen.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import util.profile
 
 @Composable
-fun Home(insets : WindowInsets) {
+fun Home(barHeight : Dp) {
     val greetings = listOf("Hey", "Hiya", "Sup", "Hello")
     Surface(
-        modifier = Modifier.fillMaxSize().consumeWindowInsets(insets)
+        modifier = Modifier.fillMaxSize().padding(bottom=barHeight)
     ) {
         Column(
             verticalArrangement = Arrangement.Top,
