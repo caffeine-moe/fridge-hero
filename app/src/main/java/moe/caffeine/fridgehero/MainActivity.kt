@@ -11,10 +11,12 @@ import moe.caffeine.fridgehero.ui.navigation.bar.MainScreen
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 import moe.caffeine.fridgehero.user.config.ProfileConfig
 import moe.caffeine.fridgehero.user.fetchProfiles
+import moe.caffeine.fridgehero.user.profile.ProfileImpl
 import util.profile
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+    override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FridgeHeroTheme {
@@ -23,10 +25,11 @@ class MainActivity : ComponentActivity() {
                     if (profiles.isEmpty()) {
                         Setup()
                     } else {
-                        profile = profiles.first()
+                        profile = ProfileImpl("0", ProfileConfig("Isaac", "Dines"))
                         MainScreen()
                     }
                 }
+
             }
         }
     }

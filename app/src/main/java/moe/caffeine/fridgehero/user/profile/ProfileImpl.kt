@@ -1,15 +1,14 @@
 package moe.caffeine.fridgehero.user.profile
 
-import android.util.Base64
 import kotlinx.serialization.Serializable
 import moe.caffeine.fridgehero.user.config.ProfileConfig
-import java.util.UUID
+import java.util.*
 
 @Serializable
 data class ProfileImpl(
     override val id : String = "",
     override val config : ProfileConfig,
-    override val fridge : List<String> = listOf()
+    override val fridge : List<String> = listOf(),
 ) : Profile() {
 
     companion object Builder {
@@ -18,7 +17,7 @@ data class ProfileImpl(
         fun config(config : ProfileConfig.() -> Unit) : ProfileConfig = ProfileConfig().also(config)
 
         fun build(config : Builder.() -> ProfileConfig) : ProfileImpl {
-            return ProfileImpl(generateId(),config.invoke(this))
+            return ProfileImpl(generateId(), config.invoke(this))
         }
     }
 }

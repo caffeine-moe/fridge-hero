@@ -6,8 +6,8 @@
             android:name="android.hardware.camera"
             android:required="false" />
 
-    <uses-feature android:name="android.hardware.camera.any" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
             android:allowBackup="true"
@@ -20,11 +20,6 @@
             android:theme="@style/Theme.FridgeHero"
             android:windowSoftInputMode="adjustResize"
             tools:targetApi="34">
-        <activity
-                android:name=".screen.scanner.ScannerActivity"
-                android:exported="false"
-                android:label="@string/title_activity_scanner"
-                android:theme="@style/Theme.FridgeHero"/>
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -43,6 +38,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-    </application>
 
+        <meta-data
+                android:name="firebase_crashlytics_collection_enabled"
+                android:value="false" />
+
+        <meta-data
+                android:name="firebase_analytics_collection_enabled"
+                android:value="false" />
+
+    </application>
 </manifest>

@@ -26,11 +26,13 @@ fun ProfileCreation() {
     fun createProfile() {
         val profile = ProfileImpl.build {
             config {
-                this@config.firstName = firstName.text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                this@config.lastName = lastName.text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                this@config.firstName =
+                    firstName.text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                this@config.lastName =
+                    lastName.text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
             }
         }
-        WriteProfileToDisk(profile,context)
+        WriteProfileToDisk(profile, context)
     }
     OutlinedTextField(
         value = firstName,

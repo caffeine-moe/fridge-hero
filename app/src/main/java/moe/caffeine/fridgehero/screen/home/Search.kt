@@ -13,12 +13,12 @@ fun HomeSearch() {
     var active by remember { mutableStateOf(false) }
     SearchBar(
         query = searchQuery,
-        onQueryChange = {searchQuery=it},
+        onQueryChange = { searchQuery = it },
         onSearch = {
-                   active=false
+            active = false
         },
         placeholder = {
-            Text(text = "Search Food")
+            Text("")
         },
         leadingIcon = {
             Icon(
@@ -31,7 +31,7 @@ fun HomeSearch() {
         content = {},
         active = active,
         onActiveChange = {
-                         //active=it
+            //active=it
         },
         tonalElevation = 0.dp
     )

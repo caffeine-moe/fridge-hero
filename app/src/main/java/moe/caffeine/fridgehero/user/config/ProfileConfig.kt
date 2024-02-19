@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class ProfileConfig(
     var firstName : String = "",
     var lastName : String = "",
-){
+) {
     val fullName : String get() = "$firstName + $lastName"
 }
