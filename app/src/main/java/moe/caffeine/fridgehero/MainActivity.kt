@@ -12,7 +12,7 @@ import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 import moe.caffeine.fridgehero.user.config.ProfileConfig
 import moe.caffeine.fridgehero.user.fetchProfiles
 import moe.caffeine.fridgehero.user.profile.ProfileImpl
-import util.profile
+import moe.caffeine.fridgehero.util.profile
 
 class MainActivity : ComponentActivity() {
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                     if (profiles.isEmpty()) {
                         Setup()
                     } else {
-                        profile = ProfileImpl("0", ProfileConfig("Isaac", "Dines"))
+                        profile = ProfileImpl("0", ProfileConfig("John", "Pork"))
                         MainScreen()
                     }
                 }

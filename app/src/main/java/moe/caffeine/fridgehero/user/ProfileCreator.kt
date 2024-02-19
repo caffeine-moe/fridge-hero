@@ -15,7 +15,7 @@ import kotlinx.serialization.encodeToString
 import moe.caffeine.fridgehero.MainActivity
 import moe.caffeine.fridgehero.user.profile.Profile
 import moe.caffeine.fridgehero.user.profile.ProfileImpl
-import util.json
+import moe.caffeine.fridgehero.util.json
 import java.util.*
 
 @Composable

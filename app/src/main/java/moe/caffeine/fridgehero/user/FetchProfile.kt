@@ -3,7 +3,7 @@ package moe.caffeine.fridgehero.user
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import moe.caffeine.fridgehero.user.profile.Profile
-import util.json
+import moe.caffeine.fridgehero.util.json
 
 @Composable
 fun fetchProfiles() : List<Profile> {

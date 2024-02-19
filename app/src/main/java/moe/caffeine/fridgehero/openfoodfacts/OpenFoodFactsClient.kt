@@ -2,8 +2,8 @@ package moe.caffeine.fridgehero.openfoodfacts
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import util.client
-import util.json
+import moe.caffeine.fridgehero.util.client
+import moe.caffeine.fridgehero.util.json
 
 class OpenFoodFactsClient private constructor() {
 

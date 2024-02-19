@@ -18,7 +18,7 @@ fun HomeSearch() {
             active = false
         },
         placeholder = {
-            Text("")
+            Text("Search")
         },
         leadingIcon = {
             Icon(

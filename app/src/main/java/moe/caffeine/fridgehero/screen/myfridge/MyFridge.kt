@@ -1,10 +1,9 @@
 package moe.caffeine.fridgehero.screen.myfridge
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,12 +83,13 @@ fun MyFridge(navHostController : NavHostController, barHeight : Dp) {
 
                 AnimatedVisibility(
                     visible = !isRemoved,
-                    exit = shrinkVertically(
+                    exit = shrinkHorizontally(
                         animationSpec = tween(500),
-                        shrinkTowards = Alignment.Top
+                        shrinkTowards = Alignment.Start
                     ) + fadeOut()
                 ) {
                     SwipeToDismissBox(
+                        modifier = Modifier.fillMaxSize(),
                         state = state,
                         backgroundContent = {
                             val colour = when (state.dismissDirection) {
@@ -112,7 +112,9 @@ fun MyFridge(navHostController : NavHostController, barHeight : Dp) {
                         },
                         enableDismissFromStartToEnd = false
                     ) {
-                        ItemCard(item)
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            ItemCard(item)
+                        }
                     }
 
                 }
@@ -130,8 +132,7 @@ fun ItemCard(item : FoodItem) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .animateContentSize(),
+            .clip(RoundedCornerShape(16.dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondary
         ),

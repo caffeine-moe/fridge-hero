@@ -12,7 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import util.profile
+import moe.caffeine.fridgehero.screen.myfridge.fridgeContents
+import moe.caffeine.fridgehero.util.profile
 
 @Composable
 fun Home(barHeight : Dp) {
@@ -35,7 +36,7 @@ fun Home(barHeight : Dp) {
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
+            Text("There are ${fridgeContents.size} items in your fridge!")
         }
     }
 }
