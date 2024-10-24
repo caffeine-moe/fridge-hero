@@ -9,5 +9,6 @@ class Profile : RealmObject {
     var _id : ObjectId = ObjectId()
     var firstName : String = ""
     var lastName : String = ""
-    val fullName : String = "$firstName $lastName"
+    val fullName : String
+        get() = "$firstName $lastName"
 }
