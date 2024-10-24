@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
 
                 realm.insertProfile(profile)
 
-                print(realm.fetchProfiles().first())
+                realm.fetchProfiles().map { println(it.firstName) }
             }
         }
     }
