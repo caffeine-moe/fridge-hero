@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import moe.caffeine.fridgehero.model.Profile
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,6 +21,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val profile = Profile().apply {
+            firstName = "Test"
+            lastName = "User"
+        }
+
+        realm.insertProfile(profile)
+
+        print(realm.fetchProfiles().first())
+
         setContent {
             FridgeHeroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
