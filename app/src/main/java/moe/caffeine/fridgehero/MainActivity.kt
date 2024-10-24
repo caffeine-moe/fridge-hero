@@ -14,6 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
 class MainActivity : ComponentActivity() {
+
+    private val realm = FridgeHeroApp().realm
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
