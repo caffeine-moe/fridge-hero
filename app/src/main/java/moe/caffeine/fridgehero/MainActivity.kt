@@ -23,15 +23,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val profile = Profile().apply {
-            firstName = "Test"
-            lastName = "User"
-        }
-
-        realm.insertProfile(profile)
-
-        print(realm.fetchProfiles().first())
-
         setContent {
             FridgeHeroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -40,6 +31,17 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+
+                val profile = Profile().apply {
+                    firstName = "Test"
+                    lastName = "User"
+                }
+
+                println("created profile")
+
+                realm.insertProfile(profile)
+
+                print(realm.fetchProfiles().first())
             }
         }
     }
