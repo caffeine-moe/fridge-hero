@@ -3,7 +3,6 @@ package moe.caffeine.fridgehero.repo
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.ext.query
-import kotlinx.coroutines.flow.map
 import moe.caffeine.fridgehero.model.Profile
 
 object MongoRealm {
