@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.map
 import moe.caffeine.fridgehero.model.Profile
 
 object MongoRealm {
-        val realm : Realm = Realm.open(
+        private val realm : Realm = Realm.open(
             configuration = RealmConfiguration.create(
                 schema = setOf(
                     Profile::class
