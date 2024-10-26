@@ -33,15 +33,13 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val profile = Profile().apply {
-                    firstName = "Test"
-                    lastName = "User"
+                    firstName = "John"
+                    lastName = "Doe"
                 }
 
-                println("created profile")
+                realm.insertObject(profile)
 
-                realm.insertProfile(profile)
-
-                realm.fetchProfiles().map { println(it.firstName) }
+                realm.fetchProfiles().map { println(it.fullName) }
             }
         }
     }
