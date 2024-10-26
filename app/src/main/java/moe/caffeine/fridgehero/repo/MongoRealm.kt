@@ -7,7 +7,7 @@ import io.realm.kotlin.types.RealmObject
 import moe.caffeine.fridgehero.model.Profile
 
 object MongoRealm {
-    private val realm: Realm = Realm.open(
+    val realm: Realm = Realm.open(
         configuration = RealmConfiguration.create(
             schema = setOf(
                 Profile::class
@@ -15,13 +15,19 @@ object MongoRealm {
         )
     )
 
-    fun insertObject(realmObject: RealmObject) {
+    fun updateObject(realmObject: RealmObject) {
         realm.writeBlocking {
             copyToRealm(realmObject)
         }
     }
 
-    fun fetchProfiles(): List<Profile> {
-        return realm.query<Profile>().find().toList()
+    inline fun <reified T : RealmObject> fetchAllByType(): List<T> {
+        return realm.query<T>().find().toList()
+    }
+
+    fun deleteObject(realmObject: RealmObject) {
+        realm.writeBlocking {
+            delete(findLatest(realmObject) ?: return@writeBlocking)
+        }
     }
 }

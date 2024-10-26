@@ -37,9 +37,17 @@ class MainActivity : ComponentActivity() {
                     lastName = "Doe"
                 }
 
-                realm.insertObject(profile)
+                realm.updateObject(profile)
 
-                realm.fetchProfiles().map { println(it.fullName) }
+                val profiles = realm.fetchAllByType<Profile>()
+
+                profiles.map { println(it.fullName) }
+
+                profiles.map {
+                    realm.deleteObject(it)
+                }
+
+                println(realm.fetchAllByType<Profile>().size)
             }
         }
     }
