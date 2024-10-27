@@ -42,11 +42,9 @@ class MainActivity : ComponentActivity() {
                 val profiles = realm.fetchAllByType<Profile>()
 
                 profiles.map { println(it.fullName) }
+                println(profiles.size)
 
-                profiles.map {
-                    realm.deleteObject(it)
-                }
-
+                profiles.map { realm.deleteObject(it) }
                 println(realm.fetchAllByType<Profile>().size)
             }
         }
