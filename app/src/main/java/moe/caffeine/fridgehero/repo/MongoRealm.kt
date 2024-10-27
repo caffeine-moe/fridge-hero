@@ -21,9 +21,8 @@ object MongoRealm {
         }
     }
 
-    inline fun <reified T : RealmObject> fetchAllByType(): List<T> {
-        return realm.query<T>().find().toList()
-    }
+    inline fun <reified T : RealmObject> fetchAllByType(): List<T> =
+        realm.query<T>().find().toList()
 
     fun deleteObject(realmObject: RealmObject) {
         realm.writeBlocking {
