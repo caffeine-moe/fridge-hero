@@ -11,18 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import moe.caffeine.fridgehero.model.Profile
-import moe.caffeine.fridgehero.repo.MongoRealm
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val realm = MongoRealm
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             FridgeHeroTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -31,21 +26,6 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
-
-                val profile = Profile().apply {
-                    firstName = "John"
-                    lastName = "Doe"
-                }
-
-                realm.updateObject(profile)
-
-                val profiles = realm.fetchAllByType<Profile>()
-
-                profiles.map { println(it.fullName) }
-                println(profiles.size)
-
-                profiles.map { realm.deleteObject(it) }
-                println(realm.fetchAllByType<Profile>().size)
             }
         }
     }
