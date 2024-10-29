@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import moe.caffeine.fridgehero.fridge.Fridge
@@ -55,23 +54,19 @@ class MainActivity : ComponentActivity() {
                             Icons.Outlined.Kitchen,
                             destination = { Fridge() })
                     )
-                Surface(
+
+                Scaffold(
                     modifier = Modifier
                         .fillMaxSize()
-                ) {
-                    Scaffold(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .systemBarsPadding(),
-                        bottomBar = {
-                            BottomNavBar(navController, navBarItems)
-                        }
-                    ) { paddingValues ->
-                        Column(
-                            Modifier.padding(paddingValues)
-                        ) {
-                            BottomNavGraph(navController, navBarItems)
-                        }
+                        .systemBarsPadding(),
+                    bottomBar = {
+                        BottomNavBar(navController, navBarItems)
+                    }
+                ) { paddingValues ->
+                    Column(
+                        Modifier.padding(paddingValues)
+                    ) {
+                        BottomNavGraph(navController, navBarItems)
                     }
                 }
             }
