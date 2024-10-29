@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Fridge() {
     val foodItems: MutableList<String> = mutableListOf()
-    (0..10).map { foodItems += "ONION" }
+    (0..25).map { foodItems += "ONION" }
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {}) {
@@ -54,8 +54,8 @@ fun Fridge() {
                             isRemoved = true
                             true
                         } else false
-
                     },
+                    positionalThreshold = { it }
                 )
                 AnimatedVisibility(
                     modifier = Modifier.animateItem(
