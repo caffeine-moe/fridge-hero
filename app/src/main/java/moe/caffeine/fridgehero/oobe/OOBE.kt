@@ -23,6 +23,9 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 fun OOBE() {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var firstNameError by remember { mutableStateOf(false) }
+    var lastNameError by remember { mutableStateOf(false) }
+
     Surface {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -46,25 +49,34 @@ fun OOBE() {
             OutlinedTextField(
                 value = firstName,
                 onValueChange = {
+                    firstNameError = false
                     firstName = it.trim().replaceFirstChar { char -> char.titlecase() }
                 },
                 label = { Text("First Name") },
-                placeholder = { Text("John") }
+                placeholder = { Text("John") },
+                isError = firstNameError
             )
 
             OutlinedTextField(
                 value = lastName,
                 onValueChange = {
+                    lastNameError = false
                     lastName = it.trim().replaceFirstChar { char -> char.titlecase() }
                 },
                 label = { Text("Last Name") },
-                placeholder = { Text("Doe") }
+                placeholder = { Text("Doe") },
+                isError = lastNameError
             )
 
             Button(
                 modifier = Modifier.padding(10.dp),
                 onClick = {
-                    println("$firstName $lastName")
+                    firstName.ifEmpty { firstNameError = true }
+                    lastName.ifEmpty { lastNameError = true }
+                    when (firstName.isEmpty() || lastName.isEmpty()) {
+                        true -> return@Button
+                        else -> println("$firstName $lastName")
+                    }
                 }
             ) {
                 Text("Create Profile")
