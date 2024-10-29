@@ -45,6 +45,8 @@ dependencies {
     //mongodb realm
     implementation(libs.library.base)
 
+    implementation("androidx.compose.material:material-icons-extended:1.7.4")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

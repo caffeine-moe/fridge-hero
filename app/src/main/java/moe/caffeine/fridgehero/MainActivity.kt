@@ -9,20 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.outlined.AccountBox
+import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import moe.caffeine.fridgehero.fridge.Fridge
 import moe.caffeine.fridgehero.home.Home
 import moe.caffeine.fridgehero.model.Profile
 import moe.caffeine.fridgehero.nav.BottomNavBar
 import moe.caffeine.fridgehero.nav.BottomNavGraph
 import moe.caffeine.fridgehero.nav.BottomNavItem
-import moe.caffeine.fridgehero.oobe.OOBE
 import moe.caffeine.fridgehero.repo.MongoRealm
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
@@ -35,8 +35,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FridgeHeroTheme {
-/*                realm.fetchAllByType<Profile>().ifEmpty {
-                    OOBE(this)
+/*                val profiles = realm.fetchAllByType<Profile>()
+                profiles.ifEmpty {
+                    OOBE()
+                    return@FridgeHeroTheme
                 }*/
                 val navController = rememberNavController()
                 val profile = Profile().apply { firstName = "James"; lastName = "Doe" }
@@ -48,10 +50,10 @@ class MainActivity : ComponentActivity() {
                             Icons.Outlined.Home,
                             destination = { Home(profile) }),
                         BottomNavItem(
-                            "OOBE",
-                            Icons.Filled.AccountBox,
-                            Icons.Outlined.AccountBox,
-                            destination = { OOBE() })
+                            "Fridge",
+                            Icons.Filled.Kitchen,
+                            Icons.Outlined.Kitchen,
+                            destination = { Fridge() })
                     )
                 Surface(
                     modifier = Modifier
