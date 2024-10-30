@@ -13,9 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
@@ -34,19 +32,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
-var persistentFridge = listOf<String>()
+var persistentFridge = listOf("ONION")
 
 @Composable
 fun Fridge() {
     var contents by remember { mutableStateOf(persistentFridge) }
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                persistentFridge += "onion ${persistentFridge.lastIndex + 1}"
-                contents = persistentFridge
-            }) {
-                Icon(Icons.Filled.Add, "Add Item Button")
-            }
+            FABMenu { contents = persistentFridge }
         }
     ) { innerPadding ->
         LazyColumn(
