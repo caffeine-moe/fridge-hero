@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -41,13 +43,15 @@ fun BottomNavBar(navController: NavController, navBarItems: List<BottomNavItem>)
                             activeContent = {
                                 Image(
                                     bottomNavItem.selectedIcon,
-                                    "${bottomNavItem.title} Button"
+                                    "${bottomNavItem.title} Button",
+                                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                                 )
                             },
                             inactiveContent = {
                                 Image(
                                     bottomNavItem.unselectedIcon,
-                                    "${bottomNavItem.title} Button"
+                                    "${bottomNavItem.title} Button",
+                                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                                 )
                             }
                         )
