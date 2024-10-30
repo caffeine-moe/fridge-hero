@@ -1,11 +1,10 @@
 package moe.caffeine.fridgehero.nav
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
@@ -36,14 +35,7 @@ fun BottomNavBar(navController: NavController, navBarItems: List<BottomNavItem>)
                     navController.navigate(bottomNavItem.title)
                 },
                 icon = {
-                    BadgedBox(
-                        badge = {
-                            if (bottomNavItem.badgeAmount != null) {
-                                Badge {
-                                    Text(bottomNavItem.badgeAmount.toString())
-                                }
-                            }
-                        }) {
+                    Box {
                         Icon(
                             active = selectedIndex == index,
                             activeContent = {
