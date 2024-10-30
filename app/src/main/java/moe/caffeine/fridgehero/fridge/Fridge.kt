@@ -22,6 +22,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,14 +32,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+
+var persistentFridge = listOf<String>()
 
 @Composable
 fun Fridge() {
-    val foodItems: MutableList<String> = mutableListOf()
-    (0..25).map { foodItems += "ONION" }
+    var contents by remember { mutableStateOf(persistentFridge) }
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {}) {
+            FloatingActionButton(onClick = {
+                persistentFridge += "onion ${persistentFridge.lastIndex + 1}"
+                contents = persistentFridge
+            }) {
                 Icon(Icons.Filled.Add, "Add Item Button")
             }
         }
@@ -46,7 +52,7 @@ fun Fridge() {
         LazyColumn(
             contentPadding = innerPadding
         ) {
-            items(foodItems) { foodItem ->
+            items(contents) { foodItem ->
                 var isRemoved by remember { mutableStateOf(false) }
                 val state = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
@@ -57,6 +63,14 @@ fun Fridge() {
                     },
                     positionalThreshold = { it }
                 )
+
+                LaunchedEffect(isRemoved) {
+                    delay(500)
+                    if (isRemoved) {
+                        persistentFridge -= foodItem
+                    }
+                }
+
                 AnimatedVisibility(
                     modifier = Modifier.animateItem(
                         tween(500)
