@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,9 +16,18 @@ import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.outlined.Dining
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Kitchen
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import moe.caffeine.fridgehero.fridge.Fridge
 import moe.caffeine.fridgehero.home.Home
@@ -33,6 +43,7 @@ class MainActivity : ComponentActivity() {
 
     private val realm = MongoRealm
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,6 +55,7 @@ class MainActivity : ComponentActivity() {
                     return@FridgeHeroTheme
                 }*/
                 val navController = rememberNavController()
+                var title by remember { mutableStateOf("Home") }
                 val profile = Profile().apply { firstName = "James"; lastName = "Doe" }
                 val navBarItems =
                     listOf(
@@ -71,7 +83,19 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .systemBarsPadding(),
                         bottomBar = {
-                            BottomNavBar(navController, navBarItems)
+                            BottomNavBar(navController, navBarItems) { title = it }
+                        },
+                        topBar = {
+                            TopAppBar(
+                                modifier = Modifier
+                                    .background(Color.Black),
+                                title = {
+                                    Text(
+                                        title,
+                                        style = MaterialTheme.typography.headlineLarge
+                                    )
+                                },
+                            )
                         }
                     ) { paddingValues ->
                         Column(

@@ -21,7 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun BottomNavBar(navController: NavController, navBarItems: List<BottomNavItem>) {
+fun BottomNavBar(
+    navController: NavController,
+    navBarItems: List<BottomNavItem>,
+    onNavigate: (title: String) -> Unit
+) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     BottomAppBar(
         modifier = Modifier.systemBarsPadding(),
@@ -35,6 +39,7 @@ fun BottomNavBar(navController: NavController, navBarItems: List<BottomNavItem>)
                     selectedIndex = index
                     navController.popBackStack()
                     navController.navigate(bottomNavItem.title)
+                    onNavigate(bottomNavItem.title)
                 },
                 icon = {
                     Box {
