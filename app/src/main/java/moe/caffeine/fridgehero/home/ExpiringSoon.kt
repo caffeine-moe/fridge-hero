@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.R
+import moe.caffeine.fridgehero.fridge.persistentFridge
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
@@ -30,7 +31,7 @@ fun ExpiringSoon() {
     Row(
         modifier = Modifier.horizontalScroll(scrollState)
     ) {
-        (0..10).map {
+        persistentFridge.forEach { item ->
             Card(
                 modifier = Modifier.padding(10.dp),
             ) {
@@ -49,7 +50,7 @@ fun ExpiringSoon() {
                 Spacer(Modifier.width(10.dp))
                 Text(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = "ONION"
+                    text = item
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
