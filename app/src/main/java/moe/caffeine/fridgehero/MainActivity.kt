@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dining
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.outlined.Dining
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material3.Scaffold
@@ -23,6 +25,7 @@ import moe.caffeine.fridgehero.model.Profile
 import moe.caffeine.fridgehero.nav.BottomNavBar
 import moe.caffeine.fridgehero.nav.BottomNavGraph
 import moe.caffeine.fridgehero.nav.BottomNavItem
+import moe.caffeine.fridgehero.recipe.Recipes
 import moe.caffeine.fridgehero.repo.MongoRealm
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
@@ -47,13 +50,18 @@ class MainActivity : ComponentActivity() {
                         BottomNavItem(
                             "Home",
                             Icons.Filled.Home,
-                            Icons.Outlined.Home,
-                            destination = { Home(profile) }),
+                            Icons.Outlined.Home
+                        ) { Home(profile) },
                         BottomNavItem(
                             "Fridge",
                             Icons.Filled.Kitchen,
-                            Icons.Outlined.Kitchen,
-                            destination = { Fridge() })
+                            Icons.Outlined.Kitchen
+                        ) { Fridge() },
+                        BottomNavItem(
+                            "Recipes",
+                            Icons.Filled.Dining,
+                            Icons.Outlined.Dining,
+                        ) { Recipes() }
                     )
                 Surface(
                     modifier = Modifier.fillMaxSize()
