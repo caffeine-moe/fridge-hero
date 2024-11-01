@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "moe.caffeine.fridgehero"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "moe.caffeine.fridgehero"
