@@ -21,12 +21,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.MainActivity
-import moe.caffeine.fridgehero.model.Profile
-import moe.caffeine.fridgehero.repo.MongoRealm
+import moe.caffeine.fridgehero.MainViewModel
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
-fun OOBE(activity: MainActivity) {
+fun OOBE(viewmodel: MainViewModel, activity: MainActivity) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var firstNameError by remember { mutableStateOf(false) }
@@ -83,12 +82,7 @@ fun OOBE(activity: MainActivity) {
                     when (firstName.isEmpty() || lastName.isEmpty()) {
                         true -> return@Button
                         else -> {
-                            MongoRealm.updateObject(
-                                Profile().apply {
-                                    this.firstName = firstName
-                                    this.lastName = lastName
-                                }
-                            )
+                            viewmodel.createProfile(firstName, lastName)
                             activity.finish()
                             context.startActivity(intent)
                         }

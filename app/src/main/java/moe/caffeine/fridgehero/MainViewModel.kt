@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import moe.caffeine.fridgehero.model.FoodItem
+import moe.caffeine.fridgehero.model.Profile
 import moe.caffeine.fridgehero.repo.MongoRealm
 
 class MainViewModel : ViewModel() {
@@ -17,4 +18,13 @@ class MainViewModel : ViewModel() {
             SharingStarted.WhileSubscribed(),
             emptyList()
         )
+
+    fun createProfile(firstName: String, lastName: String): Profile {
+        val profile = Profile().apply {
+            this.firstName = firstName
+            this.lastName = lastName
+        }
+        realm.updateObject(profile)
+        return profile
+    }
 }
