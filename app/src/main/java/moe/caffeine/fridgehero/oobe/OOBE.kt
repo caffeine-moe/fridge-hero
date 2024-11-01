@@ -1,5 +1,7 @@
 package moe.caffeine.fridgehero.oobe
 
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,17 +17,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import moe.caffeine.fridgehero.MainActivity
+import moe.caffeine.fridgehero.model.Profile
+import moe.caffeine.fridgehero.repo.MongoRealm
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
-fun OOBE() {
+fun OOBE(activity: MainActivity) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
+    val intent = Intent(context as ComponentActivity, activity::class.java)
     Surface {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -75,7 +82,16 @@ fun OOBE() {
                     lastName.ifEmpty { lastNameError = true }
                     when (firstName.isEmpty() || lastName.isEmpty()) {
                         true -> return@Button
-                        else -> println("$firstName $lastName")
+                        else -> {
+                            MongoRealm.updateObject(
+                                Profile().apply {
+                                    this.firstName = firstName
+                                    this.lastName = lastName
+                                }
+                            )
+                            activity.finish()
+                            context.startActivity(intent)
+                        }
                     }
                 }
             ) {

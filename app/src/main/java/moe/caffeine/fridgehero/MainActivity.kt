@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,13 +36,13 @@ import moe.caffeine.fridgehero.model.Profile
 import moe.caffeine.fridgehero.nav.BottomNavBar
 import moe.caffeine.fridgehero.nav.BottomNavGraph
 import moe.caffeine.fridgehero.nav.BottomNavItem
+import moe.caffeine.fridgehero.oobe.OOBE
 import moe.caffeine.fridgehero.recipe.Recipes
-import moe.caffeine.fridgehero.repo.MongoRealm
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val realm = MongoRealm
+    private val viewModel: MainViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,14 +50,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FridgeHeroTheme {
-/*                val profiles = realm.fetchAllByType<Profile>()
+                val profiles = viewModel.realm.fetchAllByType<Profile>()
                 profiles.ifEmpty {
-                    OOBE()
+                    OOBE(this)
                     return@FridgeHeroTheme
-                }*/
+                }
                 val navController = rememberNavController()
                 var title by remember { mutableStateOf("Home") }
-                val profile = Profile().apply { firstName = "James"; lastName = "Doe" }
+                val profile = profiles.first()
                 val navBarItems =
                     listOf(
                         BottomNavItem(
