@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
             FridgeHeroTheme {
                 val profiles = viewModel.realm.fetchAllByType<Profile>()
                 profiles.ifEmpty {
-                    OOBE(this)
+                    OOBE(viewModel, this)
                     return@FridgeHeroTheme
                 }
                 val navController = rememberNavController()
