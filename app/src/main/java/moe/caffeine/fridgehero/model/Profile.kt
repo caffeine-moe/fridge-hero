@@ -1,7 +1,5 @@
 package moe.caffeine.fridgehero.model
 
-import io.realm.kotlin.ext.realmListOf
-import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
@@ -13,8 +11,6 @@ class Profile : RealmObject {
 
     var firstName: String = ""
     var lastName: String = ""
-    var fridge: RealmList<FoodItem> = realmListOf()
-    var recipes: RealmList<Recipe> = realmListOf()
 
     @Ignore
     val fullName: String
