@@ -14,6 +14,7 @@ class Profile : RealmObject {
     var firstName: String = ""
     var lastName: String = ""
     var fridge: RealmList<FoodItem> = realmListOf()
+    var recipes: RealmList<Recipe> = realmListOf()
 
     @Ignore
     val fullName: String
