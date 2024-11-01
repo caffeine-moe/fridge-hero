@@ -21,6 +21,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,21 +32,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import moe.caffeine.fridgehero.MainViewModel
 
-var persistentFridge = listOf("ONION")
 
 @Composable
-fun Fridge() {
-    var contents by remember { mutableStateOf(persistentFridge) }
+fun Fridge(viewModel: MainViewModel) {
+    val fridge by viewModel.foodItems.collectAsState()
     Scaffold(
         floatingActionButton = {
-            FABMenu { contents = persistentFridge }
+            FABMenu {
+                //todo: implement addition
+            }
         }
     ) { innerPadding ->
         LazyColumn(
             contentPadding = innerPadding
         ) {
-            items(contents) { foodItem ->
+            items(fridge) { foodItem ->
                 var isRemoved by remember { mutableStateOf(false) }
                 val state = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
@@ -60,7 +63,7 @@ fun Fridge() {
                 LaunchedEffect(isRemoved) {
                     delay(500)
                     if (isRemoved) {
-                        persistentFridge -= foodItem
+                        //todo: implement removal
                     }
                 }
 
@@ -98,7 +101,7 @@ fun Fridge() {
                         enableDismissFromStartToEnd = false
                     ) {
                         Row {
-                            ItemCard(foodItem)
+                            ItemCard(foodItem.name)
                         }
                     }
                 }

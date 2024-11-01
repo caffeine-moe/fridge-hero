@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                             "Fridge",
                             Icons.Filled.Kitchen,
                             Icons.Outlined.Kitchen
-                        ) { Fridge() },
+                        ) { Fridge(viewModel) },
                         BottomNavItem(
                             "Recipes",
                             Icons.Filled.Dining,

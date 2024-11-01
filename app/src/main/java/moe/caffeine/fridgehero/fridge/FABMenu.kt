@@ -43,7 +43,6 @@ fun FABMenu(
         AnimatedVisibility(expanded) {
             Row {
                 FloatingActionButton(onClick = {
-                    persistentFridge += "onion ${persistentFridge.lastIndex + 1}"
                     onClick()
                 }) {
                     Icon(Icons.Filled.Create, "By Custom")
