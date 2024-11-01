@@ -20,10 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import moe.caffeine.fridgehero.model.FoodItem
 
 @Composable
 fun FABMenu(
-    onClick: () -> Unit
+    onClick: (item: FoodItem) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
@@ -43,7 +44,11 @@ fun FABMenu(
         AnimatedVisibility(expanded) {
             Row {
                 FloatingActionButton(onClick = {
-                    onClick()
+                    onClick(
+                        FoodItem().apply {
+                            name = "onion"
+                        }
+                    )
                 }) {
                     Icon(Icons.Filled.Create, "By Custom")
                 }
