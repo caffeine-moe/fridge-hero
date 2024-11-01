@@ -11,5 +11,5 @@ class FoodItem : RealmObject {
     var name: String = ""
     var brand: String = ""
     var barcode: String = ""
-    var expiryDate: Long = -1L
+    var expiryDate: Long = 0
 }
