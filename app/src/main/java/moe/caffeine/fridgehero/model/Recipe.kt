@@ -11,6 +11,7 @@ class Recipe : RealmObject {
     var _id: BsonObjectId = BsonObjectId()
 
     var name: String = ""
-    val ingredients: RealmList<BsonObjectId> = realmListOf()
+
+    val ingredientIds: RealmList<BsonObjectId> = realmListOf()
     var instructions: String = ""
 }
