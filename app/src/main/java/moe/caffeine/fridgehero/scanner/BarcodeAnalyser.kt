@@ -12,6 +12,8 @@ import com.google.mlkit.vision.common.InputImage
 class BarcodeAnalyser(
     private val onBarcodeDetected: (String) -> Unit
 ) : ImageAnalysis.Analyzer {
+    private var isScanning = true
+
     @OptIn(ExperimentalGetImage::class)
     override fun analyze(image: ImageProxy) {
         image.image?.let { imageToAnalyze ->
@@ -25,7 +27,8 @@ class BarcodeAnalyser(
             barcodeScanner.process(imageToProcess)
                 .addOnSuccessListener { barcodes ->
                     when {
-                        barcodes.isNotEmpty() -> {
+                        barcodes.isNotEmpty() && isScanning -> {
+                            isScanning = false
                             barcodes.first { it.rawValue != null }.rawValue?.let {
                                 onBarcodeDetected(
                                     it
