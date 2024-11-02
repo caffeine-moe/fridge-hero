@@ -1,8 +1,12 @@
 package moe.caffeine.fridgehero.scanner
 
 import android.Manifest
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -19,5 +23,12 @@ fun StartScanner(
                 cameraPermissionState.launchPermissionRequest()
             }
         }
+    }
+
+    AndroidView(
+        factory = { androidViewContext -> PreviewView(androidViewContext) },
+        modifier = Modifier.fillMaxSize()
+    ) { previewView ->
+        println(previewView.bitmap)
     }
 }
