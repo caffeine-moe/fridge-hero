@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.scanner
 
 import android.Manifest
+import androidx.camera.core.CameraSelector
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -29,6 +30,9 @@ fun StartScanner(
         factory = { androidViewContext -> PreviewView(androidViewContext) },
         modifier = Modifier.fillMaxSize()
     ) { previewView ->
-        println(previewView.bitmap)
+        val cameraSelector: CameraSelector = CameraSelector.Builder()
+            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            .build()
+        println(cameraSelector.physicalCameraId)
     }
 }
