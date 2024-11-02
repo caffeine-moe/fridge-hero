@@ -20,11 +20,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.model.FoodItem
 
 @Composable
 fun FABMenu(
-    onClick: (item: FoodItem) -> Unit
+    scanner: (Boolean) -> Unit,
+    custom: (Boolean) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
@@ -36,7 +36,10 @@ fun FABMenu(
     ) {
         AnimatedVisibility(expanded) {
             Row {
-                FloatingActionButton(onClick = {}) {
+                FloatingActionButton(onClick = {
+                    expanded = !expanded
+                    scanner(true)
+                }) {
                     Icon(Icons.Filled.QrCodeScanner, "By Barcode")
                 }
             }
@@ -44,11 +47,8 @@ fun FABMenu(
         AnimatedVisibility(expanded) {
             Row {
                 FloatingActionButton(onClick = {
-                    onClick(
-                        FoodItem().apply {
-                            name = "onion"
-                        }
-                    )
+                    expanded = !expanded
+                    custom(true)
                 }) {
                     Icon(Icons.Filled.Create, "By Custom")
                 }

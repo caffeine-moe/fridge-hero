@@ -1,5 +1,6 @@
 package moe.caffeine.fridgehero.fridge
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
@@ -24,25 +25,35 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.MainViewModel
+import moe.caffeine.fridgehero.scanner.StartScanner
 
 
 @Composable
 fun Fridge(viewModel: MainViewModel) {
     val fridge by viewModel.foodItems.collectAsState()
+    var showScanner by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Scaffold(
         floatingActionButton = {
-            FABMenu { foodItem ->
-                viewModel.addToRealm(foodItem)
-            }
+            FABMenu(
+                scanner = {
+                    showScanner = true
+                },
+                custom = {
+                    TODO()
+                }
+            )
         }
     ) { innerPadding ->
         LazyColumn(
@@ -106,6 +117,12 @@ fun Fridge(viewModel: MainViewModel) {
                     }
                 }
             }
+        }
+    }
+    if (showScanner) {
+        StartScanner {
+            showScanner = false
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
         }
     }
 }
