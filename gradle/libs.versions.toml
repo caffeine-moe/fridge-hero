@@ -1,5 +1,8 @@
 [versions]
+accompanistPermissions = "0.33.2-alpha"
 agp = "8.7.2"
+barcodeScanning = "17.3.0"
+cameraExtensions = "1.4.0"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -14,8 +17,16 @@ materialIconsExtended = "1.7.5"
 navigationCompose = "2.8.3"
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraExtensions" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraExtensions" }
+androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "cameraExtensions" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraExtensions" }
+androidx-camera-video = { module = "androidx.camera:camera-video", version.ref = "cameraExtensions" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraExtensions" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 jetbrains-kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetimeVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
