@@ -10,13 +10,14 @@ object OpenFoodFactsApi {
     private var client = HttpClient(CIO)
 
     suspend fun fetchProductByBarcode(barcode: String): Result<OpenFoodFactsProduct> {
-        val clientResponse: String
+        val openFoodFactsResponse: OpenFoodFactsResponse
         try {
-            clientResponse = client.get("$BARCODE_API_ENDPOINT/$barcode").bodyAsText()
+            val clientResponse = client.get("$BARCODE_API_ENDPOINT/$barcode").bodyAsText()
+            openFoodFactsResponse = json.decodeFromString<OpenFoodFactsResponse>(clientResponse)
+
         } catch (exception: Exception) {
             return Result.failure(exception)
         }
-        val openFoodFactsResponse = json.decodeFromString<OpenFoodFactsResponse>(clientResponse)
         return when (openFoodFactsResponse.status) {
             1 -> {
                 Result.success(openFoodFactsResponse.product)
