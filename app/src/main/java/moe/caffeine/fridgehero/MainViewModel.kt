@@ -42,13 +42,13 @@ class MainViewModel : ViewModel() {
             this.firstName = firstName
             this.lastName = lastName
         }
-        realm.updateObject(profile)
+        addToRealm(profile)
         return profile
     }
 
     fun createFoodItemFromBarcode(barcode: String, onComplete: (Result<FoodItem>) -> Unit) {
         viewModelScope.launch {
-            val fetchResult = OpenFoodFactsApi.fetchProductByBarcode(barcode)
+            val fetchResult = openFoodFactsApi.fetchProductByBarcode(barcode)
             fetchResult.fold(
                 onFailure = { result ->
                     onComplete(Result.failure(result))
