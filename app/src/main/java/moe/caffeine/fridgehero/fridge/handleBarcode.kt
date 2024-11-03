@@ -31,7 +31,7 @@ fun handleBarcode(
                     "Successfully scanned ${foodItem.name}!",
                     Toast.LENGTH_SHORT
                 ).show()
-                viewModel.addToRealm(foodItem)
+                onSuccess(foodItem)
             }
         )
     }
