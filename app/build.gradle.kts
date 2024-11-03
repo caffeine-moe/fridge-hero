@@ -44,6 +44,7 @@ dependencies {
 
     //mongodb realm
     implementation(libs.library.base)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.androidx.camera.core)
