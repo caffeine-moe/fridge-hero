@@ -44,8 +44,8 @@ dependencies {
 
     //mongodb realm
     implementation(libs.library.base)
-
-    implementation(libs.openfoodfacts.kotlin)
+    implementation(libs.ktor.ktor.client.core)
+    implementation(libs.ktor.client.cio)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
