@@ -97,7 +97,6 @@ class MainActivity : ComponentActivity() {
                         Column(
                             Modifier.padding(paddingValues)
                         ) {
-                            println("compose")
                             BottomNavGraph(navController, viewModel.destination, navBarItems)
                         }
                     }
