@@ -142,6 +142,7 @@ fun Fridge(viewModel: MainViewModel) {
                             "Successfully scanned ${foodItem.name}!",
                             Toast.LENGTH_SHORT
                         ).show()
+                        viewModel.addToRealm(foodItem)
                     }
                 )
             }
