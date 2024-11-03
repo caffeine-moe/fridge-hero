@@ -30,7 +30,7 @@ class BarcodeAnalyser(
 
             barcodeScanner.process(imageToProcess)
                 .addOnSuccessListener { barcodes ->
-                    if (barcodes.isEmpty() && !isScanning) return@addOnSuccessListener
+                    if (barcodes.isEmpty() || !isScanning) return@addOnSuccessListener
                     isScanning = false
                     barcodes.first { !it.rawValue.isNullOrBlank() }.rawValue?.let {
                         onBarcodeDetected(it)
