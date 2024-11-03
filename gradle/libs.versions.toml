@@ -15,6 +15,7 @@ activityCompose = "1.9.3"
 composeBom = "2024.10.01"
 materialIconsExtended = "1.7.5"
 navigationCompose = "2.8.3"
+openfoodfactsKotlin = "1.0-SNAPSHOT"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -43,6 +44,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 library-base = { module = "io.realm.kotlin:library-base", version.ref = "libraryBase" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+openfoodfacts-kotlin = { module = "openfoodfacts.github.scrachx.openfood.api.client:openfoodfacts-kotlin", version.ref = "openfoodfactsKotlin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

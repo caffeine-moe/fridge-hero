@@ -123,6 +123,7 @@ fun Fridge(viewModel: MainViewModel) {
         StartScanner {
             showScanner = false
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+
         }
     }
 }
