@@ -120,10 +120,31 @@ fun Fridge(viewModel: MainViewModel) {
         }
     }
     if (showScanner) {
-        StartScanner {
+        StartScanner { barcode ->
             showScanner = false
-            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-
+            Toast.makeText(
+                context,
+                "Processing barcode $barcode, please wait...",
+                Toast.LENGTH_SHORT
+            ).show()
+            viewModel.createFoodItemFromBarcode(barcode) { result ->
+                result.fold(
+                    onFailure = { throwable ->
+                        Toast.makeText(
+                            context,
+                            "ERROR: ${throwable.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    onSuccess = { foodItem ->
+                        Toast.makeText(
+                            context,
+                            "Successfully scanned ${foodItem.name}!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            }
         }
     }
 }
