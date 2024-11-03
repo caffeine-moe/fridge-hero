@@ -23,10 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
@@ -56,7 +52,6 @@ class MainActivity : ComponentActivity() {
                     return@FridgeHeroTheme
                 }
                 val navController = rememberNavController()
-                var title by remember { mutableStateOf("Home") }
                 val profile = profiles.first()
                 val navBarItems =
                     listOf(
@@ -84,7 +79,7 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .systemBarsPadding(),
                         bottomBar = {
-                            BottomNavBar(navController, navBarItems) { title = it }
+                            BottomNavBar(navController, navBarItems) { viewModel.destination = it }
                         },
                         topBar = {
                             TopAppBar(
@@ -92,7 +87,7 @@ class MainActivity : ComponentActivity() {
                                     .background(Color.Black),
                                 title = {
                                     Text(
-                                        title,
+                                        viewModel.destination,
                                         style = MaterialTheme.typography.headlineLarge
                                     )
                                 },
@@ -102,7 +97,8 @@ class MainActivity : ComponentActivity() {
                         Column(
                             Modifier.padding(paddingValues)
                         ) {
-                            BottomNavGraph(navController, navBarItems)
+                            println("compose")
+                            BottomNavGraph(navController, viewModel.destination, navBarItems)
                         }
                     }
                 }

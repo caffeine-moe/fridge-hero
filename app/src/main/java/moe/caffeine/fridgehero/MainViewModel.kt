@@ -1,5 +1,8 @@
 package moe.caffeine.fridgehero
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.realm.kotlin.types.RealmObject
@@ -15,6 +18,8 @@ import moe.caffeine.fridgehero.repo.MongoRealm
 class MainViewModel : ViewModel() {
     val realm = MongoRealm
     val openFoodFactsApi = OpenFoodFactsApi
+
+    var destination by mutableStateOf("Home")
 
     val foodItems = realm
         .fetchAllByTypeAsFlow<FoodItem>()

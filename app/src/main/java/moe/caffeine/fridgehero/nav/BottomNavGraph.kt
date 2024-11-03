@@ -8,11 +8,12 @@ import androidx.navigation.compose.composable
 @Composable
 fun BottomNavGraph(
     navController: NavHostController,
+    startDestination: String,
     navItems: List<BottomNavItem>
 ) {
     NavHost(
         navController = navController,
-        "Home"
+        startDestination = startDestination
     ) {
         navItems.forEach { item ->
             composable(item.title) {
