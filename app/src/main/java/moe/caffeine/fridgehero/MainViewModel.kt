@@ -3,6 +3,7 @@ package moe.caffeine.fridgehero
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -29,8 +30,9 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun removeFromRealm(realmObject: RealmObject) {
+    fun removeFromRealm(realmObject: RealmObject, delay: Long = 0) {
         viewModelScope.launch {
+            delay(delay)
             realm.deleteObject(
                 realmObject
             )
