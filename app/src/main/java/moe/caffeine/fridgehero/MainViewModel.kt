@@ -8,10 +8,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.model.FoodItem
 import moe.caffeine.fridgehero.model.Profile
+import moe.caffeine.fridgehero.openfoodfacts.OpenFoodFactsApi
 import moe.caffeine.fridgehero.repo.MongoRealm
 
 class MainViewModel : ViewModel() {
     val realm = MongoRealm
+    val openFoodFactsApi = OpenFoodFactsApi
 
     val foodItems = realm
         .fetchAllByTypeAsFlow<FoodItem>()
@@ -42,5 +44,19 @@ class MainViewModel : ViewModel() {
         }
         realm.updateObject(profile)
         return profile
+    }
+
+    fun createFoodItemFromBarcode(barcode: String, onComplete: (Result<FoodItem>) -> Unit) {
+        viewModelScope.launch {
+            val fetchResult = OpenFoodFactsApi.fetchProductByBarcode(barcode)
+            fetchResult.fold(
+                onFailure = { result ->
+                    onComplete(Result.failure(result))
+                },
+                onSuccess = { result ->
+                    onComplete(Result.success(result.asFoodItem()))
+                }
+            )
+        }
     }
 }
