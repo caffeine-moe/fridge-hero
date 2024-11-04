@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "moe.caffeine.fridgehero"
-        minSdk = 24
+        minSdk = 21
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -37,6 +37,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -49,9 +50,8 @@ android {
 }
 
 dependencies {
-
-    //mongodb realm
-    implementation(libs.library.base)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation(libs.library.base) //mongodb realm
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.ktor.client.core)
     implementation(libs.ktor.client.cio)
