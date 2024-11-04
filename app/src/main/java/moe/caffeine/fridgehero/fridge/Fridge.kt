@@ -53,7 +53,7 @@ fun Fridge(viewModel: MainViewModel) {
         showScanner -> {
             StartScanner { barcode ->
                 showScanner = false
-                handleBarcode(barcode, viewModel, context) { }
+                handleBarcode(barcode, viewModel, context) { viewModel.addToRealm(it) }
             }
         }
     }
