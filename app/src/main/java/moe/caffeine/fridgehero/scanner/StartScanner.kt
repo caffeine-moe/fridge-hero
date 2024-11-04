@@ -56,12 +56,10 @@ fun StartScanner(
     AndroidView(
         factory = { androidViewContext ->
             PreviewView(androidViewContext).apply {
-                PreviewView(androidViewContext).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                }
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
             }
         },
         modifier = Modifier.fillMaxSize(),
