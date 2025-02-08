@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.33.2-alpha"
-agp = "8.7.2"
+agp = "8.8.0"
 barcodeScanning = "17.3.0"
 cameraExtensions = "1.4.0"
 desugar_jdk_libs = "2.1.2"
