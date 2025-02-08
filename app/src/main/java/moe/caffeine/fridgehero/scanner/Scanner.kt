@@ -28,7 +28,7 @@ import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun StartScanner(
+fun Scanner(
     onScanned: (String) -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current

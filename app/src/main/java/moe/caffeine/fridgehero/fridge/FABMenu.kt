@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FABMenu(
-    scanner: (Boolean) -> Unit,
-    custom: (Boolean) -> Unit
+    scanner: () -> Unit,
+    custom: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
@@ -38,7 +38,7 @@ fun FABMenu(
             Row {
                 FloatingActionButton(onClick = {
                     expanded = !expanded
-                    scanner(true)
+                    scanner()
                 }) {
                     Icon(Icons.Filled.QrCodeScanner, "By Barcode")
                 }
@@ -48,7 +48,7 @@ fun FABMenu(
             Row {
                 FloatingActionButton(onClick = {
                     expanded = !expanded
-                    custom(true)
+                    custom()
                 }) {
                     Icon(Icons.Filled.Create, "By Custom")
                 }
