@@ -1,7 +1,7 @@
 package moe.caffeine.fridgehero.oobe
 
+import android.app.Activity
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,17 +21,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.MainActivity
-import moe.caffeine.fridgehero.MainViewModel
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
-fun OOBE(viewmodel: MainViewModel, activity: MainActivity) {
+fun OOBE(onCreateProfile: (String, String) -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var firstNameError by remember { mutableStateOf(false) }
     var lastNameError by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val intent = Intent(context as ComponentActivity, activity::class.java)
+    val activity = context as? Activity
     Surface {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -82,9 +81,9 @@ fun OOBE(viewmodel: MainViewModel, activity: MainActivity) {
                     when (firstName.isEmpty() || lastName.isEmpty()) {
                         true -> return@Button
                         else -> {
-                            viewmodel.createProfile(firstName, lastName)
-                            activity.finish()
-                            context.startActivity(intent)
+                            onCreateProfile(firstName, lastName)
+                            activity?.finish()
+                            context.startActivity(Intent(context, MainActivity::class.java))
                         }
                     }
                 }

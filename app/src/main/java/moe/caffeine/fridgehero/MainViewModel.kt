@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,6 +30,9 @@ class MainViewModel : ViewModel() {
             SharingStarted.WhileSubscribed(),
             emptyList()
         )
+
+    private val _toastMessage = MutableSharedFlow<String>()
+    val toastMessage: SharedFlow<String> = _toastMessage
 
     fun addToRealm(realmObject: RealmObject) {
         viewModelScope.launch {
@@ -53,17 +58,21 @@ class MainViewModel : ViewModel() {
         return profile
     }
 
-    fun createFoodItemFromBarcode(barcode: String, onComplete: (Result<FoodItem>) -> Unit) {
-        viewModelScope.launch {
-            val fetchResult = openFoodFactsApi.fetchProductByBarcode(barcode)
-            fetchResult.fold(
-                onFailure = { result ->
-                    onComplete(Result.failure(result))
-                },
-                onSuccess = { result ->
-                    onComplete(Result.success(result.asFoodItem()))
-                }
-            )
-        }
+    fun createFoodItemFromBarcode(
+        barcode: String,
+    ) = viewModelScope.launch {
+        val fetchResult = openFoodFactsApi.fetchProductByBarcode(barcode)
+        fetchResult.fold(
+            onFailure = { result ->
+                _toastMessage.emit(
+                    "ERROR: ${result.message}"
+                )
+            },
+            onSuccess = { result ->
+                val foodItem = result.asFoodItem()
+                _toastMessage.emit("Successfully scanned ${foodItem.name}!")
+                addToRealm(foodItem)
+            }
+        )
     }
 }

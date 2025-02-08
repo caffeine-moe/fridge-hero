@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,9 +24,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.collectLatest
 import moe.caffeine.fridgehero.fridge.Fridge
 import moe.caffeine.fridgehero.home.Home
 import moe.caffeine.fridgehero.model.Profile
@@ -48,7 +52,9 @@ class MainActivity : ComponentActivity() {
             FridgeHeroTheme {
                 val profiles = viewModel.realm.fetchAllByType<Profile>()
                 profiles.ifEmpty {
-                    OOBE(viewModel, this)
+                    OOBE { firstName, lastName ->
+                        viewModel.createProfile(firstName, lastName)
+                    }
                     return@FridgeHeroTheme
                 }
                 val navController = rememberNavController()
@@ -64,7 +70,17 @@ class MainActivity : ComponentActivity() {
                             "Fridge",
                             Icons.Filled.Kitchen,
                             Icons.Outlined.Kitchen
-                        ) { Fridge(viewModel) },
+                        ) {
+                            Fridge(
+                                viewModel.foodItems,
+                                createFoodItemFromBarcode = { barcode ->
+                                    viewModel.createFoodItemFromBarcode(barcode)
+                                },
+                                removeFoodItem = { foodItem, delay ->
+                                    viewModel.removeFromRealm(foodItem, delay)
+                                }
+                            )
+                        },
                         BottomNavItem(
                             "Recipes",
                             Icons.Filled.Dining,
@@ -97,6 +113,12 @@ class MainActivity : ComponentActivity() {
                         Column(
                             Modifier.padding(paddingValues)
                         ) {
+                            val context = LocalContext.current
+                            LaunchedEffect(Unit) {
+                                viewModel.toastMessage.collectLatest { message ->
+                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                }
+                            }
                             BottomNavGraph(navController, viewModel.destination, navBarItems)
                         }
                     }
