@@ -5,11 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.realm.kotlin.ext.copyFromRealm
 import io.realm.kotlin.types.RealmObject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.model.FoodItem
@@ -31,22 +32,33 @@ class MainViewModel : ViewModel() {
             emptyList()
         )
 
+    val fridgeItems =
+        foodItems.map { foodItems ->
+            foodItems.filter { !it.isRemoved }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(),
+            emptyList()
+        )
+
     private val _toastMessage = MutableSharedFlow<String>()
     val toastMessage: SharedFlow<String> = _toastMessage
 
-    fun addToRealm(realmObject: RealmObject) {
-        viewModelScope.launch {
-            realm.updateObject(realmObject)
-        }
+    fun addToRealm(realmObject: RealmObject) = viewModelScope.launch {
+        realm.updateObject(realmObject)
     }
 
-    fun removeFromRealm(realmObject: RealmObject, delay: Long = 0) {
-        viewModelScope.launch {
-            delay(delay)
-            realm.deleteObject(
-                realmObject
-            )
-        }
+    fun removeFromRealm(realmObject: RealmObject) = viewModelScope.launch {
+        realm.deleteObject(realmObject)
+    }
+
+    fun updateRemovedState(foodItem: FoodItem, isRemoved: Boolean = true) = viewModelScope.launch {
+        realm.updateObject(foodItem.copyFromRealm().apply { this.isRemoved = isRemoved })
+    }
+
+    fun addExisting(foodItem: FoodItem, expiry: Long) = viewModelScope.launch {
+        if (foodItem.isRemoved) updateRemovedState(foodItem, false)
+        realm.updateObject(foodItem.copyFromRealm().apply { expiryDates += expiry })
     }
 
     fun createProfile(firstName: String, lastName: String): Profile {
@@ -74,5 +86,15 @@ class MainViewModel : ViewModel() {
                 addToRealm(foodItem)
             }
         )
+    }
+
+    fun addFoodItemFromBarcode(barcode: String) = viewModelScope.launch {
+        foodItems.value.firstOrNull { it.barcode == barcode }.also { foodItem ->
+            if (foodItem == null) {
+                createFoodItemFromBarcode(barcode)
+                return@launch
+            }
+            addExisting(foodItem, 0)
+        }
     }
 }

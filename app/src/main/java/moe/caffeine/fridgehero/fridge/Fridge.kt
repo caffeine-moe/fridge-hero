@@ -14,22 +14,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.model.FoodItem
-import moe.caffeine.fridgehero.scanner.Scanner
 
 
 @Composable
 fun Fridge(
     foodItems: StateFlow<List<FoodItem>>,
-    createFoodItemFromBarcode: (String) -> Unit,
+    addFoodItemFromBarcode: (String) -> Unit,
     //createCustomFoodItem: () -> Unit,
-    removeFoodItem: (FoodItem, Long) -> Unit,
+    removeFoodItem: (FoodItem) -> Unit,
 ) {
     val fridge by foodItems.collectAsState()
     var showScanner by rememberSaveable { mutableStateOf(false) }
@@ -53,14 +51,12 @@ fun Fridge(
                 fridge,
                 key = { it._id.toHexString() }
             ) { foodItem ->
-                var isRemoved by remember { mutableStateOf(false) }
                 val state = rememberSwipeToDismissBoxState(
                     confirmValueChange = {
                         if (it == SwipeToDismissBoxValue.EndToStart) {
-                            isRemoved = true
-                            removeFoodItem(foodItem, 450)
+                            removeFoodItem(foodItem)
                         }
-                        isRemoved
+                        true
                     },
                     positionalThreshold = { it }
                 )
@@ -69,7 +65,7 @@ fun Fridge(
                     modifier = Modifier.animateItem(
                         tween(500)
                     ),
-                    visible = !isRemoved,
+                    visible = !foodItem.isRemoved,
                     exit = slideOutHorizontally(
                         targetOffsetX = { -it },
                         animationSpec = tween(500)
@@ -84,15 +80,16 @@ fun Fridge(
     }
     when {
         showScanner -> {
-            Scanner { barcode ->
-                showScanner = false
-                Toast.makeText(
-                    context,
-                    "Processing barcode $barcode, please wait...",
-                    Toast.LENGTH_SHORT
-                ).show()
-                createFoodItemFromBarcode(barcode)
-            }
+            //Scanner { barcode ->
+            val barcode = "7622201726485"
+            showScanner = false
+            Toast.makeText(
+                context,
+                "Processing barcode $barcode, please wait...",
+                Toast.LENGTH_SHORT
+            ).show()
+            addFoodItemFromBarcode(barcode)
+            // }
         }
     }
 }

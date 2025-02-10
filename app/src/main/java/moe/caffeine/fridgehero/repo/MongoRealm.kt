@@ -23,7 +23,7 @@ object MongoRealm {
         )
     )
 
-    fun updateObject(realmObject: RealmObject) {
+    inline fun <reified T : RealmObject> updateObject(realmObject: T) {
         realm.writeBlocking {
             copyToRealm(realmObject, UpdatePolicy.ALL)
         }
@@ -33,10 +33,13 @@ object MongoRealm {
         realm.query<T>().find().toList()
 
     inline fun <reified T : RealmObject> fetchAllByTypeAsFlow(): Flow<List<T>> =
-        realm.query<T>().find().asFlow().map { results -> results.list }
+        realm.query<T>().asFlow().map { results -> results.list }
 
     inline fun <reified T : RealmObject> fetchObjectById(id: BsonObjectId): T? =
         realm.query<T>("_id == $0", id).first().find()
+
+    fun fetchFoodItemByBarcode(barcode: String): FoodItem? =
+        realm.query<FoodItem>("").first().find()
 
     fun deleteObject(realmObject: RealmObject) {
         realm.writeBlocking {

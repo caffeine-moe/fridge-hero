@@ -72,12 +72,12 @@ class MainActivity : ComponentActivity() {
                             Icons.Outlined.Kitchen
                         ) {
                             Fridge(
-                                viewModel.foodItems,
-                                createFoodItemFromBarcode = { barcode ->
-                                    viewModel.createFoodItemFromBarcode(barcode)
+                                viewModel.fridgeItems,
+                                addFoodItemFromBarcode = { barcode ->
+                                    viewModel.addFoodItemFromBarcode(barcode)
                                 },
-                                removeFoodItem = { foodItem, delay ->
-                                    viewModel.removeFromRealm(foodItem, delay)
+                                removeFoodItem = { foodItem ->
+                                    viewModel.updateRemovedState(foodItem)
                                 }
                             )
                         },
