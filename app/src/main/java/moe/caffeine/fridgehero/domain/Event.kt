@@ -1,8 +1,7 @@
 package moe.caffeine.fridgehero.domain
 
-import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CompletableDeferred
-import moe.caffeine.fridgehero.data.realm.FoodItem
+import moe.caffeine.fridgehero.domain.model.FoodItem
 
 // These are used for the asynchronous flow of data around the app
 sealed class Event {
@@ -16,7 +15,7 @@ sealed class Event {
   // new item along with any edited expiry dates as well as upsert the new item automatically.
   data class RequestItemSheet(
     val prefill: FoodItem,
-    val result: CompletableDeferred<Result<Pair<FoodItem, List<Long>>>> = CompletableDeferred(),
+    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred(),
     val upsertResult: Boolean = false,
     val readOnly: Boolean = false
   ) : Event()
@@ -35,23 +34,22 @@ sealed class Event {
     val foodItem: FoodItem,
   ) : Event()
 
-  // Performs the operation on the latest version of the food item
-  // from within a realm write block
-  data class RequestLiveFoodItemOperation(
-    val foodItem: FoodItem,
-    val operation: (FoodItem) -> Unit,
-    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
-  ) : Event()
-
   // Updates an item, or inserts the item if it doesn't exist already
   data class UpsertFoodItem(
     val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 
-  // Completely removes an object from the database
-  data class RemoveFromDatabase(
-    val realmObject: RealmObject,
+  // Permanently deletes food item from realm
+  data class SoftRemoveFoodItem(
+    val foodItem: FoodItem,
+    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
+  ) : Event()
+
+  // Permanently deletes food item from realm
+  data class HardRemoveFoodItem(
+    val foodItem: FoodItem,
+    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 
   // Tells the main activity to display a short toast with the message

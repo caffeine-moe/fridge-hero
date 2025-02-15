@@ -23,7 +23,7 @@ import androidx.navigation.NavController
 @Composable
 fun BottomNavBar(
   navController: NavController,
-  navBarItems: List<BottomNavItem>,
+  navBarItems: List<Screen>,
   onNavigate: (title: String) -> Unit
 ) {
   var selectedIndex by rememberSaveable { mutableIntStateOf(0) }

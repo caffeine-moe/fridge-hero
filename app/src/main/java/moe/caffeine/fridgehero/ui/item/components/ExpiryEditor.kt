@@ -16,23 +16,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.ui.components.ActionableSwipeToDismissBox
+import kotlinx.coroutines.launch
+import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 
 @Composable
 fun ExpiryEditor(
   expiryDates: List<Long>,
   readOnly: Boolean = false,
-  onExpiryAddRequest: () -> Unit = {},
-  onExpiryDuplicateRequest: (Long) -> Unit = {},
-  onExpiryRemoveRequest: (Long) -> Unit = {},
+  onRequestExpiry: suspend () -> Result<Long>,
+  onListChanged: (List<Long>) -> Unit
 ) {
+  val scope = rememberCoroutineScope()
+  val firstThreeExpiryDates by remember(expiryDates) { mutableStateOf(expiryDates.take(3)) }
   Column {
     TextButton(
       enabled = !readOnly,
-      onClick = onExpiryAddRequest
+      onClick = {
+        scope.launch {
+          onRequestExpiry().onSuccess { date ->
+            onListChanged(expiryDates.toMutableList().apply { add(date) })
+          }
+        }
+      }
     ) {
       Text("Add Expiry Date")
     }
@@ -51,20 +63,25 @@ fun ExpiryEditor(
           .animateContentSize()
           .defaultMinSize(minHeight = 80.dp)
       ) {
-        for (expiryDate in expiryDates) {
+        firstThreeExpiryDates.forEach { expiryDate ->
           ActionableSwipeToDismissBox(
             modifier = Modifier
               .fillMaxWidth()
               .height(80.dp)
               .padding(4.dp),
+            visible = firstThreeExpiryDates.contains(expiryDate),
             onStartToEndAction = {
               if (!readOnly)
-                onExpiryDuplicateRequest(expiryDate)
+                onListChanged(
+                  expiryDates.toMutableList().apply { add(expiryDate) }
+                )
             },
             enableEndToStartDismiss = false,
             onEndToStartAction = {
               if (!readOnly)
-                onExpiryRemoveRequest(expiryDate)
+                onListChanged(
+                  expiryDates.toMutableList().apply { remove(expiryDate) }
+                )
             },
           ) {
             Card(

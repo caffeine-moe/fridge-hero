@@ -32,6 +32,7 @@ import java.util.concurrent.Executors
 @Composable
 fun Scanner(
   paddingValues: PaddingValues = PaddingValues(),
+  onDismiss: () -> Unit,
   onScanned: (String) -> Unit,
 ) {
   val lifecycleOwner = LocalLifecycleOwner.current

@@ -1,9 +1,7 @@
-package moe.caffeine.fridgehero.data.remote.openfoodfacts
+package moe.caffeine.fridgehero.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import moe.caffeine.fridgehero.data.realm.FoodItem
-import moe.caffeine.fridgehero.data.remote.openfoodfacts.OpenFoodFactsApi.fetchImageAsByteArrayFromURL
 
 @Serializable
 data class OpenFoodFactsProduct(
@@ -118,19 +116,4 @@ data class OpenFoodFactsProduct(
   val quantity: String = "",
   @SerialName("vitamins_tags")
   val vitaminsTags: List<String> = listOf(),
-) {
-  suspend fun asFoodItem(): FoodItem {
-    val imageFromUrl = fetchImageAsByteArrayFromURL(imageThumbUrl).await()
-    return FoodItem().apply {
-      name = productName
-      barcode = code
-      brand = brandsTags.firstOrNull() ?: "N/A"
-      imageFromUrl.fold(
-        onSuccess = { fetchedByteArray ->
-          imageByteArray = fetchedByteArray
-        },
-        onFailure = {}
-      )
-    }
-  }
-}
+)

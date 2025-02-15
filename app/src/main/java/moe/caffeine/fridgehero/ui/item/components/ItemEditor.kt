@@ -29,7 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.R
-import moe.caffeine.fridgehero.data.realm.FoodItem
+import moe.caffeine.fridgehero.domain.model.FoodItem
 
 @Composable
 fun ItemEditor(
@@ -69,10 +69,7 @@ fun ItemEditor(
             value = editableFoodItem.name,
             readOnly = readOnly,
             onValueChange = {
-              editableFoodItem.apply {
-                name = it
-                apply(onFieldChanged)
-              }
+              onFieldChanged(editableFoodItem.copy(name = it))
             },
             label = { Text("Name") },
             singleLine = true
@@ -81,10 +78,7 @@ fun ItemEditor(
             value = editableFoodItem.brand,
             readOnly = readOnly,
             onValueChange = {
-              editableFoodItem.apply {
-                brand = it
-                apply(onFieldChanged)
-              }
+              onFieldChanged(editableFoodItem.copy(brand = it))
             },
             label = { Text("Brand") },
             singleLine = true
@@ -126,10 +120,7 @@ fun ItemEditor(
             value = editableFoodItem.barcode,
             readOnly = readOnly,
             onValueChange = {
-              editableFoodItem.apply {
-                barcode = it
-                apply(onFieldChanged)
-              }
+              onFieldChanged(editableFoodItem.copy(barcode = it))
             },
             label = { Text("Barcode") },
             singleLine = true

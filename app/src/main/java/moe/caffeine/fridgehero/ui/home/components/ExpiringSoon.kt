@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.home
+package moe.caffeine.fridgehero.ui.home.components
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row

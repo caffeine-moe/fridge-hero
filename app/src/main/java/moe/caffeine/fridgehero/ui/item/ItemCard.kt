@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -29,23 +28,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.R
-import moe.caffeine.fridgehero.data.realm.FoodItem
-import moe.caffeine.fridgehero.ui.item.components.ExpiryEditor
+import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemCard(
   item: FoodItem,
-  onShowMore: () -> Unit,
   onLongPress: () -> Unit,
-  onExpiryAddRequest: () -> Unit,
-  onExpiryDuplicateRequest: (Long) -> Unit,
-  onExpiryRemoveRequest: (Long) -> Unit
+  expandedContent: @Composable () -> Unit
 ) {
   var expanded by remember { mutableStateOf(false) }
-  val showShowMoreButton by remember(item) { derivedStateOf { item.expiryDates.size > 3 } }
-  val firstThreeExpiryDates by remember(item) { derivedStateOf { item.expiryDates.take(3) } }
   val imageBitmap by remember(item) {
     derivedStateOf {
       if (item.imageByteArray.isNotEmpty()) BitmapPainter(
@@ -104,19 +97,7 @@ fun ItemCard(
             .align(Alignment.Start)
             .fillMaxWidth()
         ) {
-          ExpiryEditor(
-            firstThreeExpiryDates,
-            onExpiryAddRequest = onExpiryAddRequest,
-            onExpiryDuplicateRequest = onExpiryDuplicateRequest,
-            onExpiryRemoveRequest = onExpiryRemoveRequest,
-          )
-          if (showShowMoreButton) {
-            TextButton(
-              onClick = onShowMore
-            ) {
-              Text("See more...")
-            }
-          }
+          expandedContent()
         }
       }
     }

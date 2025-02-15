@@ -5,10 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.MainScreen
 import moe.caffeine.fridgehero.ui.MainViewModel
 import moe.caffeine.fridgehero.ui.oobe.OOBE
@@ -18,28 +18,35 @@ class MainActivity : ComponentActivity() {
 
   private val viewModel: MainViewModel by viewModels()
 
-  @OptIn(ExperimentalMaterial3Api::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      val scope = rememberCoroutineScope()
-      val profiles = viewModel.profiles.collectAsState()
       FridgeHeroTheme {
-        if (profiles.value.isEmpty()) {
+        Surface(
+          modifier = Modifier.fillMaxSize()
+        ) {
+          viewModel.profile?.let { profile ->
+            MainScreen(
+              profile = profile,
+              navBarItems = viewModel.navBarItems,
+              foodItems = viewModel.foodItems,
+              eventFlow = viewModel.eventFlow,
+              emitEvent = {
+                viewModel.emitEvent(it)
+              }
+            )
+            return@Surface
+          }
           OOBE { firstName, lastName ->
-            scope.launch {
-              viewModel.createProfile(firstName, lastName)
-            }
+            viewModel.repository.upsertProfile(
+              Profile(
+                firstName = firstName,
+                lastName = lastName
+              )
+            )
           }
         }
-        MainScreen(
-          viewModel.navBarItems,
-          eventFlow = viewModel.eventFlow,
-          emitEvent = {
-            viewModel.emitEvent(it)
-          }
-        )
       }
     }
   }

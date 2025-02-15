@@ -7,47 +7,46 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.CompletableDeferred
+import moe.caffeine.fridgehero.data.model.OpenFoodFactsProduct
+import moe.caffeine.fridgehero.data.model.OpenFoodFactsResponse
 
 object OpenFoodFactsApi {
 
   private var client = HttpClient(CIO)
 
-  suspend fun fetchProductByBarcode(barcode: String): CompletableDeferred<Result<OpenFoodFactsProduct>> {
+  suspend fun fetchProductByBarcode(barcode: String): Result<OpenFoodFactsProduct> {
     val openFoodFactsResponse: OpenFoodFactsResponse
     try {
       val clientResponse = client.get("$BARCODE_API_ENDPOINT/$barcode").bodyAsText()
       openFoodFactsResponse = json.decodeFromString<OpenFoodFactsResponse>(clientResponse)
 
     } catch (exception: Exception) {
-      return CompletableDeferred(Result.failure(exception))
+      return Result.failure(exception)
     }
     return when (openFoodFactsResponse.status) {
       1 -> {
-        CompletableDeferred(Result.success(openFoodFactsResponse.product))
+        Result.success(openFoodFactsResponse.product)
       }
 
       else -> {
-        CompletableDeferred(Result.failure(Throwable(openFoodFactsResponse.statusVerbose)))
+        Result.failure(Throwable(openFoodFactsResponse.statusVerbose))
       }
     }
   }
 
-  suspend fun fetchImageAsByteArrayFromURL(url: String): CompletableDeferred<Result<ByteArray>> {
+  suspend fun fetchImageAsByteArrayFromURL(url: String): Result<ByteArray> {
     val response: HttpResponse
     try {
       response = client.get(url)
     } catch (exception: Exception) {
-      return CompletableDeferred(Result.failure(exception))
+      return Result.failure(exception)
     }
-    return CompletableDeferred(
-      when (response.status) {
-        HttpStatusCode.OK -> {
-          Result.success(response.bodyAsBytes())
-        }
-
-        else -> Result.failure(Throwable(response.bodyAsText()))
+    return when (response.status) {
+      HttpStatusCode.OK -> {
+        Result.success(response.bodyAsBytes())
       }
-    )
+
+      else -> Result.failure(Throwable(response.bodyAsText()))
+    }
   }
 }

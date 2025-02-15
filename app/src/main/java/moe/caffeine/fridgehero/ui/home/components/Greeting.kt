@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.home
+package moe.caffeine.fridgehero.ui.home.components
 
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text

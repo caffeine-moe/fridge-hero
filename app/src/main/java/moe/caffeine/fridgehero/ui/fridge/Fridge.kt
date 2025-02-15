@@ -11,27 +11,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import moe.caffeine.fridgehero.data.realm.FoodItem
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.ui.components.ActionableSwipeToDismissBox
+import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 import moe.caffeine.fridgehero.ui.item.ItemCard
+import moe.caffeine.fridgehero.ui.item.components.ExpiryEditor
 
 @Composable
 fun Fridge(
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit,
 ) {
-  val fridge by foodItems.collectAsStateWithLifecycle()
   val lazyListState = rememberLazyListState()
-  val scope = rememberCoroutineScope()
-
+  val fridge by foodItems.collectAsStateWithLifecycle()
   Scaffold(
     floatingActionButton = {
       FloatingActionButton(
@@ -54,7 +51,7 @@ fun Fridge(
     ) {
       items(
         fridge,
-        key = { it._id.toHexString() }
+        key = { it.realmObjectId.toHexString() }
       ) { listFoodItem ->
         ActionableSwipeToDismissBox(
           visible = !listFoodItem.isRemoved,
@@ -69,32 +66,23 @@ fun Fridge(
           },
           onEndToStartAction = {
             emitEvent(
-              Event.RequestLiveFoodItemOperation(
-                listFoodItem,
-                {
-                  it.expiryDates.clear()
-                }
+              Event.SoftRemoveFoodItem(
+                listFoodItem
               )
             )
           }
         ) {
           ItemCard(
             item = listFoodItem,
-            onShowMore = {
-              emitEvent(
-                Event.RequestItemSheet(
-                  listFoodItem,
-                  upsertResult = true
-                )
-              )
-            },
             onLongPress = {
               emitEvent(
                 Event.RequestItemFullScreen(listFoodItem)
               )
-            },
-            onExpiryAddRequest = {
-              scope.launch {
+            }
+          ) {
+            ExpiryEditor(
+              expiryDates = listFoodItem.expiryDates,
+              onRequestExpiry = {
                 val completableExpiry: CompletableDeferred<Result<Long>> =
                   CompletableDeferred()
                 emitEvent(
@@ -102,39 +90,17 @@ fun Fridge(
                     completableExpiry
                   )
                 )
-                completableExpiry.await().onSuccess { expiryDate ->
-                  emitEvent(
-                    Event.RequestLiveFoodItemOperation(
-                      listFoodItem,
-                      { foodItem ->
-                        foodItem.expiryDates += expiryDate
-                      }
-                    )
+                completableExpiry.await()
+              },
+              onListChanged = { changedList ->
+                emitEvent(
+                  Event.UpsertFoodItem(
+                    listFoodItem.copy(expiryDates = changedList)
                   )
-                }
+                )
               }
-            },
-            onExpiryDuplicateRequest = { expiryDate ->
-              emitEvent(
-                Event.RequestLiveFoodItemOperation(
-                  listFoodItem,
-                  { foodItem ->
-                    foodItem.expiryDates += expiryDate
-                  }
-                )
-              )
-            },
-            onExpiryRemoveRequest = { expiry ->
-              emitEvent(
-                Event.RequestLiveFoodItemOperation(
-                  listFoodItem,
-                  {
-                    it.expiryDates -= expiry
-                  }
-                )
-              )
-            }
-          )
+            )
+          }
         }
       }
     }

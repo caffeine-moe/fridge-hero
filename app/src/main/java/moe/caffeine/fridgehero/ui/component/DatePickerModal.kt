@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.components
+package moe.caffeine.fridgehero.ui.component
 
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog

@@ -10,7 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.data.realm.Profile
+import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.ui.home.components.Greeting
 
 @Composable
 fun Home(profile: Profile) {

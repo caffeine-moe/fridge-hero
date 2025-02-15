@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.components
+package moe.caffeine.fridgehero.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
