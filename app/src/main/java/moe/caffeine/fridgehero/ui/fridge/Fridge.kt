@@ -20,7 +20,7 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 import moe.caffeine.fridgehero.ui.item.ItemCard
-import moe.caffeine.fridgehero.ui.item.components.ExpiryEditor
+import moe.caffeine.fridgehero.ui.item.component.ExpiryEditor
 
 @Composable
 fun Fridge(

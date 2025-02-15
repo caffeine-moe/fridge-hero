@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.item.ItemSheet
-import moe.caffeine.fridgehero.ui.item.components.ExpiryEditor
-import moe.caffeine.fridgehero.ui.item.components.ItemEditor
+import moe.caffeine.fridgehero.ui.item.component.ExpiryEditor
+import moe.caffeine.fridgehero.ui.item.component.ItemEditor
 
 @Composable
 fun ItemSheetOverlay(

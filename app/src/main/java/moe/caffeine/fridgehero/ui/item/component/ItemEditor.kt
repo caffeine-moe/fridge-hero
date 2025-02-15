@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.item.components
+package moe.caffeine.fridgehero.ui.item.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
