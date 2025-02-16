@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import moe.caffeine.fridgehero.domain.mapper.daysUntil
+import moe.caffeine.fridgehero.domain.mapper.toReadableDate
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 
 @Composable
@@ -104,7 +106,7 @@ fun ExpiryEditor(
                 contentAlignment = Alignment.Center,
               ) {
                 Text(
-                  text = "Expires: $expiryDate"
+                  text = "Expires: ${expiryDate.toReadableDate()} (${expiryDate.daysUntil()} days)"
                 )
               }
             }
