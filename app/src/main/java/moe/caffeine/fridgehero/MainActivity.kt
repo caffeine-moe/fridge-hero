@@ -7,11 +7,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.MainScreen
 import moe.caffeine.fridgehero.ui.MainViewModel
-import moe.caffeine.fridgehero.ui.oobe.OOBE
+import moe.caffeine.fridgehero.ui.overlay.LoadingOverlay
+import moe.caffeine.fridgehero.ui.screen.oobe.OOBE
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,28 +28,37 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
+      val profileState by viewModel.profile.collectAsState()
+      var showLoadingOverlay by remember { mutableStateOf(true) }
       FridgeHeroTheme {
         Surface(
           modifier = Modifier.fillMaxSize()
         ) {
-          viewModel.profile?.let { profile ->
-            MainScreen(
-              profile = profile,
-              navBarItems = viewModel.navBarItems,
-              foodItems = viewModel.foodItems,
-              eventFlow = viewModel.eventFlow,
-              emitEvent = {
-                viewModel.emitEvent(it)
+          LoadingOverlay(visible = showLoadingOverlay)
+          profileState?.let { maybeProfile ->
+            maybeProfile.fold(
+              onSuccess = { profile ->
+                showLoadingOverlay = false
+                MainScreen(
+                  profile = profile,
+                  navBarItems = viewModel.navBarItems,
+                  foodItems = viewModel.foodItems,
+                  eventFlow = viewModel.eventFlow,
+                  emitEvent = {
+                    viewModel.emitEvent(it)
+                  }
+                )
+              },
+              onFailure = {
+                OOBE { firstName, lastName ->
+                  viewModel.upsertProfile(
+                    Profile(
+                      firstName = firstName,
+                      lastName = lastName
+                    )
+                  )
+                }
               }
-            )
-            return@Surface
-          }
-          OOBE { firstName, lastName ->
-            viewModel.repository.upsertProfile(
-              Profile(
-                firstName = firstName,
-                lastName = lastName
-              )
             )
           }
         }

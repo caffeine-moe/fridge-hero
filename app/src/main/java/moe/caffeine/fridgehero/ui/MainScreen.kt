@@ -2,7 +2,14 @@ package moe.caffeine.fridgehero.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,12 +24,13 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.component.MainScaffold
-import moe.caffeine.fridgehero.ui.component.overlay.DatePickerOverlay
-import moe.caffeine.fridgehero.ui.component.overlay.FullScreenOverlay
-import moe.caffeine.fridgehero.ui.component.overlay.ItemSheetOverlay
-import moe.caffeine.fridgehero.ui.component.overlay.ScannerOverlay
-import moe.caffeine.fridgehero.ui.nav.Screen
+import moe.caffeine.fridgehero.ui.overlay.DatePickerOverlay
+import moe.caffeine.fridgehero.ui.overlay.FullScreenOverlay
+import moe.caffeine.fridgehero.ui.overlay.ItemSheetOverlay
+import moe.caffeine.fridgehero.ui.overlay.ScannerOverlay
+import moe.caffeine.fridgehero.ui.screen.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
   profile: Profile,
@@ -34,13 +42,36 @@ fun MainScreen(
   val navController = rememberNavController()
   val context = LocalContext.current
 
-  // overlay states
+  // mutable overlay states
   var destination by rememberSaveable { mutableStateOf("Home") }
   var fullScreenItem by remember { mutableStateOf<FoodItem?>(null) }
   var datePickerRequest by remember { mutableStateOf<Event.RequestDateFromPicker?>(null) }
+
   var bottomSheetRequest by remember { mutableStateOf<Event.RequestItemSheet?>(null) }
+  val standardBottomSheetState = rememberStandardBottomSheetState(
+    skipHiddenState = false,
+    initialValue = SheetValue.Hidden,
+    confirmValueChange = { true }
+  )
+  val bottomSheetScaffoldState =
+    rememberBottomSheetScaffoldState(bottomSheetState = standardBottomSheetState)
+
   var barcodeScanRequest by remember { mutableStateOf<Event.RequestBarcodeFromScanner?>(null) }
   var appBarPadding by remember { mutableStateOf(PaddingValues()) }
+
+  LaunchedEffect(bottomSheetRequest) {
+    if (bottomSheetRequest != null)
+      standardBottomSheetState.expand()
+    if (bottomSheetRequest == null)
+      standardBottomSheetState.hide()
+  }
+
+  LaunchedEffect(barcodeScanRequest) {
+    if (barcodeScanRequest != null && bottomSheetRequest != null)
+      standardBottomSheetState.partialExpand()
+    else if (bottomSheetRequest != null)
+      standardBottomSheetState.expand()
+  }
 
   MainScaffold(
     navController = navController,
@@ -78,6 +109,7 @@ fun MainScreen(
   )
 
   DatePickerOverlay(
+    state = rememberDatePickerState(initialDisplayMode = DisplayMode.Input),
     datePickerRequest = datePickerRequest,
     onDismiss = { datePickerRequest = null }
   )
@@ -88,10 +120,13 @@ fun MainScreen(
   )
 
   ItemSheetOverlay(
-    itemSheetRequest = bottomSheetRequest,
+    state = bottomSheetScaffoldState,
+    prefill = bottomSheetRequest?.prefill ?: FoodItem(),
     onDismiss = {
       bottomSheetRequest?.result?.complete(Result.failure(Throwable("Dismissed")))
       bottomSheetRequest = null
+      if (barcodeScanRequest != null)
+        barcodeScanRequest = null
     },
     onBarcodeFromScanner = {
       val completableBarcode: CompletableDeferred<Result<String>> =
@@ -99,24 +134,14 @@ fun MainScreen(
       emitEvent(Event.RequestBarcodeFromScanner(completableBarcode))
       completableBarcode.await()
     },
-    onFoodItemFromBarcodeFromScanner = {
-      val completableBarcode: CompletableDeferred<Result<String>> =
-        CompletableDeferred()
+    onFoodItemFromBarcode = { barcode ->
       val completableFoodItem: CompletableDeferred<Result<FoodItem>> =
         CompletableDeferred()
-      emitEvent(Event.RequestBarcodeFromScanner(completableBarcode))
-      completableBarcode.await().fold(
-        onSuccess = { barcode ->
-          emitEvent(
-            Event.RequestFoodItemFromBarcode(
-              barcode,
-              completableFoodItem
-            )
-          )
-        },
-        onFailure = {
-          return@ItemSheetOverlay Result.failure(it)
-        }
+      emitEvent(
+        Event.RequestFoodItemFromBarcode(
+          barcode,
+          completableFoodItem
+        )
       )
       completableFoodItem.await()
     },

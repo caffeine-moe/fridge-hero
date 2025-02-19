@@ -14,7 +14,19 @@ fun Long.toDate(): LocalDate =
 
 fun Long.toReadableDate(): String =
   this.toDate()
-    .let { localDate -> "${localDate.dayOfMonth}/${localDate.monthNumber.let { monthNumber -> if (monthNumber < 10) "0$monthNumber" else monthNumber }}/${localDate.year}" }
+    .let { localDate ->
+      "${
+        localDate.dayOfMonth.let { dayOfMonth ->
+          if (dayOfMonth < 10) "0$dayOfMonth" else dayOfMonth
+        }
+      }" +
+              "/${
+                localDate.monthNumber.let { monthNumber ->
+                  if (monthNumber < 10) "0$monthNumber" else monthNumber
+                }
+              }" +
+              "/${localDate.year}"
+    }
 
 fun Long.daysUntil(): Int =
   Clock.System.now().daysUntil(this.toInstant(), TimeZone.currentSystemDefault())

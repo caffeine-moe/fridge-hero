@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.nav
+package moe.caffeine.fridgehero.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -8,9 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
-import moe.caffeine.fridgehero.ui.fridge.Fridge
-import moe.caffeine.fridgehero.ui.home.Home
-import moe.caffeine.fridgehero.ui.recipe.Recipes
+import moe.caffeine.fridgehero.ui.screen.Screen
+import moe.caffeine.fridgehero.ui.screen.fridge.Fridge
+import moe.caffeine.fridgehero.ui.screen.home.Home
+import moe.caffeine.fridgehero.ui.screen.recipe.Recipes
 
 @Composable
 fun BottomNavGraph(

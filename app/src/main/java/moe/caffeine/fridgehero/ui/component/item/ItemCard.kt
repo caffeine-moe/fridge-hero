@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.item
+package moe.caffeine.fridgehero.ui.component.item
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi

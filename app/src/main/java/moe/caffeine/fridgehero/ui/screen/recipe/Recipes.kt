@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.recipe
+package moe.caffeine.fridgehero.ui.screen.recipe
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box

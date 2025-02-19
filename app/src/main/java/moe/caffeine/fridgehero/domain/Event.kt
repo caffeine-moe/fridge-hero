@@ -12,11 +12,10 @@ sealed class Event {
   ) : Event()
 
   // Launches a bottom sheet from anywhere, can be prefilled or not, can return the
-  // new item along with any edited expiry dates as well as upsert the new item automatically.
+  // new item along with any edited expiry dates.
   data class RequestItemSheet(
-    val prefill: FoodItem,
+    val prefill: FoodItem = FoodItem(),
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred(),
-    val upsertResult: Boolean = false,
     val readOnly: Boolean = false
   ) : Event()
 

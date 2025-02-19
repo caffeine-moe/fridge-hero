@@ -15,21 +15,21 @@ interface DataRepository {
   val openFoodFactsApi: OpenFoodFactsApi
 
   //profile interactions
-  fun getProfile(): Result<Profile>
-  fun upsertProfile(profile: Profile)
-  fun deleteProfile(profile: Profile)
+  fun getProfileAsFlow(): Flow<Result<Profile>?>
+  suspend fun upsertProfile(profile: Profile)
+  suspend fun deleteProfile(profile: Profile)
 
   //food item interactions
   fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>>
-  fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem>
-  fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem>
-  fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem>
+  suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem>
+  suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem>
+  suspend fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem>
   suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem>
   suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem>
 
   //recipe interactions
-  fun getAllRecipesAsFlow(): Flow<List<Recipe>>
-  fun getRecipeById(objectId: BsonObjectId): Result<Recipe>
-  fun upsertRecipe(recipe: Recipe)
-  fun deleteRecipe(recipe: Recipe)
+  suspend fun getAllRecipesAsFlow(): Flow<List<Recipe>>
+  suspend fun getRecipeById(objectId: BsonObjectId): Result<Recipe>
+  suspend fun upsertRecipe(recipe: Recipe)
+  suspend fun deleteRecipe(recipe: Recipe)
 }

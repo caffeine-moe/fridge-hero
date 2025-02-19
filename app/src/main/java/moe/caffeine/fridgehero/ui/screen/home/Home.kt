@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.home
+package moe.caffeine.fridgehero.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.domain.model.Profile
-import moe.caffeine.fridgehero.ui.home.components.Greeting
+import moe.caffeine.fridgehero.ui.screen.home.component.Greeting
 
 @Composable
 fun Home(profile: Profile) {

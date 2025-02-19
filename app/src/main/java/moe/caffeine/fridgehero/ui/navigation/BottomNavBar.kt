@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.nav
+package moe.caffeine.fridgehero.ui.navigation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import moe.caffeine.fridgehero.ui.screen.Screen
 
 @Composable
 fun BottomNavBar(

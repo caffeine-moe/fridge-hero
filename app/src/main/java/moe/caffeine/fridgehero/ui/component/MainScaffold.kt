@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
-import moe.caffeine.fridgehero.ui.nav.BottomNavBar
-import moe.caffeine.fridgehero.ui.nav.BottomNavGraph
-import moe.caffeine.fridgehero.ui.nav.Screen
+import moe.caffeine.fridgehero.ui.navigation.BottomNavBar
+import moe.caffeine.fridgehero.ui.navigation.BottomNavGraph
+import moe.caffeine.fridgehero.ui.screen.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

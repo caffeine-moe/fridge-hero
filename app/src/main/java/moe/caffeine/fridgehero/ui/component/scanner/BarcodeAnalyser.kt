@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.scanner
+package moe.caffeine.fridgehero.ui.component.scanner
 
 import androidx.annotation.OptIn
 import androidx.camera.core.ExperimentalGetImage

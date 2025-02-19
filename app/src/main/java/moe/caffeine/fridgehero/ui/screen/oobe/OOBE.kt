@@ -1,7 +1,5 @@
-package moe.caffeine.fridgehero.ui.oobe
+package moe.caffeine.fridgehero.ui.screen.oobe
 
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.MainActivity
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
@@ -29,8 +25,6 @@ fun OOBE(onCreateProfile: (String, String) -> Unit) {
   var lastName by remember { mutableStateOf("") }
   var firstNameError by remember { mutableStateOf(false) }
   var lastNameError by remember { mutableStateOf(false) }
-  val context = LocalContext.current
-  val activity = context as? Activity
   Surface {
     Column(
       modifier = Modifier.fillMaxSize(),
@@ -82,8 +76,6 @@ fun OOBE(onCreateProfile: (String, String) -> Unit) {
             true -> return@Button
             else -> {
               onCreateProfile(firstName, lastName)
-              activity?.finish()
-              context.startActivity(Intent(context, MainActivity::class.java))
             }
           }
         }

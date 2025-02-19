@@ -1,7 +1,10 @@
 package moe.caffeine.fridgehero.data.repository
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.mapper.toDomainModel
 import moe.caffeine.fridgehero.data.model.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.RealmProfile
@@ -27,115 +30,131 @@ class DataRepositoryImpl(
   override val openFoodFactsApi: OpenFoodFactsApi = OpenFoodFactsApi
 ) : DataRepository {
 
-  override fun getProfile(): Result<Profile> =
-    realmProvider.realmInstance.fetchAllByType<RealmProfile>().firstOrNull()?.let {
-      Result.success(it.toDomainModel())
-    } ?: Result.failure(Throwable("No profiles found."))
+  override fun getProfileAsFlow(): Flow<Result<Profile>?> =
+    realmProvider.realmInstance.fetchAllByTypeAsFlow<RealmProfile>()
+      .map { profiles ->
+        profiles.map { profile -> Result.success(profile.toDomainModel()) }.firstOrNull()
+          ?: Result.failure(Throwable("No profile found."))
+      }.flowOn(Dispatchers.IO)
 
-  override fun upsertProfile(profile: Profile) {
-    realmProvider.realmInstance.updateObject(
-      profile.toRealmModel()
-    ).fold(
-      onSuccess = {
-        Result.success(it.toDomainModel())
-      },
-      onFailure = {
-        Result.failure(it)
-      }
-    )
+  override suspend fun upsertProfile(profile: Profile) {
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.updateObject(
+        profile.toRealmModel()
+      ).fold(
+        onSuccess = {
+          Result.success(it.toDomainModel())
+        },
+        onFailure = {
+          Result.failure(it)
+        }
+      )
+    }
   }
 
-  override fun deleteProfile(profile: Profile) {
-    realmProvider.realmInstance.deleteObject(
-      profile.toRealmModel()
-    )
+  override suspend fun deleteProfile(profile: Profile) {
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.deleteObject(
+        profile.toRealmModel()
+      )
+    }
   }
 
   override fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>> =
     realmProvider.realmInstance.fetchAllByTypeAsFlow<RealmFoodItem>()
-      .transform { list ->
-        emit(list.map { foodItem -> foodItem.toDomainModel() })
-      }
+      .map {
+        it.map { it.toDomainModel() }
+      }.flowOn(Dispatchers.IO)
 
-  override fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem> =
-    realmProvider.realmInstance.fetchObjectById<RealmFoodItem>(objectId).fold(
-      onSuccess = {
-        Result.success(it.toDomainModel())
-      },
-      onFailure = {
-        Result.failure(it)
-      }
-    )
+  override suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem> =
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.fetchObjectById<RealmFoodItem>(objectId).fold(
+        onSuccess = {
+          Result.success(it.toDomainModel())
+        },
+        onFailure = {
+          Result.failure(it)
+        }
+      )
+    }
 
-  override fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
-    realmProvider.realmInstance.updateObject(
-      foodItem.toRealmModel()
-    ).fold(
-      onSuccess = {
-        Result.success(it.toDomainModel())
-      },
-      onFailure = {
-        Result.failure(it)
-      }
-    )
+  override suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.updateObject(
+        foodItem.toRealmModel()
+      ).fold(
+        onSuccess = {
+          Result.success(it.toDomainModel())
+        },
+        onFailure = {
+          Result.failure(it)
+        }
+      )
+    }
 
-  override fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem> =
-    realmProvider.realmInstance.deleteObject(
-      foodItem.toRealmModel()
-    ).fold(
-      onSuccess = {
-        Result.success(it.toDomainModel())
-      },
-      onFailure = {
-        Result.failure(it)
-      }
-    )
+  override suspend fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem> =
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.deleteObject(
+        foodItem.toRealmModel()
+      ).fold(
+        onSuccess = {
+          Result.success(it.toDomainModel())
+        },
+        onFailure = {
+          Result.failure(it)
+        }
+      )
+    }
 
   override suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem> =
-    fetchProductByBarcode(barcode).fold(
-      onSuccess = {
-        Result.success(
-          it.toDomainModel(
-            fetchImageAsByteArrayFromURL(it.imageThumbUrl).fold(
-              onSuccess = { value -> value },
-              onFailure = { byteArrayOf() }
+    withContext(Dispatchers.IO) {
+      fetchProductByBarcode(barcode).fold(
+        onSuccess = {
+          Result.success(
+            it.toDomainModel(
+              fetchImageAsByteArrayFromURL(it.imageThumbUrl).fold(
+                onSuccess = { value -> value },
+                onFailure = { byteArrayOf() }
+              )
             )
           )
-        )
-      },
-      onFailure = {
-        Result.failure(it)
-      }
-    )
+        },
+        onFailure = {
+          Result.failure(it)
+        }
+      )
+    }
 
   override suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem> =
-    realmProvider.realmInstance.fetchAllByType<RealmFoodItem>()
-      .firstOrNull { it.barcode == barcode }?.let {
-        Result.success(it.toDomainModel())
-      } ?: fetchFoodItemFromApi(
-      barcode
-    ).fold(
-      onSuccess = { success ->
-        Result.success(success)
-      },
-      onFailure = { failure ->
-        Result.failure(failure)
-      }
-    )
+    withContext(Dispatchers.IO) {
+      realmProvider.realmInstance.fetchAllByType<RealmFoodItem>()
+        .firstOrNull { it.barcode == barcode }?.let {
+          Result.success(it.toDomainModel())
+        } ?: fetchFoodItemFromApi(
+        barcode
+      ).fold(
+        onSuccess = { success ->
+          Result.success(success)
+        },
+        onFailure = { failure ->
+          Result.failure(failure)
+        }
+      )
+    }
 
-  override fun getAllRecipesAsFlow(): Flow<List<Recipe>> {
+  override suspend fun getAllRecipesAsFlow(): Flow<List<Recipe>> {
     TODO("Not yet implemented")
   }
 
-  override fun getRecipeById(objectId: BsonObjectId): Result<Recipe> {
+  override suspend fun getRecipeById(objectId: BsonObjectId): Result<Recipe> {
     TODO("Not yet implemented")
   }
 
-  override fun upsertRecipe(recipe: Recipe) {
+  override suspend fun upsertRecipe(recipe: Recipe) {
     TODO("Not yet implemented")
   }
 
-  override fun deleteRecipe(recipe: Recipe) {
+  override suspend fun deleteRecipe(recipe: Recipe) {
     TODO("Not yet implemented")
   }
 }

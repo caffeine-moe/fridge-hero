@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.home.components
+package moe.caffeine.fridgehero.ui.screen.home.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
@@ -17,7 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.R
-import moe.caffeine.fridgehero.ui.recipe.persistentRecipes
+import moe.caffeine.fridgehero.ui.screen.recipe.persistentRecipes
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable

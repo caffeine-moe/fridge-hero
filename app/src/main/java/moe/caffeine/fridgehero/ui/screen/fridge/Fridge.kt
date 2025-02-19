@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.fridge
+package moe.caffeine.fridgehero.ui.screen.fridge
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,8 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
-import moe.caffeine.fridgehero.ui.item.ItemCard
-import moe.caffeine.fridgehero.ui.item.component.ExpiryEditor
+import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
+import moe.caffeine.fridgehero.ui.component.item.ItemCard
 
 @Composable
 fun Fridge(
@@ -35,10 +35,7 @@ fun Fridge(
         modifier = Modifier.padding(16.dp),
         onClick = {
           emitEvent(
-            Event.RequestItemSheet(
-              FoodItem(),
-              upsertResult = true
-            )
+            Event.RequestItemSheet()
           )
         }) {
         Icon(Icons.Filled.Add, "Add Item Button")
@@ -59,8 +56,7 @@ fun Fridge(
           onStartToEndAction = {
             emitEvent(
               Event.RequestItemSheet(
-                listFoodItem,
-                upsertResult = true,
+                listFoodItem
               )
             )
           },
@@ -91,6 +87,14 @@ fun Fridge(
                   )
                 )
                 completableExpiry.await()
+              },
+              small = true,
+              onShowMore = {
+                emitEvent(
+                  Event.RequestItemSheet(
+                    listFoodItem
+                  )
+                )
               },
               onListChanged = { changedList ->
                 emitEvent(
