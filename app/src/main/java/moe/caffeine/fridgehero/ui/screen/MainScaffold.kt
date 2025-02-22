@@ -37,6 +37,7 @@ fun MainScaffold(
   emitEvent: (Event) -> Unit
 ) {
   var destination by rememberSaveable { mutableStateOf("Home") }
+  var navLeft by rememberSaveable { mutableStateOf(false) }
   Scaffold(
     modifier = Modifier
       .fillMaxSize()
@@ -45,8 +46,9 @@ fun MainScaffold(
       BottomNavBar(
         navController,
         navBarItems
-      ) {
-        destination = it
+      ) { title, left ->
+        destination = title
+        navLeft = left
       }
     },
     topBar = {
@@ -68,6 +70,7 @@ fun MainScaffold(
     ) {
       BottomNavGraph(
         navController,
+        navLeft,
         profile,
         foodItems,
         emitEvent

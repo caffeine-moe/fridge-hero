@@ -8,11 +8,14 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import kotlinx.datetime.Clock
 
 class BarcodeAnalyser(
   private val onBarcodeDetected: (String) -> Unit
 ) : ImageAnalysis.Analyzer {
-  private var isScanning = true
+  private var lastScannedTimestamp = Clock.System.now().toEpochMilliseconds()
+  private var lastScanned = lastScannedTimestamp.toString()
+
 
   @OptIn(ExperimentalGetImage::class)
   override fun analyze(image: ImageProxy) {
@@ -26,9 +29,14 @@ class BarcodeAnalyser(
 
       barcodeScanner.process(imageToProcess)
         .addOnSuccessListener { barcodes ->
-          if (barcodes.isEmpty() || !isScanning) return@addOnSuccessListener
-          isScanning = false
-          barcodes.first { !it.rawValue.isNullOrBlank() }.rawValue?.let {
+          val now = Clock.System.now().toEpochMilliseconds()
+          if (now - lastScannedTimestamp < 250) return@addOnSuccessListener
+          lastScannedTimestamp = Clock.System.now().toEpochMilliseconds()
+          barcodes.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue?.let {
+            if (it != lastScanned) {
+              lastScanned = it
+              return@addOnSuccessListener
+            }
             onBarcodeDetected(it)
           }
         }

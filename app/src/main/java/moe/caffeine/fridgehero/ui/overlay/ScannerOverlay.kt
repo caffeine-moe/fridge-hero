@@ -4,8 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -47,16 +47,15 @@ fun ScannerOverlay(
             }
           })
         }
-      ) { it ->
-/*      var barcode = "5941143028832"*/
-        Surface(Modifier.consumeWindowInsets(it)) {
+      ) {
+        Surface(Modifier.padding(it)) {
           BackHandler(enabled = true) {
             onDismiss()
           }
           Scanner(
             onDismiss = onDismiss
-          ) {
-            completable.complete(Result.success(it))
+          ) { barcode ->
+            completable.complete(Result.success(barcode))
             onDismiss()
           }
         }

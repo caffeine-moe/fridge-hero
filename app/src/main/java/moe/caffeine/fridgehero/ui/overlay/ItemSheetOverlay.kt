@@ -11,7 +11,8 @@ import moe.caffeine.fridgehero.ui.component.item.ItemSheet
 @Composable
 fun ItemSheetOverlay(
   state: SheetState,
-  request: Event.RequestItemSheet?,
+  prefill: FoodItem?,
+  request: Event.RequestItemSheet,
   onBarcodeFromScanner: suspend () -> Result<String>,
   onFoodItemFromBarcode: suspend (String) -> Result<FoodItem>,
   onExpiryDateRequest: suspend () -> Result<Long>,
@@ -19,10 +20,10 @@ fun ItemSheetOverlay(
   onDismiss: suspend () -> Unit,
   onHardRemove: (FoodItem) -> Unit,
 ) {
-  if (request == null) return
+  if (prefill == null) return
   ItemSheet(
     state = state,
-    prefill = request.prefill,
+    prefill = prefill,
     expiryEditorExpandedInitial = request.expiryEditorExpanded,
     onComplete = {
       val complete = if (it == request.prefill) Result.success(it) else onComplete(it)

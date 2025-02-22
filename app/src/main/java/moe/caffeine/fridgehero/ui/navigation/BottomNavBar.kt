@@ -1,5 +1,6 @@
 package moe.caffeine.fridgehero.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,27 +26,28 @@ import moe.caffeine.fridgehero.ui.screen.Screen
 fun BottomNavBar(
   navController: NavController,
   navBarItems: List<Screen>,
-  onNavigate: (title: String) -> Unit
+  onNavigate: (title: String, left: Boolean) -> Unit
 ) {
-  var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
+  var currentIndex by rememberSaveable { mutableIntStateOf(0) }
   BottomAppBar(
     modifier = Modifier.systemBarsPadding(),
     contentPadding = PaddingValues(10.dp),
   ) {
+    BackHandler(enabled = true) { }
     navBarItems.forEachIndexed { index, bottomNavItem ->
       NavigationBarItem(
         modifier = Modifier.fillMaxSize(),
-        selected = selectedIndex == index,
+        selected = currentIndex == index,
         onClick = {
-          selectedIndex = index
           navController.popBackStack()
-          navController.navigate(bottomNavItem.title)
-          onNavigate(bottomNavItem.title)
+          navController.navigate(bottomNavItem.route)
+          onNavigate(bottomNavItem.title, index < currentIndex)
+          currentIndex = index
         },
         icon = {
           Box {
             Icon(
-              active = selectedIndex == index,
+              active = currentIndex == index,
               activeContent = {
                 Image(
                   bottomNavItem.selectedIcon,

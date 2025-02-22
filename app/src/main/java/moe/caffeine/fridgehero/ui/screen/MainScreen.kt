@@ -47,7 +47,8 @@ fun MainScreen(
   var fullScreenItem by rememberSaveable { mutableStateOf<FoodItem?>(null) }
   var datePickerRequest by remember { mutableStateOf<Event.RequestDateFromPicker?>(null) }
 
-  var bottomSheetRequest by remember { mutableStateOf<Event.RequestItemSheet?>(null) }
+  var bottomSheetRequest by remember { mutableStateOf(Event.RequestItemSheet()) }
+  var bottomSheetPrefill by rememberSaveable { mutableStateOf<FoodItem?>(null) }
   val standardBottomSheetState = rememberStandardBottomSheetState(
     skipHiddenState = false,
     initialValue = SheetValue.Hidden,
@@ -88,6 +89,7 @@ fun MainScreen(
     onDateRequest = { datePickerRequest = it },
     onItemSheetRequest = {
       bottomSheetRequest = it
+      bottomSheetPrefill = it.prefill
       scope.launch { standardBottomSheetState.expand() }
     },
     onFullScreenRequest = { fullScreenItem = it }
@@ -112,6 +114,7 @@ fun MainScreen(
   ItemSheetOverlay(
     state = standardBottomSheetState,
     request = bottomSheetRequest,
+    prefill = bottomSheetPrefill,
     onBarcodeFromScanner = {
       val completableBarcode: CompletableDeferred<Result<String>> =
         CompletableDeferred()
@@ -152,7 +155,7 @@ fun MainScreen(
     onDismiss = {
       scope.launch {
         standardBottomSheetState.hide()
-        bottomSheetRequest = null
+        bottomSheetPrefill = null
       }
     },
     onHardRemove = {

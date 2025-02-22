@@ -1,6 +1,11 @@
 package moe.caffeine.fridgehero.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,13 +21,33 @@ import moe.caffeine.fridgehero.ui.screen.recipe.Recipes
 @Composable
 fun BottomNavGraph(
   navController: NavHostController,
+  left: Boolean,
   profile: Profile,
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit
 ) {
+  val slideDirecton by remember(left) {
+    derivedStateOf {
+      if (left) {
+        AnimatedContentTransitionScope.SlideDirection.Right
+      } else AnimatedContentTransitionScope.SlideDirection.Left
+    }
+  }
   NavHost(
     navController = navController,
-    startDestination = Screen.Home.route
+    startDestination = Screen.Home.route,
+    enterTransition = {
+      slideIntoContainer(
+        slideDirecton,
+        animationSpec = tween(250)
+      )
+    },
+    exitTransition = {
+      slideOutOfContainer(
+        slideDirecton,
+        animationSpec = tween(250)
+      )
+    },
   ) {
     composable(Screen.Home.route) {
       Home(profile)

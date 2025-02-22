@@ -144,7 +144,7 @@ fun ItemSheet(
                 style = MaterialTheme.typography.labelLarge
               )
               ExpiryEditor(
-                editableFoodItem.expiryDates.toList(),
+                editableFoodItem.expiryDates,
                 onRequestExpiry = onExpiryDateRequest,
                 small = !expiryEditorExpanded,
                 onShowMore = {

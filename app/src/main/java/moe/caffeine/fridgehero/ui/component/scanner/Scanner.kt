@@ -8,7 +8,6 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -68,9 +67,7 @@ fun Scanner(
         )
       }
     },
-    modifier = Modifier
-      .fillMaxSize()
-      .statusBarsPadding(),
+    modifier = Modifier.fillMaxSize(),
     // When the view is (re)composed
     update = { previewView ->
       val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
