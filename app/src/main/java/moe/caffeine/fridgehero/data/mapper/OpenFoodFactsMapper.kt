@@ -8,7 +8,7 @@ fun OpenFoodFactsProduct.toDomainModel(
   thumbnail: ByteArray
 ): FoodItem =
   FoodItem(
-    realmObjectId = BsonObjectId(),
+    realmObjectId = BsonObjectId().toHexString(),
     name = productName,
     barcode = code,
     brand = brandsTags.firstOrNull() ?: "N/A",

@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +21,10 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
 fun OOBE(onCreateProfile: (String, String) -> Unit) {
-  var firstName by remember { mutableStateOf("") }
-  var lastName by remember { mutableStateOf("") }
-  var firstNameError by remember { mutableStateOf(false) }
-  var lastNameError by remember { mutableStateOf(false) }
+  var firstName by rememberSaveable { mutableStateOf("") }
+  var lastName by rememberSaveable { mutableStateOf("") }
+  var firstNameError by rememberSaveable { mutableStateOf(false) }
+  var lastNameError by rememberSaveable { mutableStateOf(false) }
   Surface {
     Column(
       modifier = Modifier.fillMaxSize(),

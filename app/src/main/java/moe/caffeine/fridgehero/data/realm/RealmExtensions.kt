@@ -42,8 +42,15 @@ inline fun <reified T : RealmObject> Realm.fetchAllByType(): List<T> =
 inline fun <reified T : RealmObject> Realm.fetchAllByTypeAsFlow(): Flow<List<T>> =
   query<T>().find().asFlow().map { results -> results.list }
 
-inline fun <reified T : RealmObject> Realm.deleteObject(realmObject: T): Result<T> =
-  writeBlocking {
-    findLatest(realmObject)?.let { delete(it); Result.success(it) }
-      ?: Result.failure(Throwable("Object not found in database."))
-  }
+inline fun <reified T : RealmObject> Realm.deleteObjectById(objectId: BsonObjectId): Result<T> =
+  fetchObjectById<T>(objectId).fold(
+    onSuccess = {
+      writeBlocking {
+        findLatest(it)?.let { latest -> delete(latest); Result.success(latest) }
+          ?: Result.failure(Throwable("Object not found in database."))
+      }
+    },
+    onFailure = {
+      Result.failure(Throwable("Object not found in database."))
+    }
+  )

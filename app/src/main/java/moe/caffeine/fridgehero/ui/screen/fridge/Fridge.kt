@@ -1,9 +1,12 @@
 package moe.caffeine.fridgehero.ui.screen.fridge
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Ease
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -11,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,7 +31,6 @@ fun Fridge(
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit,
 ) {
-  val lazyListState = rememberLazyListState()
   val fridge by foodItems.collectAsStateWithLifecycle()
   Scaffold(
     floatingActionButton = {
@@ -43,41 +46,46 @@ fun Fridge(
     }
   ) { innerPadding ->
     LazyColumn(
-      state = lazyListState,
+      modifier = Modifier
+        .fillMaxSize()
+        .animateContentSize(tween(150, easing = Ease)),
       contentPadding = innerPadding,
     ) {
       items(
         fridge,
-        key = { it.realmObjectId.toHexString() }
+        key = { it.realmObjectId }
       ) { listFoodItem ->
+        val currentItem: FoodItem by rememberUpdatedState(newValue = listFoodItem)
         ActionableSwipeToDismissBox(
-          visible = !listFoodItem.isRemoved,
-          modifier = Modifier.animateItem(),
+          visible = !currentItem.isRemoved,
+          modifier = Modifier
+            .animateItem(tween(150, easing = Ease))
+            .animateContentSize(tween(150, easing = Ease)),
           onStartToEndAction = {
             emitEvent(
               Event.RequestItemSheet(
-                listFoodItem
+                currentItem
               )
             )
           },
           onEndToStartAction = {
             emitEvent(
               Event.SoftRemoveFoodItem(
-                listFoodItem
+                currentItem
               )
             )
           }
         ) {
           ItemCard(
-            item = listFoodItem,
+            item = currentItem,
             onLongPress = {
               emitEvent(
-                Event.RequestItemFullScreen(listFoodItem)
+                Event.RequestItemFullScreen(currentItem)
               )
             }
           ) {
             ExpiryEditor(
-              expiryDates = listFoodItem.expiryDates,
+              expiryDates = currentItem.expiryDates.toList(),
               onRequestExpiry = {
                 val completableExpiry: CompletableDeferred<Result<Long>> =
                   CompletableDeferred()
@@ -92,14 +100,15 @@ fun Fridge(
               onShowMore = {
                 emitEvent(
                   Event.RequestItemSheet(
-                    listFoodItem
+                    currentItem,
+                    expiryEditorExpanded = true
                   )
                 )
               },
               onListChanged = { changedList ->
                 emitEvent(
                   Event.UpsertFoodItem(
-                    listFoodItem.copy(expiryDates = changedList)
+                    currentItem.copy(expiryDates = changedList)
                   )
                 )
               }

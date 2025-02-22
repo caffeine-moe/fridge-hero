@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,8 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,12 +40,11 @@ fun ExpiryEditor(
   readOnly: Boolean = false,
   small: Boolean = false,
   onShowMore: () -> Unit,
-  isolateState: Boolean = false,
   onRequestExpiry: suspend () -> Result<Long>,
   onListChanged: (List<Long>) -> Unit
 ) {
   val scope = rememberCoroutineScope()
-  var editableExpiryDates by remember { mutableStateOf(expiryDates) }
+  var editableExpiryDates by rememberSaveable { mutableStateOf(expiryDates) }
   Column(Modifier.padding(8.dp)) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
       TextButton(
@@ -70,6 +68,7 @@ fun ExpiryEditor(
     Card(
       Modifier
         .fillMaxWidth()
+        .padding(top = 8.dp)
         .border(
           BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer),
           RoundedCornerShape(16.dp)
@@ -86,7 +85,7 @@ fun ExpiryEditor(
           ActionableSwipeToDismissBox(
             modifier = Modifier
               .fillMaxWidth()
-              .height(80.dp)
+              .defaultMinSize(minHeight = 80.dp)
               .padding(4.dp),
             onStartToEndAction = {
               if (!readOnly) {
@@ -104,27 +103,33 @@ fun ExpiryEditor(
               Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
-                .border(
-                  BorderStroke(2.dp, MaterialTheme.colorScheme.secondaryContainer),
-                  RoundedCornerShape(16.dp)
-                )
             ) {
               Box(
-                Modifier.fillMaxSize(),
+                Modifier
+                  .fillMaxSize()
+                  .defaultMinSize(minHeight = 80.dp)
+                  .padding(8.dp)
+                  .border(
+                    BorderStroke(2.dp, MaterialTheme.colorScheme.secondaryContainer),
+                    RoundedCornerShape(16.dp)
+                  ),
                 contentAlignment = Alignment.Center,
               ) {
                 Text(
-                  text = "Expires: ${expiryDate.toReadableDate()} (${expiryDate.daysUntil()} days)"
+                  softWrap = true,
+                  modifier = Modifier.padding(8.dp),
+                  style = MaterialTheme.typography.bodyLarge,
+                  text = "Expires: ${expiryDate.toReadableDate()}\n(${expiryDate.daysUntil()} days)"
                 )
               }
             }
           }
         }
-        if (small && editableExpiryDates.size > 3) {
+        if (editableExpiryDates.size > 3) {
           TextButton(
             onClick = onShowMore
           ) {
-            Text("Show more...")
+            Text("Show ${if (small) "More..." else "Less"}")
           }
         }
       }
@@ -132,16 +137,14 @@ fun ExpiryEditor(
   }
 
   LaunchedEffect(expiryDates) {
-    if (expiryDates != editableExpiryDates && !isolateState) {
+    if (expiryDates != editableExpiryDates) {
       editableExpiryDates = expiryDates
     }
   }
 
   LaunchedEffect(editableExpiryDates) {
-    if (expiryDates != editableExpiryDates) {
-      onListChanged(
-        editableExpiryDates
-      )
+    if (editableExpiryDates != expiryDates) {
+      onListChanged(editableExpiryDates)
     }
   }
 }

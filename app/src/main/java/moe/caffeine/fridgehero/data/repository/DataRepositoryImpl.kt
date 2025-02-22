@@ -3,13 +3,13 @@ package moe.caffeine.fridgehero.data.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.mapper.toDomainModel
 import moe.caffeine.fridgehero.data.model.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.RealmProfile
 import moe.caffeine.fridgehero.data.realm.RealmProvider
-import moe.caffeine.fridgehero.data.realm.deleteObject
+import moe.caffeine.fridgehero.data.realm.deleteObjectById
 import moe.caffeine.fridgehero.data.realm.fetchAllByType
 import moe.caffeine.fridgehero.data.realm.fetchAllByTypeAsFlow
 import moe.caffeine.fridgehero.data.realm.fetchObjectById
@@ -32,9 +32,11 @@ class DataRepositoryImpl(
 
   override fun getProfileAsFlow(): Flow<Result<Profile>?> =
     realmProvider.realmInstance.fetchAllByTypeAsFlow<RealmProfile>()
-      .map { profiles ->
-        profiles.map { profile -> Result.success(profile.toDomainModel()) }.firstOrNull()
-          ?: Result.failure(Throwable("No profile found."))
+      .transform { profiles ->
+        emit(
+          profiles.map { profile -> Result.success(profile.toDomainModel()) }.firstOrNull()
+            ?: Result.failure(Throwable("No profile found."))
+        )
       }.flowOn(Dispatchers.IO)
 
   override suspend fun upsertProfile(profile: Profile) {
@@ -54,17 +56,16 @@ class DataRepositoryImpl(
 
   override suspend fun deleteProfile(profile: Profile) {
     withContext(Dispatchers.IO) {
-      realmProvider.realmInstance.deleteObject(
-        profile.toRealmModel()
+      realmProvider.realmInstance.deleteObjectById<RealmProfile>(
+        profile.toRealmModel()._id
       )
     }
   }
 
   override fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>> =
     realmProvider.realmInstance.fetchAllByTypeAsFlow<RealmFoodItem>()
-      .map {
-        it.map { it.toDomainModel() }
-      }.flowOn(Dispatchers.IO)
+      .transform { foodItems -> emit(foodItems.map { it.toDomainModel() }) }
+      .flowOn(Dispatchers.IO)
 
   override suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem> =
     withContext(Dispatchers.IO) {
@@ -94,11 +95,11 @@ class DataRepositoryImpl(
 
   override suspend fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem> =
     withContext(Dispatchers.IO) {
-      realmProvider.realmInstance.deleteObject(
-        foodItem.toRealmModel()
+      realmProvider.realmInstance.deleteObjectById<RealmFoodItem>(
+        foodItem.toRealmModel()._id
       ).fold(
         onSuccess = {
-          Result.success(it.toDomainModel())
+          Result.success(foodItem)
         },
         onFailure = {
           Result.failure(it)

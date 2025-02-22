@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.component
+package moe.caffeine.fridgehero.ui.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
@@ -21,20 +25,18 @@ import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.navigation.BottomNavBar
 import moe.caffeine.fridgehero.ui.navigation.BottomNavGraph
-import moe.caffeine.fridgehero.ui.screen.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScaffold(
   navController: NavHostController,
-  destination: String,
   navBarItems: List<Screen>,
   onPaddingCreated: (PaddingValues) -> Unit,
-  onDestinationChange: (String) -> Unit,
   profile: Profile,
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit
 ) {
+  var destination by rememberSaveable { mutableStateOf("Home") }
   Scaffold(
     modifier = Modifier
       .fillMaxSize()
@@ -44,7 +46,7 @@ fun MainScaffold(
         navController,
         navBarItems
       ) {
-        onDestinationChange(it)
+        destination = it
       }
     },
     topBar = {

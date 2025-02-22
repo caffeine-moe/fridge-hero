@@ -1,18 +1,20 @@
 package moe.caffeine.fridgehero.domain.model
 
 import android.graphics.BitmapFactory
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import org.mongodb.kbson.BsonObjectId
 
 data class FoodItem(
-  val realmObjectId: BsonObjectId = BsonObjectId(),
+  val realmObjectId: String = "",
   val name: String = "",
   val brand: String = "",
   val barcode: String = "",
   val imageByteArray: ByteArray = byteArrayOf(),
-  val expiryDates: List<Long> = emptyList(),
-) {
+  val expiryDates: List<Long> = listOf(),
+) : Parcelable {
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()
 
@@ -45,5 +47,38 @@ data class FoodItem(
     result = 31 * result + imageByteArray.contentHashCode()
     result = 31 * result + expiryDates.hashCode()
     return result
+  }
+
+  //parcelable implementation
+  constructor(parcel: Parcel) : this(
+    parcel.readString() ?: BsonObjectId().toHexString(),
+    parcel.readString() ?: "",
+    parcel.readString() ?: "",
+    parcel.readString() ?: "",
+    parcel.createByteArray() ?: byteArrayOf(),
+    parcel.createLongArray()?.toList() ?: listOf()
+  )
+
+  override fun writeToParcel(parcel: Parcel, flags: Int) {
+    parcel.writeString(realmObjectId)
+    parcel.writeString(name)
+    parcel.writeString(brand)
+    parcel.writeString(barcode)
+    parcel.writeByteArray(imageByteArray)
+    parcel.writeLongArray(expiryDates.toLongArray())
+  }
+
+  override fun describeContents(): Int {
+    return 0
+  }
+
+  companion object CREATOR : Parcelable.Creator<FoodItem> {
+    override fun createFromParcel(parcel: Parcel): FoodItem {
+      return FoodItem(parcel)
+    }
+
+    override fun newArray(size: Int): Array<FoodItem?> {
+      return arrayOfNulls(size)
+    }
   }
 }

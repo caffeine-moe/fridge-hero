@@ -10,13 +10,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import moe.caffeine.fridgehero.domain.model.Profile
-import moe.caffeine.fridgehero.ui.MainScreen
 import moe.caffeine.fridgehero.ui.MainViewModel
 import moe.caffeine.fridgehero.ui.overlay.LoadingOverlay
+import moe.caffeine.fridgehero.ui.screen.MainScreen
 import moe.caffeine.fridgehero.ui.screen.oobe.OOBE
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     setContent {
       val profileState by viewModel.profile.collectAsState()
-      var showLoadingOverlay by remember { mutableStateOf(true) }
+      var showLoadingOverlay by rememberSaveable { mutableStateOf(true) }
       FridgeHeroTheme {
         Surface(
           modifier = Modifier.fillMaxSize()

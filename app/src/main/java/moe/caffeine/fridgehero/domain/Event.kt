@@ -11,12 +11,13 @@ sealed class Event {
     val result: CompletableDeferred<Result<Long>>
   ) : Event()
 
-  // Launches a bottom sheet from anywhere, can be prefilled or not, can return the
-  // new item along with any edited expiry dates.
+  // Launches the item editor sheet from anywhere, can be prefilled or not, can return the
+  // new item.
   data class RequestItemSheet(
     val prefill: FoodItem = FoodItem(),
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred(),
-    val readOnly: Boolean = false
+    val readOnly: Boolean = false,
+    val expiryEditorExpanded: Boolean = false,
   ) : Event()
 
   data class RequestBarcodeFromScanner(
@@ -39,7 +40,7 @@ sealed class Event {
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 
-  // Permanently deletes food item from realm
+  // Removes all expiry dates from the food item in the realm
   data class SoftRemoveFoodItem(
     val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
