@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ fun ActionableSwipeToDismissBox(
     modifier = modifier,
     visible = visible,
     exit = slideOutHorizontally(
+      tween(500, delayMillis = 250),
       targetOffsetX = { -it },
     ) + fadeOut()
   ) {

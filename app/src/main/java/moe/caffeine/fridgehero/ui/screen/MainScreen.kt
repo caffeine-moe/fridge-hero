@@ -48,7 +48,7 @@ fun MainScreen(
   var datePickerRequest by remember { mutableStateOf<Event.RequestDateFromPicker?>(null) }
 
   var bottomSheetRequest by remember { mutableStateOf(Event.RequestItemSheet()) }
-  var bottomSheetPrefill by rememberSaveable { mutableStateOf<FoodItem?>(null) }
+  var bottomSheetPrefill by rememberSaveable { mutableStateOf<FoodItem?>(FoodItem()) }
   val standardBottomSheetState = rememberStandardBottomSheetState(
     skipHiddenState = false,
     initialValue = SheetValue.Hidden,

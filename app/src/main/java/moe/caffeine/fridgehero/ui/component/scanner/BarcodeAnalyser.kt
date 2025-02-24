@@ -20,24 +20,33 @@ class BarcodeAnalyser(
   @OptIn(ExperimentalGetImage::class)
   override fun analyze(image: ImageProxy) {
     image.image?.let { imageToAnalyze ->
+
+      //only accept barcodes used for product identification
       val options = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+        .setBarcodeFormats(
+          Barcode.FORMAT_EAN_13,
+          Barcode.FORMAT_EAN_8,
+          Barcode.FORMAT_UPC_A,
+          Barcode.FORMAT_UPC_E
+        )
         .build()
       val barcodeScanner = BarcodeScanning.getClient(options)
+
       val imageToProcess =
         InputImage.fromMediaImage(imageToAnalyze, image.imageInfo.rotationDegrees)
 
       barcodeScanner.process(imageToProcess)
         .addOnSuccessListener { barcodes ->
           val now = Clock.System.now().toEpochMilliseconds()
-          if (now - lastScannedTimestamp < 250) return@addOnSuccessListener
+          //small delay to prevent accidents while maintaining speed
+          if (now - lastScannedTimestamp < 200) return@addOnSuccessListener
           lastScannedTimestamp = Clock.System.now().toEpochMilliseconds()
           barcodes.firstOrNull { !it.rawValue.isNullOrBlank() }?.rawValue?.let {
-            if (it != lastScanned) {
-              lastScanned = it
-              return@addOnSuccessListener
+            //only accept if it recognises the same barcode twice to reduce error
+            if (it == lastScanned) {
+              onBarcodeDetected(it)
             }
-            onBarcodeDetected(it)
+            lastScanned = it
           }
         }
         .addOnCompleteListener {

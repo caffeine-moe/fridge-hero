@@ -1,8 +1,11 @@
 package moe.caffeine.fridgehero.ui.component.item
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Ease
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -40,7 +43,6 @@ fun ItemCard(
       .fillMaxWidth()
       .padding(8.dp)
       .clip(RoundedCornerShape(16.dp))
-      .animateContentSize(tween(150, easing = Ease))
       .combinedClickable(
         onClick = {
           expanded = !expanded
@@ -71,7 +73,11 @@ fun ItemCard(
           )
         }
       }
-      if (expanded) {
+      AnimatedVisibility(
+        visible = expanded,
+        enter = fadeIn(tween(500)) + expandVertically(),
+        exit = fadeOut(tween(250)) + shrinkVertically()
+      ) {
         Column(
           Modifier
             .align(Alignment.Start)

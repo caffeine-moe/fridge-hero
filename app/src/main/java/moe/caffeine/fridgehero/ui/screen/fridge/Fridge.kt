@@ -1,8 +1,6 @@
 package moe.caffeine.fridgehero.ui.screen.fridge
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Ease
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,7 +46,7 @@ fun Fridge(
     LazyColumn(
       modifier = Modifier
         .fillMaxSize()
-        .animateContentSize(tween(150, easing = Ease)),
+        .animateContentSize(),
       contentPadding = innerPadding,
     ) {
       items(
@@ -59,8 +57,8 @@ fun Fridge(
         ActionableSwipeToDismissBox(
           visible = !currentItem.isRemoved,
           modifier = Modifier
-            .animateItem(tween(150, easing = Ease))
-            .animateContentSize(tween(150, easing = Ease)),
+            .animateItem()
+            .animateContentSize(),
           onStartToEndAction = {
             emitEvent(
               Event.RequestItemSheet(

@@ -39,6 +39,7 @@ fun BottomNavBar(
         modifier = Modifier.fillMaxSize(),
         selected = currentIndex == index,
         onClick = {
+          if (currentIndex == index) return@NavigationBarItem
           navController.popBackStack()
           navController.navigate(bottomNavItem.route)
           onNavigate(bottomNavItem.title, index < currentIndex)

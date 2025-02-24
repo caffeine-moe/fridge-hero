@@ -1,13 +1,14 @@
 package moe.caffeine.fridgehero.ui.component.scanner
 
 import android.Manifest
+import android.util.Size
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.CameraState
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -15,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -29,8 +29,9 @@ import java.util.concurrent.Executors
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun Scanner(
+  onCameraReady: () -> Unit,
   onDismiss: () -> Unit,
-  onScanned: (String) -> Unit,
+  onScanned: (String) -> Unit
 ) {
   val lifecycleOwner = LocalLifecycleOwner.current
   val context = LocalContext.current
@@ -56,31 +57,31 @@ fun Scanner(
       }
     }
   }
-
   // Create a composable view for the camera feed
   AndroidView(
     factory = { androidViewContext ->
       PreviewView(androidViewContext).apply {
+        scaleType = PreviewView.ScaleType.FILL_CENTER
         layoutParams = ViewGroup.LayoutParams(
           ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.MATCH_PARENT
         )
       }
     },
-    modifier = Modifier.fillMaxSize(),
     // When the view is (re)composed
     update = { previewView ->
       val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
       cameraProviderFuture.addListener({
 
+        preview = Preview.Builder().build().also {
+          it.surfaceProvider = previewView.surfaceProvider
+        }
+
         //get the back camera
         cameraProvider = cameraProviderFuture.get()
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        preview = Preview.Builder().build().also {
-          it.surfaceProvider = previewView.surfaceProvider
-        }
         val cameraSelector: CameraSelector = CameraSelector.Builder()
           .requireLensFacing(CameraSelector.LENS_FACING_BACK)
           .build()
@@ -90,6 +91,7 @@ fun Scanner(
           onScanned(barcode)
         }
         val imageAnalysis = ImageAnalysis.Builder()
+          .setMaxResolution(Size(640, 480))
           .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
           .build()
           .also {
@@ -103,7 +105,11 @@ fun Scanner(
           cameraSelector,
           preview,
           imageAnalysis
-        )
+        )?.cameraInfo?.cameraState?.observe(lifecycleOwner) {
+          if (it.type == CameraState.Type.OPEN) {
+            onCameraReady()
+          }
+        }
       }, ContextCompat.getMainExecutor(context))
     }
   )
