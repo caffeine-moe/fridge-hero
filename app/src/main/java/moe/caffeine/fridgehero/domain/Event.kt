@@ -8,7 +8,7 @@ sealed class Event {
 
   // Launches a date picker from anywhere
   data class RequestDateFromPicker(
-    val result: CompletableDeferred<Result<Long>>
+    val result: CompletableDeferred<Result<Long>> = CompletableDeferred()
   ) : Event()
 
   // Launches the item editor sheet from anywhere, can be prefilled or not, can return the

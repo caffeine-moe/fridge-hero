@@ -75,8 +75,12 @@ fun ItemCard(
       }
       AnimatedVisibility(
         visible = expanded,
-        enter = fadeIn(tween(500)) + expandVertically(),
-        exit = fadeOut(tween(250)) + shrinkVertically()
+        enter = expandVertically(
+          animationSpec = tween(500)
+        ) + fadeIn(tween(500)),
+        exit = shrinkVertically(
+          animationSpec = tween(500)
+        ) + fadeOut(tween(500))
       ) {
         Column(
           Modifier

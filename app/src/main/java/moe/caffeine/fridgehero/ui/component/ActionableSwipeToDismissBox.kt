@@ -40,12 +40,11 @@ fun ActionableSwipeToDismissBox(
   content: @Composable () -> Unit,
 ) {
   AnimatedVisibility(
-    modifier = modifier,
     visible = visible,
     exit = slideOutHorizontally(
-      tween(500, delayMillis = 250),
+      tween(500),
       targetOffsetX = { -it },
-    ) + fadeOut()
+    ) + fadeOut(tween(500))
   ) {
     val state = rememberSwipeToDismissBoxState(
       confirmValueChange = { value ->
@@ -65,6 +64,7 @@ fun ActionableSwipeToDismissBox(
       }
     )
     SwipeToDismissBox(
+      modifier = modifier,
       state = state,
       backgroundContent = {
         val colour = when (state.dismissDirection) {

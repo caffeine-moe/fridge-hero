@@ -6,7 +6,7 @@ import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.component.item.ItemFull
 
 @Composable
-fun FullScreenOverlay(
+fun FullScreenItemOverlay(
   fullScreenItem: FoodItem?,
   onDismiss: () -> Unit
 ) {

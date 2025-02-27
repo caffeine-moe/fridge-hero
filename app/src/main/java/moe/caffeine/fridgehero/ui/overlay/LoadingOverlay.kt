@@ -55,16 +55,21 @@ fun LoadingOverlay(
     visible = visible,
     enter = enter,
     exit = exit,
-    modifier = Modifier.fillMaxSize()
+    modifier = Modifier
+      .fillMaxSize(),
   ) {
     Column(
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier
+        .fillMaxSize(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center
     ) {
       content()
       if (showProgressIndicator) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(
+          modifier = Modifier
+            .height(32.dp)
+        )
         CircularProgressIndicator()
       }
     }

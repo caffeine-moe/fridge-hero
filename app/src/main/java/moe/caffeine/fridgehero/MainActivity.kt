@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.MainViewModel
 import moe.caffeine.fridgehero.ui.overlay.LoadingOverlay
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       val profileState by viewModel.profile.collectAsState()
       var showLoadingOverlay by rememberSaveable { mutableStateOf(true) }
+      val emitEvent: (Event) -> Unit = { event -> viewModel.emitEvent(event) }
       FridgeHeroTheme {
         Surface(
           modifier = Modifier.fillMaxSize()
@@ -41,12 +43,9 @@ class MainActivity : ComponentActivity() {
                 showLoadingOverlay = false
                 MainScreen(
                   profile = profile,
-                  navBarItems = viewModel.navBarItems,
                   foodItems = viewModel.foodItems,
                   eventFlow = viewModel.eventFlow,
-                  emitEvent = {
-                    viewModel.emitEvent(it)
-                  }
+                  emitEvent = emitEvent
                 )
               },
               onFailure = {

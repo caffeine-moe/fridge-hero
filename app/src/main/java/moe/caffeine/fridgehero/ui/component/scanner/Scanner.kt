@@ -1,7 +1,6 @@
 package moe.caffeine.fridgehero.ui.component.scanner
 
 import android.Manifest
-import android.util.Size
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
@@ -91,7 +90,6 @@ fun Scanner(
           onScanned(barcode)
         }
         val imageAnalysis = ImageAnalysis.Builder()
-          .setMaxResolution(Size(640, 480))
           .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
           .build()
           .also {
@@ -106,9 +104,8 @@ fun Scanner(
           preview,
           imageAnalysis
         )?.cameraInfo?.cameraState?.observe(lifecycleOwner) {
-          if (it.type == CameraState.Type.OPEN) {
+          if (it.type == CameraState.Type.OPEN)
             onCameraReady()
-          }
         }
       }, ContextCompat.getMainExecutor(context))
     }

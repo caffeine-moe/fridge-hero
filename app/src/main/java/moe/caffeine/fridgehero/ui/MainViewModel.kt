@@ -16,7 +16,6 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.repository.DataRepository
-import moe.caffeine.fridgehero.ui.screen.Screen
 
 class MainViewModel : ViewModel() {
   private val repository: DataRepository = DataRepositoryImpl()
@@ -32,12 +31,6 @@ class MainViewModel : ViewModel() {
   fun upsertProfile(profile: Profile) = viewModelScope.launch {
     repository.upsertProfile(profile)
   }
-
-  val navBarItems = listOf(
-    Screen.Home,
-    Screen.Fridge,
-    Screen.Recipes
-  )
 
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
     .stateIn(
@@ -74,7 +67,6 @@ class MainViewModel : ViewModel() {
             repository.upsertFoodItem(event.foodItem)
           )
 
-
         is Event.SoftRemoveFoodItem ->
           event.result.complete(
             repository.upsertFoodItem(
@@ -82,12 +74,10 @@ class MainViewModel : ViewModel() {
             )
           )
 
-
         is Event.HardRemoveFoodItem ->
           event.result.complete(
             repository.deleteFoodItem(event.foodItem)
           )
-
 
         else -> return@onEach
       }

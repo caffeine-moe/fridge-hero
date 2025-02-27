@@ -7,10 +7,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,25 +38,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.ui.component.scanner.Scanner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerOverlay(
-  barcodeScanRequest: Event.RequestBarcodeFromScanner?,
-  onDismiss: () -> Unit
+  visible: Boolean,
+  onComplete: (Result<String>) -> Unit,
 ) {
+  val onDismiss: () -> Unit = { onComplete(Result.failure(Throwable("Dismissed"))) }
   AnimatedVisibility(
-    barcodeScanRequest != null,
+    visible,
     enter = slideInVertically(
-      animationSpec = tween(500)
-    ) + fadeIn(tween(250)),
+      animationSpec = tween(500), initialOffsetY = { -it }
+    ) + fadeIn(tween(500)),
     exit = slideOutVertically(
-      animationSpec = tween(500)
-    ) + fadeOut(tween(250))
+      animationSpec = tween(500), targetOffsetY = { -it }
+    ) + fadeOut(tween(500))
   ) {
-    if (barcodeScanRequest == null) return@AnimatedVisibility
     val backColour = MaterialTheme.colorScheme.surface
     Scaffold(
       modifier = Modifier
@@ -72,7 +71,7 @@ fun ScannerOverlay(
             ) {
               TextButton(
                 modifier = Modifier.align(Alignment.CenterStart),
-                onClick = onDismiss
+                onClick = { onDismiss() }
               ) {
                 Text("Back")
               }
@@ -92,78 +91,99 @@ fun ScannerOverlay(
           .padding(paddingValues)
       ) {
         BackHandler(enabled = true) {
-          onDismiss()
+          onComplete(Result.failure(Throwable("Dismissed")))
         }
         val swapDimensions = LocalConfiguration.current.orientation == 2
         Box(Modifier.fillMaxSize()) {
-          Box(
-            modifier = Modifier
-              .drawWithContent {
-                val physicalDimensions = arrayOf(
-                  size.width,
-                  size.height
-                ).also { dimensions ->
-                  if (swapDimensions)
-                    dimensions.reverse()
-                }
-                //calculate dimensions of indicative rectangle as proportion of screen dimensions
-                val boxDimensions = Size(
-                  physicalDimensions[0] * 0.9f,
-                  physicalDimensions[1] * 0.3f
-                )
-
-                drawContent()
-                //overlay on top of camera feed
-                drawRect(backColour.copy(alpha = 0.7f))
-
-                val cutoutTopLeft = Offset(
-                  (size.width - boxDimensions.width) / 2,
-                  (size.height - boxDimensions.height) / 2
-                )
-
-                //draw transparent cutout
-                drawRoundRect(
-                  topLeft = cutoutTopLeft,
-                  size = boxDimensions,
-                  color = Color.Transparent,
-                  cornerRadius = CornerRadius(24.dp.toPx()),
-                  blendMode = BlendMode.SrcIn
-                )
-
-                //draw white rectangle around cutout
-                drawRoundRect(
-                  topLeft = cutoutTopLeft,
-                  color = Color.White,
-                  size = boxDimensions,
-                  cornerRadius = CornerRadius(24.dp.toPx()),
-                  style = Stroke(
-                    width = 2.dp.toPx()
-                  ),
-                  blendMode = BlendMode.Src
-                )
-              }
-              .fillMaxSize()
-          ) {
-            Scanner(
-              onCameraReady = { cameraReady = true },
-              onDismiss = onDismiss,
-            ) {
-              barcodeScanRequest.result.complete(Result.success(it))
-              onDismiss()
-            }
-          }
-          AnimatedVisibility(
-            visible = !cameraReady,
-            enter = EnterTransition.None,
-            exit = slideOutHorizontally(
-              tween(500, delayMillis = 250), targetOffsetX = { -it }
-            ),
-            modifier = Modifier.fillMaxSize()
-          ) {
+          if (visible) {
             Box(
               modifier = Modifier
+                .drawWithContent {
+                  val physicalDimensions = arrayOf(
+                    size.width,
+                    size.height
+                  ).also { dimensions ->
+                    if (swapDimensions)
+                      dimensions.reverse()
+                  }
+                  //calculate dimensions of indicative rectangle as proportion of screen dimensions
+                  val boxDimensions = Size(
+                    physicalDimensions[0] * 0.9f,
+                    physicalDimensions[1] * 0.3f
+                  )
+
+                  drawContent()
+                  //overlay on top of camera feed
+                  drawRect(backColour.copy(alpha = 0.7f))
+
+                  val cutoutTopLeft = Offset(
+                    (size.width - boxDimensions.width) / 2,
+                    (size.height - boxDimensions.height) / 2
+                  )
+
+                  //draw transparent cutout
+                  drawRoundRect(
+                    topLeft = cutoutTopLeft,
+                    size = boxDimensions,
+                    color = Color.Transparent,
+                    cornerRadius = CornerRadius(24.dp.toPx()),
+                    blendMode = BlendMode.SrcIn
+                  )
+
+                  //draw white rectangle around cutout
+                  drawRoundRect(
+                    topLeft = cutoutTopLeft,
+                    color = Color.White,
+                    size = boxDimensions,
+                    cornerRadius = CornerRadius(24.dp.toPx()),
+                    style = Stroke(
+                      width = 2.dp.toPx()
+                    ),
+                    blendMode = BlendMode.Src
+                  )
+                }
                 .fillMaxSize()
-                .background(backColour)
+            ) {
+              Scanner(
+                onCameraReady = { cameraReady = true },
+                onDismiss = onDismiss,
+              ) {
+                cameraReady = false
+                onComplete(Result.success(it))
+              }
+            }
+          }
+        }
+        AnimatedVisibility(
+          visible = !cameraReady || !visible,
+          enter = EnterTransition.None,
+          exit = slideOutVertically(
+            tween(500, 250), targetOffsetY = { -it }
+          ),
+          modifier = Modifier.fillMaxSize()
+        ) {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .background(backColour)
+          ) {
+            LoadingOverlay(
+              exit = fadeOut(tween(500)),
+              visible = !cameraReady && visible,
+              content = {
+                Column(
+                  horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                  Text(
+                    text = "Loading Camera...",
+                    style = MaterialTheme.typography.bodyMedium
+                  )
+                  Text(
+                    text = "Please ensure Fridge Hero is granted camera permissions.",
+                    style = MaterialTheme.typography.labelMedium
+                  )
+                }
+              }
             )
           }
         }

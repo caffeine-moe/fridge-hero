@@ -23,14 +23,14 @@ import moe.caffeine.fridgehero.ui.screen.recipe.Recipes
 @Composable
 fun BottomNavGraph(
   navController: NavHostController,
-  left: Boolean,
+  navigatedLeft: Boolean,
   profile: Profile,
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit
 ) {
-  val slideDirection by remember(left) {
+  val slideDirection by remember(navigatedLeft) {
     derivedStateOf {
-      if (left) {
+      if (navigatedLeft) {
         AnimatedContentTransitionScope.SlideDirection.Right
       } else AnimatedContentTransitionScope.SlideDirection.Left
     }
@@ -51,6 +51,7 @@ fun BottomNavGraph(
       ) + fadeOut(tween(250))
     },
   ) {
+
     composable(Screen.Home.route) {
       Home(profile)
     }

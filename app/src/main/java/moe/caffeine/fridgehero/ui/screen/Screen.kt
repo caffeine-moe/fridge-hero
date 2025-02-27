@@ -11,28 +11,30 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
   val route: String,
-  val title: String,
   val selectedIcon: ImageVector,
-  val unselectedIcon: ImageVector
+  val unselectedIcon: ImageVector,
+  val hasFloatingActionButton: Boolean = false,
 ) {
+  val title: String
+    get() = route.replaceFirstChar { it.titlecaseChar() }
+
   data object Home : Screen(
     "home",
-    "Home",
     Icons.Filled.Home,
     Icons.Outlined.Home
   )
 
   data object Fridge : Screen(
     "fridge",
-    "Fridge",
     Icons.Filled.Kitchen,
     Icons.Outlined.Kitchen,
+    true
   )
 
   data object Recipes : Screen(
     "recipes",
-    "Recipes",
     Icons.Filled.Dining,
     Icons.Outlined.Dining,
+    true
   )
 }

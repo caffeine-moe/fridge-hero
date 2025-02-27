@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-02-24T00:03:09.316549509Z">
+        <DropdownSelection timestamp="2025-02-27T12:09:48.743060091Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/home/isaac/.config/.android/avd/Legacy_Testing_Nexus_6_Like_API_22.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/isaac/.config/.android/avd/Pixel_XL_Generic_Size_API_35_AOSP_no_google.avd" />
             </handle>
           </Target>
         </DropdownSelection>

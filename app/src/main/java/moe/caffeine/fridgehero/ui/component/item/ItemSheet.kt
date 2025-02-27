@@ -9,25 +9,26 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,21 +47,20 @@ fun ItemSheet(
   onBarcodeFromScanner: suspend () -> Result<String>,
   onFoodItemFromBarcode: suspend (String) -> Result<FoodItem>,
   onExpiryDateRequest: suspend () -> Result<Long>,
-  state: SheetState,
-  onComplete: suspend (FoodItem) -> Unit,
-  onDismiss: suspend () -> Unit,
+  bottomSheetScaffoldState: BottomSheetScaffoldState,
+  onComplete: suspend (Result<FoodItem>) -> Unit,
   onHardRemove: (FoodItem) -> Unit,
 ) {
   val scrollState = rememberScrollState()
   val scope = rememberCoroutineScope()
+  val latestPrefill: FoodItem by rememberUpdatedState(newValue = prefill)
   var editableFoodItem by rememberSaveable { mutableStateOf(prefill) }
-  val saved by rememberSaveable { mutableStateOf(editableFoodItem.realmObjectId.isNotBlank()) }
+  var saved by remember(editableFoodItem) { mutableStateOf(editableFoodItem.realmObjectId.isNotBlank()) }
   var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
   BottomSheetScaffold(
-    scaffoldState = rememberBottomSheetScaffoldState(state),
-    sheetPeekHeight = 260.dp,
-    modifier = modifier
-      .systemBarsPadding(),
+    scaffoldState = bottomSheetScaffoldState,
+    sheetPeekHeight = 240.dp,
+    modifier = modifier,
     sheetContent = {
       Row {
         Box(
@@ -70,7 +70,7 @@ fun ItemSheet(
           TextButton(
             modifier = Modifier.align(Alignment.CenterStart),
             onClick = {
-              scope.launch { onDismiss() }
+              scope.launch { onComplete(Result.failure(Throwable("Dismissed"))) }
             }) {
             Text("Dismiss")
           }
@@ -84,7 +84,9 @@ fun ItemSheet(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = {
               scope.launch {
-                onComplete(editableFoodItem)
+                onComplete(Result.success(editableFoodItem))
+                editableFoodItem = FoodItem()
+                saved = false
               }
             }
           ) {
@@ -114,10 +116,9 @@ fun ItemSheet(
                   scope.launch {
                     val barcode =
                       onBarcodeFromScanner().getOrNull() ?: return@launch
-                    if (!replaceAll) {
-                      editableFoodItem = editableFoodItem.copy(barcode = barcode)
+                    editableFoodItem = editableFoodItem.copy(barcode = barcode)
+                    if (!replaceAll)
                       return@launch
-                    }
                     onFoodItemFromBarcode(barcode).onSuccess {
                       editableFoodItem = it
                     }
@@ -186,7 +187,7 @@ fun ItemSheet(
               onClick = {
                 scope.launch {
                   onHardRemove(editableFoodItem)
-                  onDismiss()
+                  saved = false
                 }
               }
             ) {
@@ -200,4 +201,7 @@ fun ItemSheet(
       }
     }
   ) {}
+  LaunchedEffect(latestPrefill) {
+    editableFoodItem = latestPrefill
+  }
 }
