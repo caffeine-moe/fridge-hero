@@ -1,7 +1,7 @@
 package moe.caffeine.fridgehero.domain.mapper
 
 import io.realm.kotlin.ext.toRealmList
-import moe.caffeine.fridgehero.data.model.RealmRecipe
+import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
 import moe.caffeine.fridgehero.domain.model.Recipe
 
 fun RealmRecipe.toDomainModel(): Recipe =

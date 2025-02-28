@@ -7,13 +7,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import moe.caffeine.fridgehero.domain.Event
+import moe.caffeine.fridgehero.domain.InitialisationState
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.MainViewModel
 import moe.caffeine.fridgehero.ui.overlay.LoadingOverlay
@@ -29,24 +34,39 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      val profileState by viewModel.profile.collectAsState()
-      var showLoadingOverlay by rememberSaveable { mutableStateOf(true) }
+      val profileState by viewModel.profile.collectAsStateWithLifecycle()
+      val initialisationState by viewModel.eventFlow.filter { it is Event.InitialisationStateBroadcast }
+        .map { (it as Event.InitialisationStateBroadcast).state }
+        .collectAsState(InitialisationState.INITIALISING)
+      var readyState by rememberSaveable {
+        mutableStateOf(false)
+      }
       val emitEvent: (Event) -> Unit = { event -> viewModel.emitEvent(event) }
+      LaunchedEffect(initialisationState) {
+        if (initialisationState == InitialisationState.READY) {
+          readyState = true
+        }
+      }
       FridgeHeroTheme {
         Surface(
           modifier = Modifier.fillMaxSize()
         ) {
-          LoadingOverlay(visible = showLoadingOverlay)
+          LoadingOverlay(
+            visible = initialisationState != InitialisationState.READY,
+            statusMessage = "Fridge Hero is Loading..."
+          )
           profileState?.let { maybeProfile ->
             maybeProfile.fold(
               onSuccess = { profile ->
-                showLoadingOverlay = false
-                MainScreen(
-                  profile = profile,
-                  foodItems = viewModel.foodItems,
-                  eventFlow = viewModel.eventFlow,
-                  emitEvent = emitEvent
-                )
+                viewModel.ensureReady()
+                if (readyState) {
+                  MainScreen(
+                    profile = profile,
+                    foodItems = viewModel.foodItems,
+                    eventFlow = viewModel.eventFlow,
+                    emitEvent = emitEvent
+                  )
+                }
               },
               onFailure = {
                 OOBE { firstName, lastName ->

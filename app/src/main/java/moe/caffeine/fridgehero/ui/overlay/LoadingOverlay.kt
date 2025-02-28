@@ -36,6 +36,7 @@ fun LoadingOverlay(
     animationSpec = tween(durationMillis = 500)
   ) + fadeOut(animationSpec = tween(durationMillis = 500)),
   showProgressIndicator: Boolean = true,
+  statusMessage: String = "",
   content: @Composable () -> Unit = {
     Row {
       Icon(
@@ -68,9 +69,19 @@ fun LoadingOverlay(
       if (showProgressIndicator) {
         Spacer(
           modifier = Modifier
-            .height(32.dp)
+            .height(16.dp)
         )
         CircularProgressIndicator()
+      }
+      if (statusMessage.isNotEmpty()) {
+        Spacer(
+          modifier = Modifier
+            .height(16.dp)
+        )
+        Text(
+          text = statusMessage,
+          style = MaterialTheme.typography.labelMedium
+        )
       }
     }
   }

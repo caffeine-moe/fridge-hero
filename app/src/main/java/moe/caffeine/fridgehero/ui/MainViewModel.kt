@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
 import moe.caffeine.fridgehero.domain.Event
+import moe.caffeine.fridgehero.domain.InitialisationState
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.repository.DataRepository
@@ -30,6 +31,15 @@ class MainViewModel : ViewModel() {
 
   fun upsertProfile(profile: Profile) = viewModelScope.launch {
     repository.upsertProfile(profile)
+  }
+
+  fun ensureReady() {
+    viewModelScope.launch {
+      emitEvent(Event.InitialisationStateBroadcast(InitialisationState.INITIALISING))
+      repository.ensureReady().await().getOrNull()?.let {
+        emitEvent(Event.InitialisationStateBroadcast(InitialisationState.READY))
+      } ?: throw Throwable("FATAL ERROR, PLEASE REINSTALL APP.")
+    }
   }
 
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()

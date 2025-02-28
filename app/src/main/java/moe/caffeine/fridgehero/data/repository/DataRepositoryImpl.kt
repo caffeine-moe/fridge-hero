@@ -1,24 +1,30 @@
 package moe.caffeine.fridgehero.data.repository
 
+import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.ext.query
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.mapper.toDomainModel
-import moe.caffeine.fridgehero.data.model.RealmFoodItem
-import moe.caffeine.fridgehero.data.model.RealmProfile
+import moe.caffeine.fridgehero.data.model.realm.RealmFoodCategory
+import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
+import moe.caffeine.fridgehero.data.model.realm.RealmProfile
+import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.fetchImageAsByteArrayFromURL
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.fetchProductByBarcode
 import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.realm.deleteObjectById
 import moe.caffeine.fridgehero.data.realm.fetchAllByType
 import moe.caffeine.fridgehero.data.realm.fetchAllByTypeAsFlow
 import moe.caffeine.fridgehero.data.realm.fetchObjectById
 import moe.caffeine.fridgehero.data.realm.updateObject
-import moe.caffeine.fridgehero.data.remote.openfoodfacts.OpenFoodFactsApi
-import moe.caffeine.fridgehero.data.remote.openfoodfacts.OpenFoodFactsApi.fetchImageAsByteArrayFromURL
-import moe.caffeine.fridgehero.data.remote.openfoodfacts.OpenFoodFactsApi.fetchProductByBarcode
 import moe.caffeine.fridgehero.domain.mapper.toDomainModel
 import moe.caffeine.fridgehero.domain.mapper.toRealmModel
+import moe.caffeine.fridgehero.domain.model.FoodCategory
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
@@ -29,6 +35,49 @@ class DataRepositoryImpl(
   override val realmProvider: RealmProvider = RealmProvider,
   override val openFoodFactsApi: OpenFoodFactsApi = OpenFoodFactsApi
 ) : DataRepository {
+  override suspend fun ensureReady(): CompletableDeferred<Result<Boolean>> =
+    CompletableDeferred<Result<Boolean>>().also { completable ->
+      if (realmProvider.realmInstance.fetchAllByType<RealmFoodCategory>().isEmpty()) {
+        withContext(Dispatchers.Default) {
+          val taxonomyNodes = OpenFoodFactsTaxonomyParser.parse()
+          val realmCategories = mutableMapOf<String, RealmFoodCategory>()
+          realmProvider.realmInstance.writeBlocking {
+
+            taxonomyNodes.values.forEach { node ->
+              val realmCategory = RealmFoodCategory().apply {
+                _id = node.id
+                name = node.name
+              }
+              realmCategories[node.name] = realmCategory
+              copyToRealm(realmCategory, UpdatePolicy.ALL)
+            }
+
+            realmCategories.values.forEach { category ->
+              val taxnode = taxonomyNodes[category.name] ?: return@forEach
+              taxnode.parents.keys.forEach {
+                copyToRealm(
+                  category.apply { parents.add(realmCategories[it]!!) }, UpdatePolicy.ALL
+                )
+              }
+            }
+          }
+          completable.complete(Result.success(true))
+          realmProvider.realmInstance.fetchAllByType<RealmFoodCategory>().forEach {
+            println(
+              "${it.name} \n|| PARENTS: ${
+                it.parents.map { it.name }.joinToString(", ")
+              } \n|| CHILDREN: ${
+                it.children.map { it.name }.joinToString(
+                  ", "
+                )
+              } "
+            )
+          }
+        }
+      } else {
+        completable.complete(Result.success(true))
+      }
+    }
 
   override fun getProfileAsFlow(): Flow<Result<Profile>?> =
     realmProvider.realmInstance.fetchAllByTypeAsFlow<RealmProfile>()
@@ -82,7 +131,7 @@ class DataRepositoryImpl(
   override suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
     withContext(Dispatchers.IO) {
       realmProvider.realmInstance.updateObject(
-        foodItem.toRealmModel()
+        foodItem.toRealmModel(realmProvider.realmInstance)
       ).fold(
         onSuccess = {
           Result.success(it.toDomainModel())
@@ -96,7 +145,7 @@ class DataRepositoryImpl(
   override suspend fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem> =
     withContext(Dispatchers.IO) {
       realmProvider.realmInstance.deleteObjectById<RealmFoodItem>(
-        foodItem.toRealmModel()._id
+        foodItem.toRealmModel(realmProvider.realmInstance)._id
       ).fold(
         onSuccess = {
           Result.success(foodItem)
@@ -116,7 +165,11 @@ class DataRepositoryImpl(
               fetchImageAsByteArrayFromURL(it.imageThumbUrl).fold(
                 onSuccess = { value -> value },
                 onFailure = { byteArrayOf() }
-              )
+              ),
+              it.categoriesHierarchy.map {
+                realmProvider.realmInstance.query<RealmFoodCategory>("name == $0", it).first()
+                  .find()?.toDomainModel() ?: FoodCategory(name = it)
+              }
             )
           )
         },

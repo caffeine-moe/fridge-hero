@@ -1,8 +1,9 @@
 package moe.caffeine.fridgehero.domain.repository
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
 import moe.caffeine.fridgehero.data.realm.RealmProvider
-import moe.caffeine.fridgehero.data.remote.openfoodfacts.OpenFoodFactsApi
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
@@ -13,6 +14,8 @@ interface DataRepository {
   //used for interactions
   val realmProvider: RealmProvider
   val openFoodFactsApi: OpenFoodFactsApi
+
+  suspend fun ensureReady(): CompletableDeferred<Result<Boolean>>
 
   //profile interactions
   fun getProfileAsFlow(): Flow<Result<Profile>?>

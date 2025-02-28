@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.data.model
+package moe.caffeine.fridgehero.data.model.realm
 
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey

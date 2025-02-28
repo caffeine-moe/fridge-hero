@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.data.remote.openfoodfacts
+package moe.caffeine.fridgehero.data.openfoodfacts.remote
 
 import android.os.Build
 import io.ktor.client.HttpClient
@@ -8,8 +8,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import moe.caffeine.fridgehero.data.model.OpenFoodFactsProduct
-import moe.caffeine.fridgehero.data.model.OpenFoodFactsResponse
+import moe.caffeine.fridgehero.data.model.openfoodfacts.OpenFoodFactsProduct
+import moe.caffeine.fridgehero.data.model.openfoodfacts.OpenFoodFactsResponse
 import java.io.InputStream
 
 object OpenFoodFactsApi {

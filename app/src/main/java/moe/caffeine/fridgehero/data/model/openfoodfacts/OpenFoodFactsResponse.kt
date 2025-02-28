@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.data.model
+package moe.caffeine.fridgehero.data.model.openfoodfacts
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
