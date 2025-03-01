@@ -40,6 +40,7 @@ fun ActionableSwipeToDismissBox(
   content: @Composable () -> Unit,
 ) {
   AnimatedVisibility(
+    modifier = modifier,
     visible = visible,
     exit = slideOutHorizontally(
       tween(500),
