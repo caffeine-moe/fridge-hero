@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +35,11 @@ fun LoadingOverlay(
   exit: ExitTransition = slideOutHorizontally(
     targetOffsetX = { -it },
     animationSpec = tween(durationMillis = 500)
-  ) + fadeOut(animationSpec = tween(durationMillis = 500)),
+  ) + fadeOut(animationSpec = tween(durationMillis = 250)),
   showProgressIndicator: Boolean = true,
+  definitiveProgress: Float = -1f,
   statusMessage: String = "",
+  extraContent: @Composable () -> Unit = {},
   content: @Composable () -> Unit = {
     Row {
       Icon(
@@ -71,7 +74,13 @@ fun LoadingOverlay(
           modifier = Modifier
             .height(16.dp)
         )
-        CircularProgressIndicator()
+        if (definitiveProgress == -1f) {
+          CircularProgressIndicator()
+        } else {
+          LinearProgressIndicator(
+            progress = { definitiveProgress }
+          )
+        }
       }
       if (statusMessage.isNotEmpty()) {
         Spacer(
@@ -83,6 +92,7 @@ fun LoadingOverlay(
           style = MaterialTheme.typography.labelMedium
         )
       }
+      extraContent()
     }
   }
 }

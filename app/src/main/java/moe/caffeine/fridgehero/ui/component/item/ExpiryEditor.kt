@@ -20,12 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -44,7 +41,7 @@ fun ExpiryEditor(
   onListChanged: (List<Long>) -> Unit
 ) {
   val scope = rememberCoroutineScope()
-  var editableExpiryDates by rememberSaveable { mutableStateOf(expiryDates) }
+  val currentExpiryDates by rememberUpdatedState(newValue = expiryDates)
   Column(Modifier.padding(8.dp)) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
       TextButton(
@@ -53,7 +50,7 @@ fun ExpiryEditor(
         onClick = {
           scope.launch {
             onRequestExpiry().onSuccess { date ->
-              editableExpiryDates += date
+              onListChanged(currentExpiryDates + date)
             }
           }
         }
@@ -81,7 +78,7 @@ fun ExpiryEditor(
           .animateContentSize()
           .defaultMinSize(minHeight = 80.dp)
       ) {
-        (if (!small) editableExpiryDates else editableExpiryDates.take(3)).forEach { expiryDate ->
+        (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEach { expiryDate ->
           ActionableSwipeToDismissBox(
             modifier = Modifier
               .fillMaxWidth()
@@ -89,13 +86,13 @@ fun ExpiryEditor(
               .padding(4.dp),
             onStartToEndAction = {
               if (!readOnly) {
-                editableExpiryDates += expiryDate
+                onListChanged(currentExpiryDates + expiryDate)
               }
             },
             enableEndToStartDismiss = false,
             onEndToStartAction = {
               if (!readOnly) {
-                editableExpiryDates -= expiryDate
+                onListChanged(currentExpiryDates - expiryDate)
               }
             },
           ) {
@@ -125,7 +122,7 @@ fun ExpiryEditor(
             }
           }
         }
-        if (editableExpiryDates.size > 3) {
+        if (currentExpiryDates.size > 3) {
           TextButton(
             onClick = onShowMore
           ) {
@@ -133,18 +130,6 @@ fun ExpiryEditor(
           }
         }
       }
-    }
-  }
-
-  LaunchedEffect(expiryDates) {
-    if (expiryDates != editableExpiryDates) {
-      editableExpiryDates = expiryDates
-    }
-  }
-
-  LaunchedEffect(editableExpiryDates) {
-    if (editableExpiryDates != expiryDates) {
-      onListChanged(editableExpiryDates)
     }
   }
 }

@@ -3,50 +3,65 @@ package moe.caffeine.fridgehero.data.openfoodfacts.local
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.model.openfoodfacts.OpenFoodFactsTaxonomyNode
-import org.mongodb.kbson.BsonObjectId
+import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION
+import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser.Constants.PARENT_DEFINITION
 import java.io.InputStream
 
 object OpenFoodFactsTaxonomyParser {
 
-  private suspend fun loadTaxonomyInputStream(): InputStream = withContext(Dispatchers.IO) {
-    javaClass.classLoader?.getResource("food_categories.txt")?.openStream()
-      ?: throw Throwable("Unable to find taxonomy file")
+  data object Constants {
+    //lines starting with this are referring to parents of
+    //a following node definition
+    const val PARENT_DEFINITION = "< en:"
+
+    //lines starting with this define individual nodes
+    const val NODE_DEFINITION = "en:"
   }
 
-  suspend fun parse(): Map<String, OpenFoodFactsTaxonomyNode> {
-    val rawTaxonomyText = loadTaxonomyInputStream().bufferedReader().use { it.readText() }
+  fun normalisedIdFromName(name: String) =
+    name.replace(Regex("[^a-zA-Z0-9]"), "").lowercase()
+
+  private suspend fun loadTaxonomyInputStream(): Result<InputStream> = withContext(Dispatchers.IO) {
+    javaClass.classLoader?.getResource("food_categories.txt")?.openStream()?.let {
+      Result.success(it)
+    } ?: Result.failure(Throwable("Unable to find taxonomy file, potentially invalid APK."))
+  }
+
+  suspend fun parse(): Result<Map<String, OpenFoodFactsTaxonomyNode>> {
+    val rawTaxonomyText =
+      loadTaxonomyInputStream().getOrElse { return Result.failure(it) }.bufferedReader()
+        .use { it.readText() }
     val lines = rawTaxonomyText.lines()
       .filter { it.isNotBlank() && !it.startsWith("#") }
 
+    //keep a map of the entire DAG
     val nodes = mutableMapOf<String, OpenFoodFactsTaxonomyNode>()
 
     // add all nodes to the structure
     lines.forEach { line ->
       when {
-        //reference to a parent
-        line.startsWith("< en:") -> {
-          val parentName = line.substringAfter("< en:").trim()
+        line.startsWith(PARENT_DEFINITION) -> {
+          val parentName = line.substringAfter(PARENT_DEFINITION).trim()
+          val parentId = normalisedIdFromName(parentName)
 
           // create parent node if it doesn't exist
-          if (!nodes.containsKey(parentName)) {
-            nodes[parentName] = OpenFoodFactsTaxonomyNode(
-              id = BsonObjectId(),
+          if (!nodes.containsKey(parentId)) {
+            nodes[parentId] = OpenFoodFactsTaxonomyNode(
               name = parentName
             )
           }
         }
 
-        //node definition
-        line.startsWith("en:") -> {
+        line.startsWith(NODE_DEFINITION) -> {
           val parts = line.split(":", limit = 2)
-          if (parts.size == 2) {
-            val valueParts = parts[1].split(",")
+          if (parts.size == 2) { //if it's not "en:something" then it's not a node definition
+            val valueParts = parts[1].split(",") //we only want the canonical name
             val name = valueParts.first().trim()
+            val id = normalisedIdFromName(name)
 
             // create node if it doesn't exist
-            if (!nodes.containsKey(name)) {
-              nodes[name] = OpenFoodFactsTaxonomyNode(
-                id = BsonObjectId(),
+            if (!nodes.containsKey(id)) {
+              nodes[id] = OpenFoodFactsTaxonomyNode(
                 name = name
               )
             }
@@ -56,40 +71,39 @@ object OpenFoodFactsTaxonomyParser {
     }
 
     // figure out node relations
-    var currentParents = mutableListOf<String>()
+    var currentParents = mutableSetOf<String>()
     lines.forEach { line ->
       when {
-        // parent reference
-        line.startsWith("< en:") -> {
-          val parentName = line.substringAfter("< en:").trim()
+        line.startsWith(PARENT_DEFINITION) -> {
+          val parentName = line.substringAfter(PARENT_DEFINITION).trim()
+          val parentId = normalisedIdFromName(parentName)
 
           // add to current parents
-          if (!currentParents.contains(parentName)) {
-            currentParents.add(parentName)
-          }
+          currentParents.add(parentId)
         }
 
         // node definition
-        line.startsWith("en:") && !line.contains(":en:") -> {
+        line.startsWith(NODE_DEFINITION) && !line.contains(":en:") -> {
           val parts = line.split(":", limit = 2)
           if (parts.size == 2) {
             val valueParts = parts[1].split(",")
             val name = valueParts.first().trim()
+            val id = normalisedIdFromName(name)
 
             // propagate relationships to any parents found
             currentParents.forEach { parent ->
-              nodes[parent]?.let { nodes[name]?.parents?.set(it.name, it) }
+              nodes[parent]?.let { nodes[id]?.parents?.set(it.id, it) }
 
-              nodes[name]?.let { nodes[parent]?.children?.set(it.name, it) }
+              nodes[id]?.let { nodes[parent]?.children?.set(it.id, it) }
             }
 
-            // Reset current parents for next node
-            currentParents = mutableListOf()
+            // reset current parents for next node
+            currentParents = mutableSetOf()
           }
         }
       }
     }
 
-    return nodes
+    return Result.success(nodes)
   }
 }

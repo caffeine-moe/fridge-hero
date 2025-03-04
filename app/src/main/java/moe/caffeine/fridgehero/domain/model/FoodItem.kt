@@ -14,7 +14,7 @@ data class FoodItem(
   val barcode: String = "",
   val imageByteArray: ByteArray = byteArrayOf(),
   val expiryDates: List<Long> = listOf(),
-  val categories: List<FoodCategory> = listOf()
+  val categories: List<String> = listOf()
 ) : Parcelable {
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()

@@ -8,7 +8,7 @@ import moe.caffeine.fridgehero.data.model.realm.RealmProfile
 import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
 
 object RealmProvider {
-  private val realmConfig: RealmConfiguration = RealmConfiguration.create(
+  private val realmConfig: RealmConfiguration = RealmConfiguration.Builder(
     schema = setOf(
       RealmProfile::class,
       RealmFoodItem::class,
@@ -16,6 +16,9 @@ object RealmProvider {
       RealmFoodCategory::class
     )
   )
+    .deleteRealmIfMigrationNeeded()
+    .name("FridgeHero")
+    .build()
 
   val realmInstance: Realm by lazy { Realm.open(realmConfig) }
 }

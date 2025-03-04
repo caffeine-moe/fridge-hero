@@ -11,15 +11,21 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
+import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.InitialisationState
+import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 
 class MainViewModel : ViewModel() {
-  private val repository: DataRepository = DataRepositoryImpl()
+  private val repository: DataRepository = DataRepositoryImpl(
+    realmProvider = RealmProvider,
+    openFoodFactsApi = OpenFoodFactsApi,
+    viewModelScope
+  )
 
   val profile: StateFlow<Result<Profile>?> = repository.getProfileAsFlow()
     .onStart { emit(null) }
@@ -33,14 +39,14 @@ class MainViewModel : ViewModel() {
     repository.upsertProfile(profile)
   }
 
-  fun ensureReady() {
-    viewModelScope.launch {
-      emitEvent(Event.InitialisationStateBroadcast(InitialisationState.INITIALISING))
-      repository.ensureReady().await().getOrNull()?.let {
-        emitEvent(Event.InitialisationStateBroadcast(InitialisationState.READY))
-      } ?: throw Throwable("FATAL ERROR, PLEASE REINSTALL APP.")
-    }
-  }
+  private fun initialiseRepository() = viewModelScope.launch { repository.initialise() }
+
+  val initialisationStage: StateFlow<InitialisationStage> = repository.initialisationStage
+    .stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(),
+      InitialisationStage.None
+    )
 
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
     .stateIn(
@@ -55,6 +61,9 @@ class MainViewModel : ViewModel() {
   fun emitEvent(event: Event) = viewModelScope.launch { _eventFlow.emit(event) }
 
   init {
+    if (initialisationStage.value == InitialisationStage.None) {
+      initialiseRepository()
+    }
     eventFlow.onEach { event ->
       when (event) {
         is Event.RequestFoodItemFromBarcode -> {

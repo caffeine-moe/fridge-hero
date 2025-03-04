@@ -8,11 +8,40 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.json.Json
 import moe.caffeine.fridgehero.data.model.openfoodfacts.OpenFoodFactsProduct
 import moe.caffeine.fridgehero.data.model.openfoodfacts.OpenFoodFactsResponse
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.Constants.BARCODE_API_ENDPOINT
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.Constants.json
+import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.Constants.trustManager
 import java.io.InputStream
+import java.security.KeyStore
+import java.security.cert.CertificateFactory
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 object OpenFoodFactsApi {
+
+  data object Constants {
+    const val BARCODE_API_ENDPOINT = "https://world.openfoodfacts.org/api/v2/product"
+
+    val trustManager = { certificateStream: InputStream ->
+      (TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
+        init(KeyStore.getInstance(KeyStore.getDefaultType()).apply {
+          load(null, null)
+          setCertificateEntry(
+            "isrg",
+            CertificateFactory.getInstance("X.509").generateCertificate(
+              certificateStream
+            )
+          )
+        })
+      }).trustManagers.first() as X509TrustManager
+    }
+
+    val json = Json { ignoreUnknownKeys = true }
+
+  }
 
   private fun tryLoadCertificate(): Result<InputStream> =
     try {

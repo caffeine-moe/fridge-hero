@@ -60,7 +60,7 @@ fun Fridge(
           }
         ) {
           ExpiryEditor(
-            expiryDates = currentItem.expiryDates.toList(),
+            expiryDates = currentItem.expiryDates,
             onRequestExpiry = {
               Event.RequestDateFromPicker()
                 .apply(emitEvent).result.await()

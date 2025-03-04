@@ -3,6 +3,7 @@ package moe.caffeine.fridgehero.data.realm
 import io.realm.kotlin.Realm
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.query.TRUE_PREDICATE
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,11 +37,17 @@ inline fun <reified T : RealmObject> Realm.fetchObjectById(objectId: BsonObjectI
   }
 }
 
-inline fun <reified T : RealmObject> Realm.fetchAllByType(): List<T> =
-  query<T>().find().toList()
+inline fun <reified T : RealmObject> Realm.fetchAllByType(
+  query: String = TRUE_PREDICATE,
+  vararg args: Any?
+): List<T> =
+  query<T>(query, *args).find().toList()
 
-inline fun <reified T : RealmObject> Realm.fetchAllByTypeAsFlow(): Flow<List<T>> =
-  query<T>().find().asFlow().map { results -> results.list }
+inline fun <reified T : RealmObject> Realm.fetchAllByTypeAsFlow(
+  query: String = TRUE_PREDICATE,
+  vararg args: Any?
+): Flow<List<T>> =
+  query<T>(query, *args).find().asFlow().map { results -> results.list }
 
 inline fun <reified T : RealmObject> Realm.deleteObjectById(objectId: BsonObjectId): Result<T> =
   fetchObjectById<T>(objectId).fold(

@@ -16,14 +16,13 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,7 +53,9 @@ fun ItemSheet(
   val scrollState = rememberScrollState()
   val scope = rememberCoroutineScope()
   val latestPrefill: FoodItem by rememberUpdatedState(newValue = prefill)
-  var editableFoodItem by rememberSaveable { mutableStateOf(prefill) }
+  var editableFoodItem by rememberSaveable(latestPrefill) { mutableStateOf(latestPrefill) }
+  var categoriesState by rememberSaveable(latestPrefill) { mutableStateOf(editableFoodItem.categories) }
+  var expiryDatesState by rememberSaveable(latestPrefill) { mutableStateOf(editableFoodItem.expiryDates) }
   var saved by remember(editableFoodItem) { mutableStateOf(editableFoodItem.realmObjectId.isNotBlank()) }
   var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
   BottomSheetScaffold(
@@ -77,6 +78,8 @@ fun ItemSheet(
           TextButton(
             onClick = {
               editableFoodItem = prefill
+              categoriesState = editableFoodItem.categories
+              expiryDatesState = editableFoodItem.expiryDates
             }) {
             Text("Reset")
           }
@@ -84,8 +87,17 @@ fun ItemSheet(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = {
               scope.launch {
-                onComplete(Result.success(editableFoodItem))
+                onComplete(
+                  Result.success(
+                    editableFoodItem.copy(
+                      categories = categoriesState,
+                      expiryDates = expiryDatesState
+                    )
+                  )
+                )
                 editableFoodItem = FoodItem()
+                categoriesState = editableFoodItem.categories
+                expiryDatesState = editableFoodItem.expiryDates
                 saved = false
               }
             }
@@ -96,7 +108,7 @@ fun ItemSheet(
       }
       Surface(modifier = Modifier.verticalScroll(scrollState)) {
         Column {
-          Card(
+          ElevatedCard(
             modifier = Modifier
               .padding(8.dp)
               .border(
@@ -111,7 +123,8 @@ fun ItemSheet(
                 style = MaterialTheme.typography.labelLarge
               )
               ItemEditor(
-                editableFoodItem,
+                foodItem = editableFoodItem,
+                categories = categoriesState,
                 onScannerRequest = { replaceAll ->
                   scope.launch {
                     val barcode =
@@ -120,17 +133,23 @@ fun ItemSheet(
                     if (!replaceAll)
                       return@launch
                     onFoodItemFromBarcode(barcode).onSuccess {
+                      categoriesState = it.categories
+                      expiryDatesState = it.expiryDates
                       editableFoodItem = it
                     }
                   }
                 },
                 onFieldChanged = { editedFoodItem ->
                   editableFoodItem = editedFoodItem
+                },
+                onCategoriesChanged = { editedCategories ->
+                  categoriesState = editedCategories
+                  editableFoodItem = editableFoodItem.copy(categories = editedCategories)
                 }
               )
             }
           }
-          Card(
+          ElevatedCard(
             modifier = Modifier
               .padding(8.dp)
               .border(
@@ -145,20 +164,20 @@ fun ItemSheet(
                 style = MaterialTheme.typography.labelLarge
               )
               ExpiryEditor(
-                editableFoodItem.expiryDates,
+                expiryDatesState,
                 onRequestExpiry = onExpiryDateRequest,
                 small = !expiryEditorExpanded,
                 onShowMore = {
                   expiryEditorExpanded = !expiryEditorExpanded
                 },
                 onListChanged = { newDates ->
-                  editableFoodItem =
-                    editableFoodItem.copy(expiryDates = newDates)
+                  expiryDatesState = newDates
+                  editableFoodItem = editableFoodItem.copy(expiryDates = newDates)
                 }
               )
             }
           }
-          Card(
+          ElevatedCard(
             modifier = Modifier
               .padding(8.dp)
               .border(
@@ -201,7 +220,4 @@ fun ItemSheet(
       }
     }
   ) {}
-  LaunchedEffect(latestPrefill) {
-    editableFoodItem = latestPrefill
-  }
 }

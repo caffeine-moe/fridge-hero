@@ -54,10 +54,13 @@ fun ItemCard(
       modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
+        .align(Alignment.CenterHorizontally)
     ) {
       Row {
         ItemImageCard(
-          Modifier.size(80.dp),
+          Modifier
+            .size(80.dp)
+            .align(Alignment.CenterVertically),
           item
         )
         Spacer(Modifier.padding(10.dp))
@@ -66,11 +69,20 @@ fun ItemCard(
             style = Typography.titleMedium,
             text = item.name
           )
-          Text(
-            style = Typography.labelLarge,
-            text = item.brand,
-            color = Color.LightGray
-          )
+          if (item.brand.isNotEmpty()) {
+            Text(
+              style = Typography.labelLarge,
+              text = "Brand: ${item.brand}",
+              color = Color.LightGray
+            )
+          }
+          if (item.categories.isNotEmpty()) {
+            Text(
+              style = Typography.labelLarge,
+              text = "Categorisation: ${item.categories.first()}",
+              color = Color.LightGray
+            )
+          }
         }
       }
       AnimatedVisibility(
