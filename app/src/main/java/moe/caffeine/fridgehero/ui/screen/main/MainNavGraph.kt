@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.navigation
+package moe.caffeine.fridgehero.ui.screen.main
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -21,7 +21,7 @@ import moe.caffeine.fridgehero.ui.screen.home.Home
 import moe.caffeine.fridgehero.ui.screen.recipe.Recipes
 
 @Composable
-fun BottomNavGraph(
+fun MainNavGraph(
   navController: NavHostController,
   navigatedLeft: Boolean,
   profile: Profile,

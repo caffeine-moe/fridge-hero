@@ -44,14 +44,14 @@ class MainViewModel : ViewModel() {
   val initialisationStage: StateFlow<InitialisationStage> = repository.initialisationStage
     .stateIn(
       viewModelScope,
-      SharingStarted.WhileSubscribed(),
+      SharingStarted.WhileSubscribed(5000),
       InitialisationStage.None
     )
 
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
     .stateIn(
       viewModelScope,
-      SharingStarted.WhileSubscribed(),
+      SharingStarted.WhileSubscribed(5000),
       emptyList()
     )
 

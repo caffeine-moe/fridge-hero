@@ -1,5 +1,6 @@
 package moe.caffeine.fridgehero.ui.overlay
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -99,6 +100,10 @@ fun ScannerOverlay(
             Box(
               modifier = Modifier
                 .drawWithContent {
+                  if (Build.VERSION.SDK_INT < 24) {
+                    drawContent()
+                    return@drawWithContent
+                  }
                   val physicalDimensions = arrayOf(
                     size.width,
                     size.height

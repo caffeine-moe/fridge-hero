@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,8 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.ui.theme.Typography
@@ -33,16 +31,15 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemCard(
+  modifier: Modifier,
   item: FoodItem,
   onLongPress: () -> Unit,
   expandedContent: @Composable () -> Unit
 ) {
   var expanded by rememberSaveable { mutableStateOf(false) }
-  Card(
-    modifier = Modifier
+  ElevatedCard(
+    modifier = modifier
       .fillMaxWidth()
-      .padding(8.dp)
-      .clip(RoundedCornerShape(16.dp))
       .combinedClickable(
         onClick = {
           expanded = !expanded
@@ -73,14 +70,14 @@ fun ItemCard(
             Text(
               style = Typography.labelLarge,
               text = "Brand: ${item.brand}",
-              color = Color.LightGray
+              color = MaterialTheme.colorScheme.onSurfaceVariant
             )
           }
           if (item.categories.isNotEmpty()) {
             Text(
               style = Typography.labelLarge,
               text = "Categorisation: ${item.categories.first()}",
-              color = Color.LightGray
+              color = MaterialTheme.colorScheme.onSurfaceVariant
             )
           }
         }

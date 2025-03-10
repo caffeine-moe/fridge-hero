@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.mapper.toDomainModel
+import moe.caffeine.fridgehero.data.mapper.toRealmModel
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodCategory
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.realm.RealmProfile
@@ -84,16 +86,13 @@ class DataRepositoryImpl(
       realm.write {
         //write all nodes
         taxonomyNodes.map { node ->
-          val realmCategory = RealmFoodCategory().apply {
-            _id = node.key
-            name = node.value.name
-          }
-          copyToRealm(realmCategory, UpdatePolicy.ALL)
           coroutineScope.launch {
             total += 0.5f
             flow.emit(total / taxonomyNodes.keys.size.toFloat())
           }
-          realmCategory
+          node.value.toRealmModel().also {
+            copyToRealm(it, UpdatePolicy.ALL)
+          }
         }.associateBy { it._id }.apply {
           forEach { entry ->
             val taxNode = taxonomyNodes[entry.key] ?: return@forEach
@@ -110,15 +109,15 @@ class DataRepositoryImpl(
         }
 
       }
-      realm.fetchAllByType<RealmFoodCategory>().takeLast(10).forEach {
-        println(
-          "${it.name} \n|| PARENTS: ${
-            it.parentsMap.values.joinToString(", ") { it.name }
-          } \n|| CHILDREN: ${
-            it.childrenMap.values.joinToString(", ") { it.name }
-          } \n|| LEVEL: ${it.findTrees().lastOrNull()?.keys?.size ?: 0}"
-        )
-      }
+      /*      realm.fetchAllByType<RealmFoodCategory>().takeLast(100).forEach {
+              println(
+                "${it.name} \n|| PARENTS: ${
+                  it.parentsMap.values.joinToString(", ") { it.name }
+                } \n|| CHILDREN: ${
+                  it.childrenMap.values.joinToString(", ") { it.name }
+                } \n|| LEVEL: ${it.findTrees().lastOrNull()?.keys?.size ?: 0}"
+              )
+            }*/
       return Result.success(null)
     } else {
       return Result.success(null)
@@ -159,6 +158,7 @@ class DataRepositoryImpl(
 
   override fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>> =
     realm.fetchAllByTypeAsFlow<RealmFoodItem>()
+      .distinctUntilChanged()
       .transform { foodItems -> emit(foodItems.map { it.toDomainModel() }) }
       .flowOn(Dispatchers.IO)
 

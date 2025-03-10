@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.ui.component.scanner
 
 import android.Manifest
+import android.view.Surface
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.CameraState
@@ -75,6 +76,7 @@ fun Scanner(
 
         preview = Preview.Builder().build().also {
           it.surfaceProvider = previewView.surfaceProvider
+          it.targetRotation = Surface.ROTATION_0
         }
 
         //get the back camera

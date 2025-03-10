@@ -2,7 +2,7 @@ package moe.caffeine.fridgehero.ui.component.item
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NoFood
 import androidx.compose.material3.Card
@@ -46,7 +46,8 @@ fun ItemImageCard(
         ColorFilter.tint(MaterialTheme.colorScheme.outlineVariant)
       } else null,
       modifier = modifier
-        .clip(RoundedCornerShape(16.dp)),
+        .clip(MaterialTheme.shapes.medium)
+        .fillMaxSize(),
       painter = imageBitmap ?: rememberVectorPainter(Icons.Outlined.NoFood),
       alignment = Alignment.Center,
       contentDescription = "Image of ${item.name}",

@@ -1,17 +1,13 @@
 package moe.caffeine.fridgehero.ui.component.item
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
@@ -21,10 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.mapper.daysUntil
@@ -41,49 +41,45 @@ fun ExpiryEditor(
   onListChanged: (List<Long>) -> Unit
 ) {
   val scope = rememberCoroutineScope()
-  val currentExpiryDates by rememberUpdatedState(newValue = expiryDates)
+  val currentExpiryDates by rememberUpdatedState(expiryDates)
   Column(Modifier.padding(8.dp)) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-      TextButton(
-        enabled = !readOnly,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-        onClick = {
-          scope.launch {
-            onRequestExpiry().onSuccess { date ->
-              onListChanged(currentExpiryDates + date)
+    Row(Modifier.fillMaxWidth()) {
+      Box(Modifier.fillMaxWidth()) {
+        Text(
+          modifier = Modifier
+            .align(Alignment.CenterStart)
+            .padding(8.dp),
+          text = "Expiry",
+          style = MaterialTheme.typography.titleMedium
+        )
+        TextButton(
+          modifier = Modifier.align(Alignment.CenterEnd),
+          enabled = !readOnly,
+          onClick = {
+            scope.launch {
+              onRequestExpiry().onSuccess { date ->
+                onListChanged(currentExpiryDates + date)
+              }
             }
           }
+        ) {
+          Icon(
+            Icons.Filled.Add,
+            "Add Expiry Date",
+          )
         }
-      ) {
-        Icon(
-          Icons.Filled.Add,
-          "Add Expiry Date",
-        )
-        Text("Add Expiry Date")
       }
     }
-    Card(
+    Column(
       Modifier
         .fillMaxWidth()
-        .padding(top = 8.dp)
-        .border(
-          BorderStroke(2.dp, MaterialTheme.colorScheme.primaryContainer),
-          RoundedCornerShape(16.dp)
-        )
+        .align(Alignment.CenterHorizontally)
+        .animateContentSize()
     ) {
-      Column(
-        Modifier
-          .fillMaxWidth()
-          .align(Alignment.CenterHorizontally)
-          .animateContentSize()
-          .defaultMinSize(minHeight = 80.dp)
-      ) {
-        (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEach { expiryDate ->
+      (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEach { expiryDate ->
+        val expired by remember { mutableStateOf(expiryDate.daysUntil() <= -1) }
+        Box(Modifier.padding(8.dp)) {
           ActionableSwipeToDismissBox(
-            modifier = Modifier
-              .fillMaxWidth()
-              .defaultMinSize(minHeight = 80.dp)
-              .padding(4.dp),
             onStartToEndAction = {
               if (!readOnly) {
                 onListChanged(currentExpiryDates + expiryDate)
@@ -96,38 +92,35 @@ fun ExpiryEditor(
               }
             },
           ) {
-            Card(
-              Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-            ) {
-              Box(
+            Card {
+              Column(
                 Modifier
-                  .fillMaxSize()
-                  .defaultMinSize(minHeight = 80.dp)
+                  .fillMaxWidth()
                   .padding(8.dp)
-                  .border(
-                    BorderStroke(2.dp, MaterialTheme.colorScheme.secondaryContainer),
-                    RoundedCornerShape(16.dp)
-                  ),
-                contentAlignment = Alignment.Center,
               ) {
                 Text(
                   softWrap = true,
-                  modifier = Modifier.padding(8.dp),
-                  style = MaterialTheme.typography.bodyLarge,
-                  text = "Expires: ${expiryDate.toReadableDate()}\n(${expiryDate.daysUntil()} days)"
+                  style = MaterialTheme.typography.titleLarge,
+                  fontWeight = FontWeight.Bold,
+                  text = expiryDate.toReadableDate()
+                )
+                Spacer(Modifier.size(4.dp))
+                Text(
+                  style = MaterialTheme.typography.titleSmall,
+                  fontWeight = FontWeight.Bold,
+                  text = if (!expired) "${expiryDate.daysUntil() + 1}d left" else "Expired.",
+                  color = if (expired) Color.Red else MaterialTheme.colorScheme.onSurface
                 )
               }
             }
           }
         }
-        if (currentExpiryDates.size > 3) {
-          TextButton(
-            onClick = onShowMore
-          ) {
-            Text("Show ${if (small) "More..." else "Less"}")
-          }
+      }
+      if (currentExpiryDates.size > 3) {
+        TextButton(
+          onClick = onShowMore
+        ) {
+          Text("Show ${if (small) "More..." else "Less"}")
         }
       }
     }

@@ -1,151 +1,312 @@
 package moe.caffeine.fridgehero.ui.component.item
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.QrCodeScanner
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ItemEditor(
   foodItem: FoodItem,
   categories: List<String>,
+  expiryDates: List<Long>,
+  expiryEditorExpandedInitial: Boolean = false,
+  imageSectionExpanded: Boolean = true,
   readOnly: Boolean = false,
-  onScannerRequest: (replaceAll: Boolean) -> Unit = {},
-  onFieldChanged: (FoodItem) -> Unit = {},
-  onCategoriesChanged: (List<String>) -> Unit = {}
+  compact: Boolean = false,
+  onScannerRequest: suspend () -> Unit = {},
+  onDatePickerRequest: suspend () -> (Result<Long>) = { Result.failure(Throwable("")) },
+  onValueChanged: (FoodItem) -> Unit = {}
 ) {
-  var expanded by rememberSaveable { mutableStateOf(false) }
-  Box(
-    Modifier
-      .padding(8.dp)
-  ) {
-    Column(
+  val scope = rememberCoroutineScope()
+  var interactedWithTitle by rememberSaveable { mutableStateOf(false) }
+
+  var editingBarcode by remember { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+  val barcodeFocusRequester = remember { FocusRequester() }
+
+  var categoryEditorExpanded by rememberSaveable { mutableStateOf(false) }
+  var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
+
+  val trailingEditIcon = @Composable {
+    if (!readOnly) {
+      Icon(
+        Icons.Outlined.Edit,
+        null,
+        Modifier.size(16.dp)
+      )
+    }
+  }
+  //Title Editor
+  ElevatedCard {
+    Box(Modifier.padding(8.dp)) {
+      Column {
+        OutlinedTextField(
+          isError = foodItem.name.isEmpty() && interactedWithTitle,
+          label = { Text("Name") },
+          modifier = Modifier
+            .fillMaxWidth(),
+          value = foodItem.name,
+          readOnly = readOnly,
+          onValueChange = {
+            interactedWithTitle = true
+            onValueChanged(foodItem.copy(name = it))
+          },
+          textStyle = MaterialTheme.typography.titleMedium,
+          trailingIcon = trailingEditIcon,
+          placeholder = { Text("Name") },
+          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        )
+      }
+    }
+  }
+  Spacer(Modifier.size(8.dp))
+  //Barcode n image n stuff
+  ElevatedCard {
+    Box(
       Modifier
-        .wrapContentSize()
+        .padding(8.dp)
     ) {
-      Row(
+      Column(
         Modifier
-          .fillMaxWidth()
-          .height(IntrinsicSize.Min)
+          .wrapContentSize()
       ) {
-        Column(Modifier.weight(0.5f)) {
-          OutlinedTextField(
-            value = foodItem.name,
-            readOnly = readOnly,
-            onValueChange = {
-              onFieldChanged(foodItem.copy(name = it))
-            },
-            label = { Text("Name") },
-            singleLine = true
-          )
-          OutlinedTextField(
-            value = foodItem.brand,
-            readOnly = readOnly,
-            onValueChange = {
-              onFieldChanged(foodItem.copy(brand = it))
-            },
-            label = { Text("Brand") },
-            singleLine = true
-          )
-          OutlinedTextField(
-            value = foodItem.barcode,
-            readOnly = readOnly,
-            onValueChange = {
-              onFieldChanged(foodItem.copy(barcode = it))
-            },
-            label = { Text("Barcode") },
-            singleLine = true
-          )
-        }
-        Spacer(Modifier.size(8.dp))
-        Box(
+        Row(
           Modifier
-            .weight(0.5f)
-            .padding(top = 6.dp)
-            .fillMaxSize(),
-          contentAlignment = Alignment.Center
+            .fillMaxWidth()
         ) {
-          ItemImageCard(
-            modifier = Modifier
-              .align(Alignment.TopCenter)
-              .size(120.dp),
-            foodItem
-          )
-          Button(
-            modifier = Modifier
-              .align(Alignment.BottomCenter),
-            enabled = !readOnly,
-            onClick = {
-              onScannerRequest(true)
-            }) {
-            Image(
-              imageVector = Icons.Outlined.QrCodeScanner,
-              contentDescription = "Scanner Icon",
-              colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
+          BoxWithConstraints(Modifier.weight(0.5f)) {
+            val targetWidth = if (imageSectionExpanded) maxWidth.coerceAtMost(800.dp) else 80.dp
+            val targetHeight = if (imageSectionExpanded) maxWidth.coerceAtMost(800.dp) else 80.dp
+
+            val animatedWidth by animateDpAsState(
+              targetValue = targetWidth,
+              animationSpec = tween(durationMillis = 500)
             )
-            Spacer(Modifier.size(8.dp))
-            Text("Scan Barcode")
+            val animatedHeight by animateDpAsState(
+              targetValue = targetHeight,
+              animationSpec = tween(durationMillis = 500)
+            )
+            Column(
+              Modifier
+                .fillMaxSize(),
+              horizontalAlignment = Alignment.Start
+            ) {
+              Box {
+                ItemImageCard(
+                  modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(animatedWidth, animatedHeight)
+                    .aspectRatio(1f),
+                  foodItem
+                )
+              }
+            }
+          }
+          Spacer(Modifier.size(8.dp))
+          Box(
+            Modifier
+              .weight(0.5f)
+              .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
+          ) {
+            Column {
+              AnimatedVisibility(editingBarcode) {
+                var isFocused by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                  barcodeFocusRequester.requestFocus()
+                }
+                LaunchedEffect(isFocused) {
+                  if (!isFocused) {
+                    editingBarcode = false
+                  }
+                }
+                OutlinedTextField(
+                  value = foodItem.barcode,
+                  label = { Text("Barcode") },
+                  onValueChange = {
+                    onValueChanged(foodItem.copy(barcode = it))
+                  },
+                  singleLine = true,
+                  modifier = Modifier
+                    .focusRequester(barcodeFocusRequester)
+                    .onFocusChanged { focusState ->
+                      isFocused = focusState.isFocused
+                    },
+                  keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Number
+                  ),
+                  keyboardActions = KeyboardActions(
+                    onDone = {
+                      focusManager.clearFocus()
+                      editingBarcode = false
+                    }
+                  ),
+                  trailingIcon = trailingEditIcon
+                )
+              }
+              AnimatedVisibility(!editingBarcode) {
+                Box(
+                  Modifier.clickable {
+                    editingBarcode = true
+                  }
+                ) {
+                  Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                      maxLines = 1,
+                      text = foodItem.barcode.ifBlank { "Barcode" },
+                      overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    trailingEditIcon()
+                  }
+                }
+              }
+              Spacer(Modifier.size(8.dp))
+              AnimatedVisibility(
+                visible = !compact && !foodItem.isSaved,
+                enter = slideInHorizontally(tween(500), initialOffsetX = { 2 * it }),
+                exit = slideOutHorizontally(
+                  tween(500, delayMillis = 125),
+                  targetOffsetX = { 2 * it }) + fadeOut(
+                  tween(
+                    500, delayMillis = 125
+                  )
+                )
+              ) {
+                ScannerFloatingActionButton(onClick = {
+                  scope.launch { onScannerRequest() }
+                })
+              }
+            }
           }
         }
       }
-      Spacer(Modifier.size(8.dp))
-      AnimatedVisibility(
-        visible = expanded,
-        enter = expandVertically(
-          animationSpec = tween(500)
-        ) + fadeIn(tween(500)),
-        exit = shrinkVertically(
-          animationSpec = tween(500)
-        ) + fadeOut(tween(500))
-      ) {
-        Card {
+    }
+  }
+  Spacer(Modifier.size(8.dp))
+  //Tags editor
+  ElevatedCard(
+    Modifier.fillMaxWidth()
+  ) {
+    Box(
+      Modifier
+        .padding(8.dp)
+    ) {
+      Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth()) {
+          Box(Modifier
+            .fillMaxWidth()
+            .clickable {
+              categoryEditorExpanded = !categoryEditorExpanded
+            }) {
+            Text(
+              modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(8.dp),
+              text = "Tags",
+              style = MaterialTheme.typography.titleMedium
+            )
+            TextButton(
+              modifier = Modifier.align(Alignment.CenterEnd),
+              onClick = {
+                categoryEditorExpanded = !categoryEditorExpanded
+              }
+            ) {
+              val rotationState by animateFloatAsState(if (categoryEditorExpanded) 180f else 0f)
+              Icon(
+                modifier = Modifier.rotate(rotationState),
+                imageVector = Icons.Filled.KeyboardArrowDown,
+                contentDescription = "Expand Tags"
+              )
+            }
+          }
+        }
+        AnimatedVisibility(
+          visible = categoryEditorExpanded,
+          enter = expandVertically(
+            animationSpec = tween(500)
+          ) + fadeIn(tween(500)),
+          exit = shrinkVertically(
+            animationSpec = tween(500)
+          ) + fadeOut(tween(500))
+        ) {
           CategoryEditor(
             categories = categories,
-            onListChanged = onCategoriesChanged
+            onListChanged = {
+              onValueChanged(foodItem.copy(categories = it))
+            }
           )
         }
       }
-      TextButton(
-        onClick = {
-          expanded = !expanded
-        }
-      ) {
-        Text("Show ${if (!expanded) "More..." else "Less"}")
-      }
     }
+  }
+  Spacer(Modifier.size(8.dp))
+  //EXPIRY EDITOR
+  ElevatedCard {
+    ExpiryEditor(
+      expiryDates,
+      onRequestExpiry = onDatePickerRequest,
+      small = !expiryEditorExpanded,
+      onShowMore = {
+        expiryEditorExpanded = !expiryEditorExpanded
+      },
+      onListChanged = {
+        onValueChanged(foodItem.copy(expiryDates = it))
+      }
+    )
   }
 }

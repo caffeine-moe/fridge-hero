@@ -6,6 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
@@ -17,8 +20,8 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.MainViewModel
-import moe.caffeine.fridgehero.ui.screen.InitialisationLoadingOverlay
-import moe.caffeine.fridgehero.ui.screen.MainScreen
+import moe.caffeine.fridgehero.ui.overlay.InitialisationLoadingOverlay
+import moe.caffeine.fridgehero.ui.screen.main.MainScreen
 import moe.caffeine.fridgehero.ui.screen.oobe.OOBE
 import moe.caffeine.fridgehero.ui.theme.FridgeHeroTheme
 
@@ -44,32 +47,38 @@ class MainActivity : ComponentActivity() {
             profileState?.let { maybeProfile ->
               maybeProfile.fold(
                 onSuccess = { profile ->
-                  MainScreen(
-                    profile = profile,
-                    foodItems = viewModel.foodItems,
-                    eventFlow = viewModel.eventFlow,
-                    emitEvent = emitEvent
-                  )
+                  AnimatedVisibility(
+                    visible = maybeProfile.isSuccess,
+                    enter = fadeIn(tween(500)),
+                    exit = fadeOut(tween(500))
+                  ) {
+                    MainScreen(
+                      profile = profile,
+                      foodItems = viewModel.foodItems,
+                      eventFlow = viewModel.eventFlow,
+                      emitEvent = emitEvent
+                    )
+                  }
                 },
                 onFailure = {
-                  OOBE { firstName, lastName ->
-                    viewModel.upsertProfile(
-                      Profile(
-                        firstName = firstName,
-                        lastName = lastName
+                  AnimatedVisibility(
+                    visible = maybeProfile.isFailure,
+                    enter = fadeIn(tween(500)),
+                    exit = fadeOut(tween(500))
+                  ) {
+                    OOBE { firstName, lastName ->
+                      viewModel.upsertProfile(
+                        Profile(
+                          firstName = firstName,
+                          lastName = lastName
+                        )
                       )
-                    )
+                    }
                   }
                 }
               )
             }
           }
-          /*          runBlocking {
-                      OpenFoodFactsTaxonomyParser.parse().getOrNull()?.forEach {
-                        println(it.value.name)
-                        println("----" + it.value.parents.keys)
-                      }
-                    }*/
           InitialisationLoadingOverlay(initialisationStage)
         }
       }

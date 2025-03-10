@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.RemoveCircleOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +60,22 @@ fun CategoryEditor(
           }
         )
       }
+    }
+    Box(Modifier.padding(2.dp)) {
+      InputChip(
+        modifier = Modifier.height(30.dp),
+        label = {
+          Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.Filled.Add,
+            contentDescription = null
+          )
+        },
+        onClick = {
+
+        },
+        selected = false
+      )
     }
   }
 }

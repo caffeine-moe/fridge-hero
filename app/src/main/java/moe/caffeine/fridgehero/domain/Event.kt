@@ -5,7 +5,6 @@ import moe.caffeine.fridgehero.domain.model.FoodItem
 
 // These are used for the asynchronous flow of data around the app
 sealed class Event {
-
   // Launches a date picker from anywhere
   data class RequestDateFromPicker(
     val result: CompletableDeferred<Result<Long>> = CompletableDeferred()

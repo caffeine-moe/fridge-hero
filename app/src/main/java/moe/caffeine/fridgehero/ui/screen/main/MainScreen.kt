@@ -1,12 +1,8 @@
-package moe.caffeine.fridgehero.ui.screen
+package moe.caffeine.fridgehero.ui.screen.main
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,10 +20,11 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.ui.EventHandler
-import moe.caffeine.fridgehero.ui.component.item.ItemSheet
-import moe.caffeine.fridgehero.ui.overlay.DatePickerOverlay
+import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
 import moe.caffeine.fridgehero.ui.overlay.FullScreenItemOverlay
+import moe.caffeine.fridgehero.ui.overlay.ItemSheetOverlay
 import moe.caffeine.fridgehero.ui.overlay.ScannerOverlay
+import moe.caffeine.fridgehero.ui.screen.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +34,7 @@ fun MainScreen(
   eventFlow: SharedFlow<Event>,
   emitEvent: (Event) -> Unit,
 ) {
+  //constant values
   val context = LocalContext.current
   val scope = rememberCoroutineScope()
   val screens: List<Screen> =
@@ -47,27 +45,31 @@ fun MainScreen(
     )
 
   // states for UI components
+
+  //fullscreen
   var fullScreenItem by rememberSaveable { mutableStateOf<FoodItem?>(null) }
 
-  val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-  var datePickerRequest by remember { mutableStateOf<Event.RequestDateFromPicker?>(null) }
+  //date picker
+  var showDatePicker by rememberSaveable { mutableStateOf(false) }
+  var datePickerRequest by remember { mutableStateOf(Event.RequestDateFromPicker()) }
 
+  //item bottom sheet
   var itemBottomSheetRequest by remember { mutableStateOf(Event.RequestItemSheet()) }
-  val itemStandardBottomSheetState = rememberStandardBottomSheetState(
+  val itemBottomSheetState = rememberStandardBottomSheetState(
     skipHiddenState = false,
     initialValue = SheetValue.Hidden,
     confirmValueChange = { true }
   )
-  val itemBottomSheetScaffoldState = rememberBottomSheetScaffoldState(itemStandardBottomSheetState)
 
+  //barcode scanner
   var barcodeScanRequest by remember { mutableStateOf<Event.RequestBarcodeFromScanner?>(null) }
   LaunchedEffect(barcodeScanRequest) {
-    if (barcodeScanRequest != null && itemStandardBottomSheetState.isVisible)
-      itemStandardBottomSheetState.hide()
+    if (barcodeScanRequest != null && itemBottomSheetState.isVisible)
+      itemBottomSheetState.hide()
   }
 
-  var appBarPadding by remember { mutableStateOf(PaddingValues()) }
-
+  // collects events from the event flow and calls their respective lambdas
+  // (cleaner than a massive when block being here imo)
   EventHandler(
     eventFlow,
     onDisplayToast = { message ->
@@ -77,38 +79,36 @@ fun MainScreen(
         Toast.LENGTH_SHORT
       ).show()
     },
-    onBarcodeRequest = {
-      barcodeScanRequest = it
-    },
-    onDateRequest = { datePickerRequest = it },
+    onBarcodeRequest = { barcodeScanRequest = it },
+    onDateRequest = { datePickerRequest = it;showDatePicker = true },
     onItemSheetRequest = {
       itemBottomSheetRequest = it
-      scope.launch { itemStandardBottomSheetState.expand() }
+      scope.launch { itemBottomSheetState.expand() }
     },
     onFullScreenRequest = { fullScreenItem = it }
   )
 
+  // Hosts main UI components (FAB, Bars, screens)
   MainScaffold(
-    onPaddingCreated = { appBarPadding = it },
     screens = screens,
     profile = profile,
     foodItems = foodItems,
     emitEvent = emitEvent
   )
 
+  // Composables that overlay the main screen
+
   FullScreenItemOverlay(
     fullScreenItem = fullScreenItem,
     onDismiss = { fullScreenItem = null }
   )
 
-  DatePickerOverlay(
-    visible = datePickerRequest != null,
-    state = datePickerState,
+  DatePickerModalOverlay(
+    visible = showDatePicker,
     onComplete = { result ->
-      datePickerRequest?.let { request ->
-        datePickerRequest = null
-        request.result.complete(result)
-      }
+      datePickerRequest.result.complete(result)
+      showDatePicker = false
+      datePickerRequest = Event.RequestDateFromPicker()
     }
   )
 
@@ -120,29 +120,15 @@ fun MainScreen(
     },
   )
 
-  ItemSheet(
-    bottomSheetScaffoldState = itemBottomSheetScaffoldState,
+  // This is more like a screen, but it overlays the main screen so therefore overlay.
+  ItemSheetOverlay(
+    sheetState = itemBottomSheetState,
     prefill = itemBottomSheetRequest.prefill,
+    emitEvent = emitEvent,
     expiryEditorExpandedInitial = itemBottomSheetRequest.expiryEditorExpanded,
-    onComplete = { editedFoodItem ->
-      itemBottomSheetRequest.result.complete(editedFoodItem)
-      itemStandardBottomSheetState.hide()
+    onComplete = { result ->
+      itemBottomSheetRequest.result.complete(result)
       itemBottomSheetRequest = Event.RequestItemSheet()
-    },
-    onBarcodeFromScanner = {
-      itemStandardBottomSheetState.hide()
-      Event.RequestBarcodeFromScanner()
-        .apply(emitEvent).result.await()
-        .also { itemStandardBottomSheetState.expand() }
-    },
-    onFoodItemFromBarcode = { barcode ->
-      Event.RequestFoodItemFromBarcode(barcode).apply(emitEvent).result.await()
-    },
-    onExpiryDateRequest = {
-      Event.RequestDateFromPicker().apply(emitEvent).result.await()
-    },
-    onHardRemove = { itemToRemove ->
-      Event.HardRemoveFoodItem(itemToRemove).apply(emitEvent)
     }
   )
 }

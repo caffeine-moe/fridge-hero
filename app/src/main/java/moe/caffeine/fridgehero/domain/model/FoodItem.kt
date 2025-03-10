@@ -5,7 +5,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import org.mongodb.kbson.BsonObjectId
 
 data class FoodItem(
   val realmObjectId: String = "",
@@ -18,6 +17,9 @@ data class FoodItem(
 ) : Parcelable {
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()
+
+  val isSaved: Boolean
+    get() = realmObjectId.isNotBlank()
 
   val imageBitmap: ImageBitmap
     get() = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
@@ -36,6 +38,7 @@ data class FoodItem(
     if (barcode != other.barcode) return false
     if (!imageByteArray.contentEquals(other.imageByteArray)) return false
     if (expiryDates != other.expiryDates) return false
+    if (categories != other.categories) return false
 
     return true
   }
@@ -47,17 +50,20 @@ data class FoodItem(
     result = 31 * result + barcode.hashCode()
     result = 31 * result + imageByteArray.contentHashCode()
     result = 31 * result + expiryDates.hashCode()
+    result = 31 * result + categories.hashCode()
     return result
   }
 
   //parcelable implementation
   constructor(parcel: Parcel) : this(
-    parcel.readString() ?: BsonObjectId().toHexString(),
+    parcel.readString() ?: "",
     parcel.readString() ?: "",
     parcel.readString() ?: "",
     parcel.readString() ?: "",
     parcel.createByteArray() ?: byteArrayOf(),
-    parcel.createLongArray()?.toList() ?: listOf()
+    parcel.createLongArray()?.toList() ?: listOf(),
+    parcel.createStringArray()?.toList() ?: listOf()
+
   )
 
   override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -67,6 +73,7 @@ data class FoodItem(
     parcel.writeString(barcode)
     parcel.writeByteArray(imageByteArray)
     parcel.writeLongArray(expiryDates.toLongArray())
+    parcel.writeStringArray(categories.toTypedArray())
   }
 
   override fun describeContents(): Int {
