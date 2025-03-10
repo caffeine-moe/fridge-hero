@@ -36,20 +36,19 @@ object OpenFoodFactsTaxonomyParser {
 
     //keep a map of the entire DAG
     val nodes = mutableMapOf<String, OpenFoodFactsTaxonomyNode>()
-
-    // add all nodes to the structure
+    var currentParents = mutableSetOf<String>()
+    
     lines.forEach { line ->
       when {
         line.startsWith(PARENT_DEFINITION) -> {
           val parentName = line.substringAfter(PARENT_DEFINITION).trim()
           val parentId = normalisedIdFromName(parentName)
 
-          // create parent node if it doesn't exist
+
           if (!nodes.containsKey(parentId)) {
-            nodes[parentId] = OpenFoodFactsTaxonomyNode(
-              name = parentName
-            )
+            nodes[parentId] = OpenFoodFactsTaxonomyNode(parentName)
           }
+          currentParents.add(parentId)
         }
 
         line.startsWith(NODE_DEFINITION) -> {
@@ -59,36 +58,9 @@ object OpenFoodFactsTaxonomyParser {
             val name = valueParts.first().trim()
             val id = normalisedIdFromName(name)
 
-            // create node if it doesn't exist
             if (!nodes.containsKey(id)) {
-              nodes[id] = OpenFoodFactsTaxonomyNode(
-                name = name
-              )
+              nodes[id] = OpenFoodFactsTaxonomyNode(name)
             }
-          }
-        }
-      }
-    }
-
-    // figure out node relations
-    var currentParents = mutableSetOf<String>()
-    lines.forEach { line ->
-      when {
-        line.startsWith(PARENT_DEFINITION) -> {
-          val parentName = line.substringAfter(PARENT_DEFINITION).trim()
-          val parentId = normalisedIdFromName(parentName)
-
-          // add to current parents
-          currentParents.add(parentId)
-        }
-
-        // node definition
-        line.startsWith(NODE_DEFINITION) && !line.contains(":en:") -> {
-          val parts = line.split(":", limit = 2)
-          if (parts.size == 2) {
-            val valueParts = parts[1].split(",")
-            val name = valueParts.first().trim()
-            val id = normalisedIdFromName(name)
 
             // propagate relationships to any parents found
             currentParents.forEach { parent ->

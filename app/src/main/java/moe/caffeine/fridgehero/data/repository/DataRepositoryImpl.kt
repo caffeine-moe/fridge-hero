@@ -76,52 +76,35 @@ class DataRepositoryImpl(
     }
   }
 
-  private suspend fun initialiseTaxonomies(flow: MutableStateFlow<Float>): Result<Nothing?> {
-    if (realm.fetchAllByType<RealmFoodCategory>().isEmpty()) {
-      val taxonomyNodes =
-        OpenFoodFactsTaxonomyParser.parse()
-          .getOrElse { return Result.failure(it) }
+  private suspend fun initialiseTaxonomies(progressFlow: MutableStateFlow<Float>): Result<Nothing?> {
+    val taxonomyNodes =
+      OpenFoodFactsTaxonomyParser.parse()
+        .getOrElse { return Result.failure(it) }
 
-      var total = 0f
-      realm.write {
-        //write all nodes
-        taxonomyNodes.map { node ->
-          coroutineScope.launch {
-            total += 0.5f
-            flow.emit(total / taxonomyNodes.keys.size.toFloat())
-          }
-          node.value.toRealmModel().also {
-            copyToRealm(it, UpdatePolicy.ALL)
-          }
-        }.associateBy { it._id }.apply {
-          forEach { entry ->
-            val taxNode = taxonomyNodes[entry.key] ?: return@forEach
-            copyToRealm(
-              entry.value.apply {
-                children = taxNode.children.map { get(it.key) ?: return@forEach }.toRealmList()
-              }, UpdatePolicy.ALL
-            )
-            coroutineScope.launch {
-              total += 0.5f
-              flow.emit(total / taxonomyNodes.keys.size.toFloat())
-            }
-          }
+    realm.write {
+      //write all nodes
+      taxonomyNodes.onEachIndexed { index, node ->
+        coroutineScope.launch {
+          progressFlow.emit(index / taxonomyNodes.keys.size.toFloat())
         }
-
+        node.value.toRealmModel().also {
+          it.children += node.value.children.map { child ->
+            child.value.toRealmModel()
+          }.toRealmList()
+          copyToRealm(it, UpdatePolicy.ALL)
+        }
       }
-      /*      realm.fetchAllByType<RealmFoodCategory>().takeLast(100).forEach {
-              println(
-                "${it.name} \n|| PARENTS: ${
-                  it.parentsMap.values.joinToString(", ") { it.name }
-                } \n|| CHILDREN: ${
-                  it.childrenMap.values.joinToString(", ") { it.name }
-                } \n|| LEVEL: ${it.findTrees().lastOrNull()?.keys?.size ?: 0}"
-              )
-            }*/
-      return Result.success(null)
-    } else {
-      return Result.success(null)
     }
+    /*    realm.fetchAllByType<RealmFoodCategory>().takeLast(20).forEach {
+          println(
+            "${it.name} \n|| PARENTS: ${
+              it.parentsMap.values.joinToString(", ") { it.name }
+            } \n|| CHILDREN: ${
+              it.childrenMap.values.joinToString(", ") { it.name }
+            } \n|| LEVEL: ${it.findTrees().lastOrNull()?.values?.map { it.name }}"
+          )
+        }*/
+    return Result.success(null)
   }
 
   override fun getProfileAsFlow(): Flow<Result<Profile>?> =
