@@ -52,7 +52,13 @@ object OpenFoodFactsApi {
       Result.failure(e)
     }
 
-  private val httpClient: HttpClient by lazy { HttpClient(CIO) }
+  private val httpClient: HttpClient by lazy {
+    HttpClient(CIO) {
+      engine {
+        requestTimeout = 5000
+      }
+    }
+  }
 
   private fun getClient(): Result<HttpClient> {
     if (Build.VERSION.SDK_INT >= 25) return Result.success(httpClient)
