@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.mapper.daysUntil
+import moe.caffeine.fridgehero.domain.mapper.hoursUntil
 import moe.caffeine.fridgehero.domain.mapper.toReadableDate
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 
@@ -76,41 +78,49 @@ fun ExpiryEditor(
         .align(Alignment.CenterHorizontally)
         .animateContentSize()
     ) {
-      (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEach { expiryDate ->
-        val expired by remember { mutableStateOf(expiryDate.daysUntil() <= -1) }
-        Box(Modifier.padding(8.dp)) {
-          ActionableSwipeToDismissBox(
-            onStartToEndAction = {
-              if (!readOnly) {
-                onListChanged(currentExpiryDates + expiryDate)
-              }
-            },
-            enableEndToStartDismiss = false,
-            onEndToStartAction = {
-              if (!readOnly) {
-                onListChanged(currentExpiryDates - expiryDate)
-              }
-            },
-          ) {
-            Card {
-              Column(
-                Modifier
-                  .fillMaxWidth()
-                  .padding(8.dp)
-              ) {
-                Text(
-                  softWrap = true,
-                  style = MaterialTheme.typography.titleLarge,
-                  fontWeight = FontWeight.Bold,
-                  text = expiryDate.toReadableDate()
-                )
-                Spacer(Modifier.size(4.dp))
-                Text(
-                  style = MaterialTheme.typography.titleSmall,
-                  fontWeight = FontWeight.Bold,
-                  text = if (!expired) "${expiryDate.daysUntil() + 1}d left" else "Expired.",
-                  color = if (expired) Color.Red else MaterialTheme.colorScheme.onSurface
-                )
+      (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEachIndexed { index, expiryDate ->
+        key(expiryDate, index) {
+          val expired by remember { mutableStateOf(expiryDate.daysUntil() <= -1) }
+          Box(Modifier.padding(8.dp)) {
+            ActionableSwipeToDismissBox(
+              onStartToEndAction = {
+                if (!readOnly) {
+                  onListChanged(currentExpiryDates + expiryDate)
+                }
+              },
+              enableEndToStartDismiss = false,
+              onEndToStartAction = {
+                if (!readOnly) {
+                  onListChanged(currentExpiryDates - expiryDate)
+                }
+              },
+            ) {
+              Card {
+                Column(
+                  Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                ) {
+                  Text(
+                    softWrap = true,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    text = expiryDate.toReadableDate()
+                  )
+                  Spacer(Modifier.size(4.dp))
+                  Text(
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    text = if (!expired) {
+                      when {
+                        expiryDate.hoursUntil() in 0..24 -> "Tomorrow."
+                        expiryDate.daysUntil() == 0 -> "Today."
+                        else -> "${expiryDate.daysUntil()}d"
+                      }
+                    } else "Expired.",
+                    color = if (expired) Color.Red else MaterialTheme.colorScheme.onSurface
+                  )
+                }
               }
             }
           }

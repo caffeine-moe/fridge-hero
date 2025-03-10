@@ -23,7 +23,7 @@ fun ItemFull(
     Column {
       Text(foodItem.name)
       TextButton(onDismiss) { Text("Back") }
-      ItemEditor(foodItem, foodItem.categories, foodItem.expiryDates, readOnly = true)
+      ItemEditor(foodItem, readOnly = true)
     }
   }
 }

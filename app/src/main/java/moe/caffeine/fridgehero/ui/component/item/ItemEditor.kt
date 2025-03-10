@@ -60,8 +60,6 @@ import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButto
 @Composable
 fun ItemEditor(
   foodItem: FoodItem,
-  categories: List<String>,
-  expiryDates: List<Long>,
   expiryEditorExpandedInitial: Boolean = false,
   imageSectionExpanded: Boolean = true,
   readOnly: Boolean = false,
@@ -72,11 +70,9 @@ fun ItemEditor(
 ) {
   val scope = rememberCoroutineScope()
   var interactedWithTitle by rememberSaveable { mutableStateOf(false) }
-
   var editingBarcode by remember { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
   val barcodeFocusRequester = remember { FocusRequester() }
-
   var categoryEditorExpanded by rememberSaveable { mutableStateOf(false) }
   var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
 
@@ -285,7 +281,7 @@ fun ItemEditor(
           ) + fadeOut(tween(500))
         ) {
           CategoryEditor(
-            categories = categories,
+            categories = foodItem.categories,
             onListChanged = {
               onValueChanged(foodItem.copy(categories = it))
             }
@@ -298,7 +294,7 @@ fun ItemEditor(
   //EXPIRY EDITOR
   ElevatedCard {
     ExpiryEditor(
-      expiryDates,
+      foodItem.expiryDates,
       onRequestExpiry = onDatePickerRequest,
       small = !expiryEditorExpanded,
       onShowMore = {

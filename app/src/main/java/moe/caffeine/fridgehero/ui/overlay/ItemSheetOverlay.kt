@@ -153,8 +153,6 @@ fun ItemSheetOverlay(
             ) {
               ItemEditor(
                 foodItem = editableFoodItem,
-                categories = editableFoodItem.categories,
-                expiryDates = editableFoodItem.expiryDates,
                 expiryEditorExpandedInitial = expiryEditorExpandedInitial,
                 imageSectionExpanded = !visibleButNotExpanded,
                 compact = !visibleButNotExpanded,
