@@ -31,12 +31,12 @@ class RealmFoodCategory : RealmObject {
   fun findTrees(): List<Map<String, RealmFoodCategory>> =
     parents.flatMap { immediateParent ->
       val branches = mutableListOf<Map<String, RealmFoodCategory>>()
-      val paths = mutableListOf(listOf(immediateParent._id to immediateParent))
+      val paths = mutableListOf(mapOf(immediateParent._id to immediateParent))
 
       while (paths.isNotEmpty()) {
         val path = paths.removeAt(0)
-        branches.add(path.associate { it.first to it.second })
-        path.last().second.parents.forEach { paths.add(path + (it._id to it)) }
+        branches.add(path)
+        path.values.last().parents.forEach { paths.add(path + (it._id to it)) }
       }
       branches
     }.sortedBy { it.size }
