@@ -22,6 +22,9 @@ class RealmFoodItem : RealmObject {
   var imageByteArray: ByteArray = byteArrayOf()
   var expiryDates: RealmList<Long> = realmListOf()
   var categoryNames: RealmSet<String> = realmSetOf()
+  var novaGroup: Int = 0
+  var nutriScore: String = ""
+  var nutriments: RealmList<RealmNutrimentEntry> = realmListOf()
 
   @Ignore
   val categories: (Realm) -> Map<String, RealmFoodCategory>

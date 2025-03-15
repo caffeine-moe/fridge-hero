@@ -44,7 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemEditor
 import moe.caffeine.fridgehero.ui.component.itemsheet.ActionRow
 import moe.caffeine.fridgehero.ui.component.itemsheet.FloatingActionBar
@@ -63,6 +64,8 @@ fun ItemSheetOverlay(
   val scope = rememberCoroutineScope()
 
   var editableFoodItem by rememberSaveable(prefill) { mutableStateOf(prefill) }
+
+  var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
 
   val visibleButNotExpanded =
     sheetState.isVisible && sheetState.currentValue != SheetValue.Expanded
@@ -153,19 +156,30 @@ fun ItemSheetOverlay(
             ) {
               ItemEditor(
                 foodItem = editableFoodItem,
-                expiryEditorExpandedInitial = expiryEditorExpandedInitial,
-                imageSectionExpanded = !visibleButNotExpanded,
-                compact = !visibleButNotExpanded,
+                compact = visibleButNotExpanded,
                 onScannerRequest = {
                   barcodeAction()
-                },
-                onDatePickerRequest = {
-                  Event.RequestDateFromPicker().apply(emitEvent).result.await()
                 },
                 onValueChanged = { editedFoodItem ->
                   editableFoodItem = editedFoodItem
                 }
               )
+              Spacer(Modifier.size(8.dp))
+              ElevatedCard {
+                ExpiryEditor(
+                  editableFoodItem.expiryDates,
+                  onRequestExpiry = {
+                    Event.RequestDateFromPicker().apply(emitEvent).result.await()
+                  },
+                  small = !expiryEditorExpanded,
+                  onShowMore = {
+                    expiryEditorExpanded = !expiryEditorExpanded
+                  },
+                  onListChanged = {
+                    editableFoodItem = editableFoodItem.copy(expiryDates = it)
+                  }
+                )
+              }
               Spacer(Modifier.size(8.dp))
               ElevatedCard(
                 modifier = Modifier

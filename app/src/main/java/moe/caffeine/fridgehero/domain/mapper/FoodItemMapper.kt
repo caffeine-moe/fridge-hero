@@ -3,7 +3,11 @@ package moe.caffeine.fridgehero.domain.mapper
 import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.ext.toRealmSet
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.data.model.realm.RealmNutrimentEntry
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import org.mongodb.kbson.BsonObjectId
 
 fun RealmFoodItem.toDomainModel(): FoodItem =
@@ -14,7 +18,12 @@ fun RealmFoodItem.toDomainModel(): FoodItem =
     barcode,
     imageByteArray,
     expiryDates.toList(),
-    categoryNames.toList()
+    categoryNames.toList(),
+    novaGroup = NovaGroup.enumByNumber(novaGroup),
+    nutriScore = NutriScore.enumByLetter(nutriScore),
+    nutriments = nutriments.associate {
+      Nutriment.valueOf(it.nutriment) to it.value
+    }
   )
 
 fun FoodItem.toRealmModel(): RealmFoodItem =
@@ -30,7 +39,15 @@ fun FoodItem.toRealmModel(): RealmFoodItem =
     barcode = this@toRealmModel.barcode
     imageByteArray = this@toRealmModel.imageByteArray
     expiryDates = this@toRealmModel.expiryDates.toRealmList()
-    categoryNames = this@toRealmModel.categories.toRealmSet().also { println(it) }
+    categoryNames = this@toRealmModel.categories.toRealmSet()
+    novaGroup = this@toRealmModel.novaGroup.number
+    nutriScore = this@toRealmModel.nutriScore.letter
+    nutriments.addAll(this@toRealmModel.nutriments.map {
+      RealmNutrimentEntry().apply {
+        nutriment = it.key.name
+        value = it.value
+      }
+    })
     /*    categories = this@toRealmModel.categories.map {
           it.toRealmModel(realm)
         }.toRealmList()*/

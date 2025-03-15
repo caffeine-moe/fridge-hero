@@ -16,8 +16,8 @@ import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
-import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 
 class MainViewModel : ViewModel() {

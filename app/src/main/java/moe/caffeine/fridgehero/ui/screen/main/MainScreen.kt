@@ -17,8 +17,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.EventHandler
 import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
 import moe.caffeine.fridgehero.ui.overlay.FullScreenItemOverlay

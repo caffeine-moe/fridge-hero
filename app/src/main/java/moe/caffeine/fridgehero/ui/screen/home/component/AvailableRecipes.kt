@@ -43,7 +43,7 @@ fun AvailableRecipes() {
             modifier = Modifier
               .padding(10.dp),
             contentScale = ContentScale.FillBounds,
-            painter = painterResource(R.drawable.ic_launcher_background),
+            painter = painterResource(R.drawable.ic_launcher_foreground),
             contentDescription = "test"
           )
         }

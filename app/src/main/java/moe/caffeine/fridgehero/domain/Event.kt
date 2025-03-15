@@ -1,7 +1,7 @@
 package moe.caffeine.fridgehero.domain
 
 import kotlinx.coroutines.CompletableDeferred
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
 // These are used for the asynchronous flow of data around the app
 sealed class Event {

@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
 @Composable
 fun ItemImageCard(

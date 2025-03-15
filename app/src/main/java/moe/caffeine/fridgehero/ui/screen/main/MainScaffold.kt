@@ -27,8 +27,8 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.screen.Screen
 import moe.caffeine.fridgehero.ui.screen.main.component.MainBottomBar
 import moe.caffeine.fridgehero.ui.screen.main.component.MainTopBar

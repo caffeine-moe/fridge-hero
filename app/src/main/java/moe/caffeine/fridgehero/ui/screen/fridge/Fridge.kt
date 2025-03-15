@@ -20,7 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemCard

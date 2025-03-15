@@ -32,9 +32,9 @@ import moe.caffeine.fridgehero.data.realm.updateObject
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.mapper.toDomainModel
 import moe.caffeine.fridgehero.domain.mapper.toRealmModel
-import moe.caffeine.fridgehero.domain.model.FoodItem
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 import org.mongodb.kbson.BsonObjectId
 
@@ -195,11 +195,13 @@ class DataRepositoryImpl(
                 onSuccess = { value -> value },
                 onFailure = { byteArrayOf() }
               ),
-              product.categoriesHierarchy.map { category ->
-                category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
-                  .split("-")
-                  .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
-              }
+              product.categoriesHierarchy
+                .filter { it.startsWith(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION) }
+                .map { category ->
+                  category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
+                    .split("-")
+                    .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
+                }
             )
           )
         },

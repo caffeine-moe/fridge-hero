@@ -10,23 +10,28 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,21 +56,17 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
 
 @Composable
 fun ItemEditor(
   foodItem: FoodItem,
-  expiryEditorExpandedInitial: Boolean = false,
-  imageSectionExpanded: Boolean = true,
   readOnly: Boolean = false,
   compact: Boolean = false,
   onScannerRequest: suspend () -> Unit = {},
-  onDatePickerRequest: suspend () -> (Result<Long>) = { Result.failure(Throwable("")) },
   onValueChanged: (FoodItem) -> Unit = {}
 ) {
   val scope = rememberCoroutineScope()
@@ -74,7 +75,6 @@ fun ItemEditor(
   val focusManager = LocalFocusManager.current
   val barcodeFocusRequester = remember { FocusRequester() }
   var categoryEditorExpanded by rememberSaveable { mutableStateOf(false) }
-  var expiryEditorExpanded by rememberSaveable { mutableStateOf(expiryEditorExpandedInitial) }
 
   val trailingEditIcon = @Composable {
     if (!readOnly) {
@@ -123,9 +123,9 @@ fun ItemEditor(
           Modifier
             .fillMaxWidth()
         ) {
-          BoxWithConstraints(Modifier.weight(0.5f)) {
-            val targetWidth = if (imageSectionExpanded) maxWidth.coerceAtMost(800.dp) else 80.dp
-            val targetHeight = if (imageSectionExpanded) maxWidth.coerceAtMost(800.dp) else 80.dp
+          BoxWithConstraints(Modifier.fillMaxWidth(0.5f)) {
+            val targetWidth = if (!compact) maxWidth.coerceAtMost(800.dp) else 80.dp
+            val targetHeight = if (!compact) maxWidth.coerceAtMost(800.dp) else 80.dp
 
             val animatedWidth by animateDpAsState(
               targetValue = targetWidth,
@@ -138,27 +138,51 @@ fun ItemEditor(
             Column(
               Modifier
                 .fillMaxSize(),
-              horizontalAlignment = Alignment.Start
+              horizontalAlignment = Alignment.Start,
+              verticalArrangement = Arrangement.Center
             ) {
               Box {
                 ItemImageCard(
                   modifier = Modifier
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.Center)
                     .size(animatedWidth, animatedHeight)
                     .aspectRatio(1f),
                   foodItem
                 )
+                androidx.compose.animation.AnimatedVisibility(
+                  visible = !compact && foodItem.barcode.isNotBlank() && foodItem.isSaved,
+                  modifier = Modifier.align(Alignment.BottomEnd),
+                  enter = expandVertically(tween(500, 1000)),
+                  exit = fadeOut(
+                    tween(
+                      250
+                    )
+                  ) + shrinkVertically(tween(250), shrinkTowards = Alignment.Bottom)
+                ) {
+                  Box(
+                    modifier = Modifier
+                      .align(Alignment.BottomEnd)
+                      .padding(top = 8.dp)
+                  ) {
+                    Image(
+                      modifier = Modifier.fillMaxWidth(0.4f),
+                      painter = foodItem.nutriScoreVectorPainter,
+                      contentDescription = "NutriScore"
+                    )
+                  }
+                }
               }
             }
           }
           Spacer(Modifier.size(8.dp))
           Box(
             Modifier
-              .weight(0.5f)
-              .fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
+              .fillMaxSize()
           ) {
-            Column {
+            Column(
+              Modifier
+                .fillMaxHeight()
+            ) {
               AnimatedVisibility(editingBarcode) {
                 var isFocused by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) {
@@ -211,9 +235,8 @@ fun ItemEditor(
                   }
                 }
               }
-              Spacer(Modifier.size(8.dp))
               AnimatedVisibility(
-                visible = !compact && !foodItem.isSaved,
+                visible = compact && !foodItem.isSaved,
                 enter = slideInHorizontally(tween(500), initialOffsetX = { 2 * it }),
                 exit = slideOutHorizontally(
                   tween(500, delayMillis = 125),
@@ -223,9 +246,44 @@ fun ItemEditor(
                   )
                 )
               ) {
+                Spacer(Modifier.size(8.dp))
                 ScannerFloatingActionButton(onClick = {
                   scope.launch { onScannerRequest() }
                 })
+              }
+            }
+          }
+        }
+      }
+      Box(
+        Modifier
+          .matchParentSize()
+      ) {
+        androidx.compose.animation.AnimatedVisibility(
+          visible = !compact && foodItem.barcode.isNotBlank() && foodItem.isSaved,
+          modifier = Modifier.align(Alignment.BottomEnd),
+          enter = expandVertically(tween(500, 1000)),
+          exit = fadeOut(
+            tween(
+              250
+            )
+          ) + shrinkVertically(tween(250), shrinkTowards = Alignment.Bottom)
+        ) {
+          Row(verticalAlignment = Alignment.Bottom) {
+            Spacer(Modifier.size(8.dp))
+            Box {
+              Card(
+                modifier = Modifier
+                  .align(Alignment.BottomEnd)
+                  .padding(top = 8.dp)
+              ) {
+                Image(
+                  modifier = Modifier
+                    .width(80.dp)
+                    .aspectRatio(1f),
+                  painter = foodItem.novaGroupVectorPainter,
+                  contentDescription = "Nova Group"
+                )
               }
             }
           }
@@ -289,20 +347,5 @@ fun ItemEditor(
         }
       }
     }
-  }
-  Spacer(Modifier.size(8.dp))
-  //EXPIRY EDITOR
-  ElevatedCard {
-    ExpiryEditor(
-      foodItem.expiryDates,
-      onRequestExpiry = onDatePickerRequest,
-      small = !expiryEditorExpanded,
-      onShowMore = {
-        expiryEditorExpanded = !expiryEditorExpanded
-      },
-      onListChanged = {
-        onValueChanged(foodItem.copy(expiryDates = it))
-      }
-    )
   }
 }

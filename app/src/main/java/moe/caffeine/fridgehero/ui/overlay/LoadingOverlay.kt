@@ -41,11 +41,11 @@ fun LoadingOverlay(
   statusMessage: String = "",
   extraContent: @Composable () -> Unit = {},
   content: @Composable () -> Unit = {
-    Row {
+    Row(verticalAlignment = Alignment.CenterVertically) {
       Icon(
         imageVector = Icons.Default.Kitchen,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurface
+        tint = MaterialTheme.colorScheme.onSurface,
       )
       Spacer(modifier = Modifier.size(16.dp))
       Text(

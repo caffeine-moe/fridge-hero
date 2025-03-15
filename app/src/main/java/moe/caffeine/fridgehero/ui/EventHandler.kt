@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.model.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
 @Composable
 fun EventHandler(
