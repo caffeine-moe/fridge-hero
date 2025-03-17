@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.ui.overlay
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
@@ -118,125 +120,139 @@ fun ItemSheetOverlay(
       Unit
     }
   )
-
-  Box(
-    Modifier
-      .fillMaxSize()
-      .background(Color.Transparent)
-  ) {
-    BottomSheetScaffold(
-      scaffoldState = sheetScaffoldState,
-      sheetPeekHeight = 360.dp,
-      modifier = Modifier.fillMaxWidth(),
-      sheetContent = {
-        Column {
-          AnimatedVisibility(
-            modifier = Modifier
-              .fillMaxWidth(),
-            visible = visibleButNotExpanded,
-            enter = expandVertically(tween(500))
-                    + slideInVertically(tween(500)) { it },
-            exit = shrinkVertically(tween(500))
-                    + slideOutVertically(tween(500)) { it }
-          ) {
-            ActionRow(actions)
-          }
-          Surface(
-            modifier = Modifier
-              .verticalScroll(scrollState)
-              .padding(
-                bottom = WindowInsets.navigationBars.asPaddingValues()
-                  .calculateBottomPadding() + 80.dp
-              )
-          ) {
-            Column(
-              Modifier
-                .padding(8.dp)
-                .fillMaxSize()
+  Column {
+    AnimatedVisibility(
+      visible = sheetState.targetValue == SheetValue.Hidden,
+      enter = expandVertically(tween(durationMillis = 300, easing = FastOutSlowInEasing)),
+      exit = shrinkVertically(tween(durationMillis = 300, easing = FastOutSlowInEasing))
+    ) {
+      Box(
+        Modifier
+          .weight(1f)
+          .fillMaxSize(),
+      )
+    }
+    Box(
+      Modifier
+        .fillMaxSize()
+        .background(Color.Transparent)
+        .systemBarsPadding(),
+      contentAlignment = Alignment.Center
+    ) {
+      BottomSheetScaffold(
+        scaffoldState = sheetScaffoldState,
+        sheetPeekHeight = 360.dp,
+        sheetContent = {
+          Column {
+            AnimatedVisibility(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+              visible = visibleButNotExpanded,
+              enter = expandVertically(tween(500))
+                      + slideInVertically(tween(500)) { it },
+              exit = shrinkVertically(tween(500))
+                      + slideOutVertically(tween(500)) { it }
             ) {
-              ItemEditor(
-                foodItem = editableFoodItem,
-                compact = visibleButNotExpanded,
-                onScannerRequest = {
-                  barcodeAction()
-                },
-                onValueChanged = { editedFoodItem ->
-                  editableFoodItem = editedFoodItem
-                }
-              )
-              Spacer(Modifier.size(8.dp))
-              ElevatedCard {
-                ExpiryEditor(
-                  editableFoodItem.expiryDates,
-                  onRequestExpiry = {
-                    Event.RequestDateFromPicker().apply(emitEvent).result.await()
+              ActionRow(actions)
+            }
+            Surface(
+              modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(
+                  bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 80.dp
+                )
+            ) {
+              Column(
+                Modifier
+                  .padding(8.dp)
+                  .fillMaxSize()
+              ) {
+                ItemEditor(
+                  foodItem = editableFoodItem,
+                  compact = visibleButNotExpanded,
+                  onScannerRequest = {
+                    barcodeAction()
                   },
-                  small = !expiryEditorExpanded,
-                  onShowMore = {
-                    expiryEditorExpanded = !expiryEditorExpanded
-                  },
-                  onListChanged = {
-                    editableFoodItem = editableFoodItem.copy(expiryDates = it)
+                  onValueChanged = { editedFoodItem ->
+                    editableFoodItem = editedFoodItem
                   }
                 )
-              }
-              Spacer(Modifier.size(8.dp))
-              ElevatedCard(
-                modifier = Modifier
-                  .border(
-                    BorderStroke(2.dp, Color.Red),
-                    MaterialTheme.shapes.medium
-                  )
-              ) {
-                Column(Modifier.padding(8.dp)) {
-                  Box(Modifier.fillMaxWidth()) {
-                    Text(
-                      modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(8.dp),
-                      text = "Danger Zone",
-                      style = MaterialTheme.typography.titleMedium
-                    )
-                  }
-                  Button(
-                    enabled = editableFoodItem.isSaved,
-                    modifier = Modifier
-                      .align(Alignment.Start)
-                      .padding(8.dp),
-                    colors = ButtonColors(
-                      containerColor = Color.Red,
-                      contentColor = Color.Black,
-                      disabledContentColor = Color.LightGray,
-                      disabledContainerColor = Color.DarkGray
-                    ),
-                    onClick = {
-                      Event.HardRemoveFoodItem(editableFoodItem).apply(emitEvent)
-                      actions[2]()
+                Spacer(Modifier.size(8.dp))
+                ElevatedCard {
+                  ExpiryEditor(
+                    editableFoodItem.expiryDates,
+                    onRequestExpiry = {
+                      Event.RequestDateFromPicker().apply(emitEvent).result.await()
+                    },
+                    small = !expiryEditorExpanded,
+                    onShowMore = {
+                      expiryEditorExpanded = !expiryEditorExpanded
+                    },
+                    onListChanged = {
+                      editableFoodItem = editableFoodItem.copy(expiryDates = it)
                     }
-                  ) {
-                    Text(
-                      "PERMANENTLY DELETE"
+                  )
+                }
+                Spacer(Modifier.size(8.dp))
+                ElevatedCard(
+                  modifier = Modifier
+                    .border(
+                      BorderStroke(2.dp, Color.Red),
+                      MaterialTheme.shapes.medium
                     )
+                ) {
+                  Column(Modifier.padding(8.dp)) {
+                    Box(Modifier.fillMaxWidth()) {
+                      Text(
+                        modifier = Modifier
+                          .align(Alignment.CenterStart)
+                          .padding(8.dp),
+                        text = "Danger Zone",
+                        style = MaterialTheme.typography.titleMedium
+                      )
+                    }
+                    Button(
+                      enabled = editableFoodItem.isSaved,
+                      modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(8.dp),
+                      colors = ButtonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.Black,
+                        disabledContentColor = Color.LightGray,
+                        disabledContainerColor = Color.DarkGray
+                      ),
+                      onClick = {
+                        Event.HardRemoveFoodItem(editableFoodItem).apply(emitEvent)
+                        actions[2]()
+                      }
+                    ) {
+                      Text(
+                        "PERMANENTLY DELETE"
+                      )
+                    }
                   }
                 }
               }
             }
           }
+        },
+        snackbarHost = {
+          FloatingActionBar(
+            visible =
+            sheetState.isVisible &&
+                    sheetState.targetValue == SheetValue.Expanded &&
+                    sheetState.currentValue == SheetValue.Expanded,
+            actions = actions,
+            showScannerButton = !editableFoodItem.isSaved,
+            onScannerRequest = {
+              barcodeAction()
+            }
+          )
         }
-      },
-      snackbarHost = {
-        FloatingActionBar(
-          visible =
-          sheetState.isVisible &&
-                  sheetState.targetValue == SheetValue.Expanded &&
-                  sheetState.currentValue == SheetValue.Expanded,
-          actions = actions,
-          showScannerButton = !editableFoodItem.isSaved,
-          onScannerRequest = {
-            barcodeAction()
-          }
-        )
-      }
-    ) {}
+      ) {}
+    }
   }
 }

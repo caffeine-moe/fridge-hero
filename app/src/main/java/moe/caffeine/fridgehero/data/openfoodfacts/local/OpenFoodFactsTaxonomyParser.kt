@@ -37,7 +37,7 @@ object OpenFoodFactsTaxonomyParser {
     //keep a map of the entire DAG
     val nodes = mutableMapOf<String, OpenFoodFactsTaxonomyNode>()
     var currentParents = mutableSetOf<String>()
-    
+
     lines.forEach { line ->
       when {
         line.startsWith(PARENT_DEFINITION) -> {

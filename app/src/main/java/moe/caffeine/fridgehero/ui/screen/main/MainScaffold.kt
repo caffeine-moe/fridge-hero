@@ -43,17 +43,16 @@ fun MainScaffold(
   val navController: NavHostController = rememberNavController()
   val scope = rememberCoroutineScope()
   var currentScreenIndex by rememberSaveable { mutableIntStateOf(0) }
-  val title = screens.getOrNull(currentScreenIndex)?.title ?: ""
   var navigatedLeft by rememberSaveable { mutableStateOf(false) }
 
   Scaffold(
     modifier = Modifier
       .systemBarsPadding()
       .fillMaxSize(),
-    topBar = { MainTopBar(currentScreenIndex, title) },
+    topBar = { MainTopBar(screens, currentScreenIndex) },
     floatingActionButton = {
       AnimatedVisibility(
-        screens.any { it.hasFloatingActionButton && it.title == title },
+        screens[currentScreenIndex].hasFloatingActionButton,
         enter = slideInHorizontally(tween(500), initialOffsetX = { 2 * it }),
         exit = slideOutHorizontally(tween(500), targetOffsetX = { 2 * it })
       ) {

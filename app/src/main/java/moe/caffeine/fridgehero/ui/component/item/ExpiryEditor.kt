@@ -113,9 +113,10 @@ fun ExpiryEditor(
                     fontWeight = FontWeight.Bold,
                     text = if (!expired) {
                       when {
+                        expiryDate == -1L -> "Never."
                         expiryDate.hoursUntil() in 0..24 -> "Tomorrow."
                         expiryDate.daysUntil() == 0 -> "Today."
-                        else -> "${expiryDate.daysUntil()}d"
+                        else -> "${expiryDate.daysUntil()}d."
                       }
                     } else "Expired.",
                     color = if (expired) Color.Red else MaterialTheme.colorScheme.onSurface

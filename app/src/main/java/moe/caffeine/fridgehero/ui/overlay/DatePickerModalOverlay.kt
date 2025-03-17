@@ -3,9 +3,10 @@ package moe.caffeine.fridgehero.ui.overlay
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -95,20 +96,17 @@ fun DatePickerModalOverlay(
 
   Dialog(
     onDismissRequest = { onComplete(Result.failure(Throwable("Dismissed"))) },
-    properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)
+    properties = DialogProperties(usePlatformDefaultWidth = true, decorFitsSystemWindows = true)
   ) {
     Surface(
       shape = MaterialTheme.shapes.medium,
-      modifier = modifier
-        .fillMaxWidth(0.95f)
-        .wrapContentHeight()
     ) {
       Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         Text(
-          text = "Select Date",
+          text = "Date",
           style = MaterialTheme.typography.titleMedium
         )
 
@@ -121,58 +119,65 @@ fun DatePickerModalOverlay(
           }
 
           @Composable
-          fun PresetRow(days: Int, label: String) {
+          fun Preset(days: Int, label: String) {
             Row(
-              modifier = Modifier.padding(2.dp),
+              modifier = Modifier
+                .padding(2.dp)
+                .weight(1f),
+              horizontalArrangement = Arrangement.Center,
               verticalAlignment = Alignment.CenterVertically
             ) {
-              IconButton(
-                onClick = {
-                  updateSelection(selectedDate.minus(days, DateTimeUnit.DAY))
-                },
-
-                ) {
-                Icon(
-                  Icons.Filled.Remove,
-                  "Remove ${days.days.inWholeDays} days off of date."
-                )
-              }
-              Text(label)
-              IconButton(
-                onClick = {
-                  updateSelection(selectedDate.plus(days, DateTimeUnit.DAY))
-                },
+              Column(
+                horizontalAlignment = Alignment.CenterHorizontally
               ) {
-                Icon(
-                  Icons.Filled.Add,
-                  "Add ${days.days.inWholeDays} days to date."
-                )
+                Text(label, style = MaterialTheme.typography.titleMedium)
+                Row {
+                  IconButton(
+                    onClick = {
+                      updateSelection(selectedDate.minus(days, DateTimeUnit.DAY))
+                    },
+
+                    ) {
+                    Icon(
+                      Icons.Filled.Remove,
+                      "Remove ${days.days.inWholeDays} days off of date."
+                    )
+                  }
+                  IconButton(
+                    onClick = {
+                      updateSelection(selectedDate.plus(days, DateTimeUnit.DAY))
+                    },
+                  ) {
+                    Icon(
+                      Icons.Filled.Add,
+                      "Add ${days.days.inWholeDays} days to date."
+                    )
+                  }
+                }
               }
             }
           }
 
           ElevatedCard {
-            Text(
-              modifier = Modifier
-                .align(Alignment.Start)
-                .padding(8.dp),
-              text = "Days",
-              style = MaterialTheme.typography.titleMedium
-            )
-            Row {
+            Row(Modifier.fillMaxWidth()) {
               presetOptions.take(3).forEach { (label, days) ->
-                PresetRow(days, label)
+                Preset(days, label)
               }
             }
           }
 
+          Spacer(Modifier.size(8.dp))
+
           ElevatedCard {
-            Row {
+            Row(Modifier.fillMaxWidth()) {
               presetOptions.takeLast(3).forEach { (label, days) ->
-                PresetRow(days, label)
+                Preset(days, label)
               }
             }
           }
+
+          Spacer(Modifier.size(8.dp))
+
 
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             dropdownData.forEachIndexed { index, (label, items) ->
@@ -215,6 +220,8 @@ fun DatePickerModalOverlay(
               }
             }
           }
+
+          Spacer(Modifier.size(8.dp))
 
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
