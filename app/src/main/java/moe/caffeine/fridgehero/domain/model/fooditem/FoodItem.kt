@@ -13,8 +13,8 @@ import io.realm.kotlin.ext.toRealmSet
 import moe.caffeine.fridgehero.R
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.realm.RealmNutrimentEntry
-import moe.caffeine.fridgehero.domain.mapping.DomainModel
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
+import moe.caffeine.fridgehero.domain.model.DomainModel
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment

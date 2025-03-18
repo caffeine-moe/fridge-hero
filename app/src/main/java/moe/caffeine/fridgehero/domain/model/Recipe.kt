@@ -2,7 +2,6 @@ package moe.caffeine.fridgehero.domain.model
 
 import io.realm.kotlin.ext.toRealmList
 import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
-import moe.caffeine.fridgehero.domain.mapping.DomainModel
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import org.mongodb.kbson.BsonObjectId
 

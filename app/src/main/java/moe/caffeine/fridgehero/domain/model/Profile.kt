@@ -1,7 +1,6 @@
 package moe.caffeine.fridgehero.domain.model
 
 import moe.caffeine.fridgehero.data.model.realm.RealmProfile
-import moe.caffeine.fridgehero.domain.mapping.DomainModel
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
 
 data class Profile(

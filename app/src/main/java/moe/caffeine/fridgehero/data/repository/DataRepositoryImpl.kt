@@ -32,8 +32,8 @@ import moe.caffeine.fridgehero.data.realm.fetchAllByTypeAsFlow
 import moe.caffeine.fridgehero.data.realm.fetchObjectById
 import moe.caffeine.fridgehero.data.realm.updateObject
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
-import moe.caffeine.fridgehero.domain.mapping.DomainModel
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
+import moe.caffeine.fridgehero.domain.model.DomainModel
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
