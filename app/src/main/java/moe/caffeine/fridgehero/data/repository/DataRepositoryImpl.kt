@@ -223,7 +223,7 @@ suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<
 
 suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> DataRepository.deleteDomainModel(
   model: M
-): Result<M> =
+): Result<D> =
   withContext(Dispatchers.IO) {
     this@deleteDomainModel.realmProvider.realmInstance.deleteObjectById<R>(
       model.realmObjectId
@@ -232,7 +232,7 @@ suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<
       model.toRealmModel()
     ).fold(
       onSuccess = {
-        Result.success(model)
+        Result.success(model.toDomainModel())
       },
       onFailure = {
         Result.failure(it)

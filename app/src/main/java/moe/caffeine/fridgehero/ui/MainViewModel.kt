@@ -2,6 +2,8 @@ package moe.caffeine.fridgehero.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,9 +16,12 @@ import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
 import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
+import moe.caffeine.fridgehero.data.repository.deleteDomainModel
 import moe.caffeine.fridgehero.data.repository.upsertDomainModel
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
+import moe.caffeine.fridgehero.domain.mapping.DomainModel
+import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
@@ -37,9 +42,26 @@ class MainViewModel : ViewModel() {
       initialValue = Result.failure(Throwable("No profile found."))
     )
 
-  fun upsertProfile(profile: Profile) = viewModelScope.launch {
-    repository.upsertDomainModel(profile)
+  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> upsertDomainModelAndComplete(
+    model: M,
+    completable: CompletableDeferred<Result<D>>
+  ) {
+    completable.complete(
+      repository.upsertDomainModel(model)
+    )
   }
+
+  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> deleteDomainModelAndComplete(
+    model: M,
+    completable: CompletableDeferred<Result<D>>
+  ) {
+    completable.complete(
+      repository.deleteDomainModel(model)
+    )
+  }
+
+  fun upsertProfile(profile: Profile) =
+    viewModelScope.launch { repository.upsertDomainModel(profile) }
 
   private fun initialiseRepository() = viewModelScope.launch { repository.initialise() }
 
@@ -90,23 +112,21 @@ class MainViewModel : ViewModel() {
           event.result.complete(result)
         }
 
-        is Event.UpsertFoodItem -> {
-          event.result.complete(
-            repository.upsertDomainModel(event.model)
-          )
-        }
+        //food item
+
+        is Event.UpsertFoodItem ->
+          upsertDomainModelAndComplete(event.foodItem, event.result)
 
         is Event.SoftRemoveFoodItem ->
-          event.result.complete(
-            repository.upsertDomainModel(
-              event.foodItem.copy(expiryDates = listOf())
-            )
-          )
+          upsertDomainModelAndComplete(event.foodItem.copy(expiryDates = listOf()), event.result)
 
         is Event.DeleteFoodItem ->
-          event.result.complete(
-            repository.upsertDomainModel(event.model)
-          )
+          deleteDomainModelAndComplete(event.foodItem, event.result)
+
+        //recipe
+
+        is Event.UpsertRecipe ->
+          upsertDomainModelAndComplete(event.recipe, event.result)
 
         else -> return@onEach
       }

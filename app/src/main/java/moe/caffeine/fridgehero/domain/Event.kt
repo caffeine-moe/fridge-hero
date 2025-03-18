@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.domain
 
 import kotlinx.coroutines.CompletableDeferred
+import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
 // These are used for the asynchronous flow of data around the app
@@ -19,6 +20,11 @@ sealed class Event {
     val expiryEditorExpanded: Boolean = false,
   ) : Event()
 
+  data class RequestRecipeEditor(
+    val prefill: Recipe = Recipe(),
+    val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred(),
+  ) : Event()
+
   data class RequestBarcodeFromScanner(
     val result: CompletableDeferred<Result<String>> = CompletableDeferred()
   ) : Event()
@@ -34,12 +40,17 @@ sealed class Event {
   ) : Event()
 
   data class UpsertFoodItem(
-    val model: FoodItem,
+    val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 
+  data class UpsertRecipe(
+    val recipe: Recipe,
+    val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred()
+  ) : Event()
+
   data class DeleteFoodItem(
-    val model: FoodItem,
+    val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 

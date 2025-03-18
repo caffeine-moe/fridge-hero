@@ -70,7 +70,9 @@ fun MainScaffold(
 
                 //recipes
                 2 -> {
-                  //
+                  Event.RequestRecipeEditor()
+                    .apply(emitEvent).result.await()
+                    .onSuccess { Event.UpsertRecipe(it).apply(emitEvent) }
                 }
               }
             }
