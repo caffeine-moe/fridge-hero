@@ -225,7 +225,7 @@ fun ItemSheetOverlay(
                         disabledContainerColor = Color.DarkGray
                       ),
                       onClick = {
-                        Event.HardRemoveFoodItem(editableFoodItem).apply(emitEvent)
+                        Event.DeleteFoodItem(editableFoodItem).apply(emitEvent)
                         actions[2]()
                       }
                     ) {

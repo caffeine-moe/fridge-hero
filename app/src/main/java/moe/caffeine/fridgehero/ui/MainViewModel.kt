@@ -14,9 +14,11 @@ import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
 import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
+import moe.caffeine.fridgehero.data.repository.upsertDomainModel
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 
@@ -36,7 +38,7 @@ class MainViewModel : ViewModel() {
     )
 
   fun upsertProfile(profile: Profile) = viewModelScope.launch {
-    repository.upsertProfile(profile)
+    repository.upsertDomainModel(profile)
   }
 
   private fun initialiseRepository() = viewModelScope.launch { repository.initialise() }
@@ -49,6 +51,13 @@ class MainViewModel : ViewModel() {
     )
 
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
+    .stateIn(
+      viewModelScope,
+      SharingStarted.WhileSubscribed(5000),
+      emptyList()
+    )
+
+  val recipes: StateFlow<List<Recipe>> = repository.getAllRecipesAsFlow()
     .stateIn(
       viewModelScope,
       SharingStarted.WhileSubscribed(5000),
@@ -81,21 +90,22 @@ class MainViewModel : ViewModel() {
           event.result.complete(result)
         }
 
-        is Event.UpsertFoodItem ->
+        is Event.UpsertFoodItem -> {
           event.result.complete(
-            repository.upsertFoodItem(event.foodItem)
+            repository.upsertDomainModel(event.model)
           )
+        }
 
         is Event.SoftRemoveFoodItem ->
           event.result.complete(
-            repository.upsertFoodItem(
+            repository.upsertDomainModel(
               event.foodItem.copy(expiryDates = listOf())
             )
           )
 
-        is Event.HardRemoveFoodItem ->
+        is Event.DeleteFoodItem ->
           event.result.complete(
-            repository.deleteFoodItem(event.foodItem)
+            repository.upsertDomainModel(event.model)
           )
 
         else -> return@onEach

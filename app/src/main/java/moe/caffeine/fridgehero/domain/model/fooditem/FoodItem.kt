@@ -8,13 +8,20 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.ext.toRealmSet
 import moe.caffeine.fridgehero.R
+import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
+import moe.caffeine.fridgehero.data.model.realm.RealmNutrimentEntry
+import moe.caffeine.fridgehero.domain.mapping.DomainModel
+import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
+import org.mongodb.kbson.BsonObjectId
 
 data class FoodItem(
-  val realmObjectId: String = "",
+  override val realmId: String = "",
   val name: String = "",
   val brand: String = "",
   val barcode: String = "",
@@ -23,20 +30,14 @@ data class FoodItem(
   val categories: List<String> = listOf(),
   val novaGroup: NovaGroup = NovaGroup.UNKNOWN,
   val nutriScore: NutriScore = NutriScore.UNKNOWN,
-  val nutriments: Map<Nutriment, String> = mapOf()
-) : Parcelable {
-
-  init {
-    println(nutriments.map {
-      "${it.key} ${it.value}"
-    })
-  }
+  val nutriments: Map<Nutriment, String> = mapOf(),
+) : Parcelable, MappableModel<FoodItem, RealmFoodItem>, DomainModel {
 
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()
 
   val isSaved: Boolean
-    get() = realmObjectId.isNotBlank()
+    get() = realmId.isNotBlank()
 
   val imageBitmap: ImageBitmap
     get() = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
@@ -67,6 +68,8 @@ data class FoodItem(
       }
     )
 
+  override fun toDomainModel() = this
+
   //auto generated because of ByteArray
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -74,7 +77,7 @@ data class FoodItem(
 
     other as FoodItem
 
-    if (realmObjectId != other.realmObjectId) return false
+    if (realmId != other.realmId) return false
     if (name != other.name) return false
     if (brand != other.brand) return false
     if (barcode != other.barcode) return false
@@ -89,7 +92,7 @@ data class FoodItem(
   }
 
   override fun hashCode(): Int {
-    var result = realmObjectId.hashCode()
+    var result = realmId.hashCode()
     result = 31 * result + name.hashCode()
     result = 31 * result + brand.hashCode()
     result = 31 * result + barcode.hashCode()
@@ -113,7 +116,7 @@ data class FoodItem(
   )
 
   override fun writeToParcel(parcel: Parcel, flags: Int) {
-    parcel.writeString(realmObjectId)
+    parcel.writeString(realmId)
     parcel.writeString(name)
     parcel.writeString(brand)
     parcel.writeString(barcode)
@@ -137,4 +140,32 @@ data class FoodItem(
       return arrayOfNulls(size)
     }
   }
+
+  override fun toRealmModel(): RealmFoodItem =
+    RealmFoodItem().apply {
+      realmObjectId =
+        this@FoodItem.realmId.let {
+          if (it.isBlank()) BsonObjectId() else BsonObjectId.invoke(
+            it
+          )
+        }
+      name = this@FoodItem.name
+      brand = this@FoodItem.brand
+      barcode = this@FoodItem.barcode
+      imageByteArray = this@FoodItem.imageByteArray
+      expiryDates = this@FoodItem.expiryDates.toRealmList()
+      categoryNames = this@FoodItem.categories.toRealmSet()
+      novaGroup = this@FoodItem.novaGroup.number
+      nutriScore = this@FoodItem.nutriScore.letter
+      nutriments.addAll(this@FoodItem.nutriments.map {
+        RealmNutrimentEntry().apply {
+          nutriment = it.key.name
+          value = it.value
+        }
+      })
+      /*    categories = this@toRealmModel.categories.map {
+            it.toRealmModel(realm)
+          }.toRealmList()*/
+    }
+
 }

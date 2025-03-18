@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
                     MainScreen(
                       profile = profile,
                       foodItems = viewModel.foodItems,
+                      recipes = viewModel.recipes,
                       eventFlow = viewModel.eventFlow,
                       emitEvent = emitEvent
                     )

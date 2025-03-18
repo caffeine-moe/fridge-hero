@@ -2,6 +2,7 @@ package moe.caffeine.fridgehero.data.repository
 
 import io.realm.kotlin.UpdatePolicy
 import io.realm.kotlin.ext.toRealmList
+import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,7 @@ import moe.caffeine.fridgehero.data.mapper.toRealmModel
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodCategory
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.realm.RealmProfile
+import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
 import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.fetchImageAsByteArrayFromURL
@@ -30,8 +32,8 @@ import moe.caffeine.fridgehero.data.realm.fetchAllByTypeAsFlow
 import moe.caffeine.fridgehero.data.realm.fetchObjectById
 import moe.caffeine.fridgehero.data.realm.updateObject
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
-import moe.caffeine.fridgehero.domain.mapper.toDomainModel
-import moe.caffeine.fridgehero.domain.mapper.toRealmModel
+import moe.caffeine.fridgehero.domain.mapping.DomainModel
+import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
@@ -111,33 +113,11 @@ class DataRepositoryImpl(
     realm.fetchAllByTypeAsFlow<RealmProfile>()
       .transform { profiles ->
         emit(
-          profiles.map { profile -> Result.success(profile.toDomainModel()) }.firstOrNull()
+          profiles.map { profile -> Result.success(profile.toDomainModel()) }
+            .firstOrNull()
             ?: Result.failure(Throwable("No profile found."))
         )
       }.flowOn(Dispatchers.IO)
-
-  override suspend fun upsertProfile(profile: Profile) {
-    withContext(Dispatchers.IO) {
-      realm.updateObject(
-        profile.toRealmModel()
-      ).fold(
-        onSuccess = {
-          Result.success(it.toDomainModel())
-        },
-        onFailure = {
-          Result.failure(it)
-        }
-      )
-    }
-  }
-
-  override suspend fun deleteProfile(profile: Profile) {
-    withContext(Dispatchers.IO) {
-      realm.deleteObjectById<RealmProfile>(
-        profile.toRealmModel()._id
-      )
-    }
-  }
 
   override fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>> =
     realm.fetchAllByTypeAsFlow<RealmFoodItem>()
@@ -157,33 +137,19 @@ class DataRepositoryImpl(
       )
     }
 
-  override suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
-    withContext(Dispatchers.IO) {
-      realm.updateObject(
-        foodItem.toRealmModel()
-      ).fold(
-        onSuccess = {
-          Result.success(it.toDomainModel())
-        },
-        onFailure = {
-          Result.failure(it)
-        }
-      )
-    }
-
-  override suspend fun deleteFoodItem(foodItem: FoodItem): Result<FoodItem> =
-    withContext(Dispatchers.IO) {
-      realm.deleteObjectById<RealmFoodItem>(
-        foodItem.toRealmModel()._id
-      ).fold(
-        onSuccess = {
-          Result.success(foodItem)
-        },
-        onFailure = {
-          Result.failure(it)
-        }
-      )
-    }
+  /*  override suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
+      withContext(Dispatchers.IO) {
+        realm.updateObject(
+          foodItem.toRealmModel()
+        ).fold(
+          onSuccess = {
+            Result.success(it.toDomainModel())
+          },
+          onFailure = {
+            Result.failure(it)
+          }
+        )
+      }*/
 
   override suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem> =
     withContext(Dispatchers.IO) {
@@ -228,19 +194,48 @@ class DataRepositoryImpl(
       )
     }
 
-  override suspend fun getAllRecipesAsFlow(): Flow<List<Recipe>> {
-    TODO("Not yet implemented")
-  }
+  override fun getAllRecipesAsFlow(): Flow<List<Recipe>> =
+    realm.fetchAllByTypeAsFlow<RealmRecipe>()
+      .distinctUntilChanged()
+      .transform { recipes -> emit(recipes.map { it.toDomainModel() }) }
+      .flowOn(Dispatchers.IO)
 
   override suspend fun getRecipeById(objectId: BsonObjectId): Result<Recipe> {
     TODO("Not yet implemented")
   }
-
-  override suspend fun upsertRecipe(recipe: Recipe) {
-    TODO("Not yet implemented")
-  }
-
-  override suspend fun deleteRecipe(recipe: Recipe) {
-    TODO("Not yet implemented")
-  }
 }
+
+suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> DataRepository.upsertDomainModel(
+  model: M
+): Result<D> =
+  withContext(Dispatchers.IO) {
+    this@upsertDomainModel.realmProvider.realmInstance.updateObject(
+      model.toRealmModel()
+    ).fold(
+      onSuccess = {
+        Result.success(model.toDomainModel())
+      },
+      onFailure = {
+        Result.failure(it)
+      },
+    )
+  }
+
+suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> DataRepository.deleteDomainModel(
+  model: M
+): Result<M> =
+  withContext(Dispatchers.IO) {
+    this@deleteDomainModel.realmProvider.realmInstance.deleteObjectById<R>(
+      model.realmObjectId
+    )
+    this@deleteDomainModel.realmProvider.realmInstance.updateObject(
+      model.toRealmModel()
+    ).fold(
+      onSuccess = {
+        Result.success(model)
+      },
+      onFailure = {
+        Result.failure(it)
+      },
+    )
+  }

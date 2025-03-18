@@ -10,11 +10,16 @@ import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser
 import moe.caffeine.fridgehero.data.realm.fetchAllByType
+import moe.caffeine.fridgehero.domain.mapping.MappableModel
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import org.mongodb.kbson.BsonObjectId
 
-class RealmFoodItem : RealmObject {
+class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
   @PrimaryKey
-  var _id: BsonObjectId = BsonObjectId()
+  override var realmObjectId: BsonObjectId = BsonObjectId()
 
   var name: String = ""
   var brand: String = ""
@@ -36,4 +41,22 @@ class RealmFoodItem : RealmObject {
         )
       }.associateBy { it.name }
     }
+
+  override fun toDomainModel() =
+    FoodItem(
+      realmObjectId.toHexString(),
+      name,
+      brand,
+      barcode,
+      imageByteArray,
+      expiryDates.toList(),
+      categoryNames.toList(),
+      novaGroup = NovaGroup.enumByNumber(novaGroup),
+      nutriScore = NutriScore.enumByLetter(nutriScore),
+      nutriments = nutriments.associate {
+        Nutriment.valueOf(it.nutriment) to it.value
+      }
+    )
+
+  override fun toRealmModel(): RealmFoodItem = this
 }

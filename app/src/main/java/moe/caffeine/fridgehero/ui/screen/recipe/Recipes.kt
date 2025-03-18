@@ -12,25 +12,27 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.R
+import moe.caffeine.fridgehero.domain.model.Recipe
 
 var persistentRecipes = listOf("ONION SALAD")
 
 @Composable
-fun Recipes() {
-  var recipes by remember { mutableStateOf(persistentRecipes) }
+fun Recipes(
+  recipes: StateFlow<List<Recipe>>,
+) {
+  val recipesList by recipes.collectAsStateWithLifecycle()
   LazyVerticalGrid(
     columns = GridCells.FixedSize(128.dp)
   ) {
-    items(recipes) { recipe ->
+    items(recipesList) { recipe ->
       Card(
         modifier = Modifier.padding(10.dp),
       ) {
@@ -49,7 +51,7 @@ fun Recipes() {
         Spacer(Modifier.width(10.dp))
         Text(
           modifier = Modifier.align(Alignment.CenterHorizontally),
-          text = recipe
+          text = recipe.name
         )
         Spacer(Modifier.width(10.dp))
       }

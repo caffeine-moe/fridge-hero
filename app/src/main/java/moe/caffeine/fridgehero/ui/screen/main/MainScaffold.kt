@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.screen.Screen
 import moe.caffeine.fridgehero.ui.screen.main.component.MainBottomBar
@@ -38,6 +39,7 @@ fun MainScaffold(
   screens: List<Screen> = listOf(),
   profile: Profile,
   foodItems: StateFlow<List<FoodItem>>,
+  recipes: StateFlow<List<Recipe>>,
   emitEvent: (Event) -> Unit
 ) {
   val navController: NavHostController = rememberNavController()
@@ -99,6 +101,7 @@ fun MainScaffold(
         navigatedLeft,
         profile,
         foodItems,
+        recipes,
         emitEvent
       )
     }

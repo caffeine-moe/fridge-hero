@@ -28,9 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import moe.caffeine.fridgehero.domain.mapper.daysUntil
-import moe.caffeine.fridgehero.domain.mapper.hoursUntil
-import moe.caffeine.fridgehero.domain.mapper.toReadableDate
+import moe.caffeine.fridgehero.domain.mapping.daysUntil
+import moe.caffeine.fridgehero.domain.mapping.hoursUntil
+import moe.caffeine.fridgehero.domain.mapping.toReadableDate
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 
 @Composable

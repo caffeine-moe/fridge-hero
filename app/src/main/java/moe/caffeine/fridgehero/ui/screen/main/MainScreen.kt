@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.EventHandler
 import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
@@ -31,6 +32,7 @@ import moe.caffeine.fridgehero.ui.screen.Screen
 fun MainScreen(
   profile: Profile,
   foodItems: StateFlow<List<FoodItem>>,
+  recipes: StateFlow<List<Recipe>>,
   eventFlow: SharedFlow<Event>,
   emitEvent: (Event) -> Unit,
 ) {
@@ -93,6 +95,7 @@ fun MainScreen(
     screens = screens,
     profile = profile,
     foodItems = foodItems,
+    recipes = recipes,
     emitEvent = emitEvent
   )
 

@@ -27,7 +27,7 @@ fun OpenFoodFactsProduct.toDomainModel(
   categoryNames: List<String>,
 ): FoodItem =
   FoodItem(
-    realmObjectId = "",
+    realmId = "",
     name = productName,
     barcode = code,
     brand = brands,

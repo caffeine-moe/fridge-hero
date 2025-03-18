@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.domain.mapper
+package moe.caffeine.fridgehero.domain.mapping
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit

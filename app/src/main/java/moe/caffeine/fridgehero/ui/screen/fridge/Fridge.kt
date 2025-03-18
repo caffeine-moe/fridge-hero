@@ -40,7 +40,7 @@ fun Fridge(
   ) {
     items(
       fridge,
-      key = { it.realmObjectId }
+      key = { it.realmId }
     ) { listFoodItem ->
       AnimatedVisibility(
         modifier = Modifier

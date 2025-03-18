@@ -33,20 +33,18 @@ sealed class Event {
     val foodItem: FoodItem,
   ) : Event()
 
-  // Updates an item, or inserts the item if it doesn't exist already
   data class UpsertFoodItem(
-    val foodItem: FoodItem,
+    val model: FoodItem,
+    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
+  ) : Event()
+
+  data class DeleteFoodItem(
+    val model: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
 
   // Removes all expiry dates from the food item in the realm
   data class SoftRemoveFoodItem(
-    val foodItem: FoodItem,
-    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
-  ) : Event()
-
-  // Permanently deletes food item from realm
-  data class HardRemoveFoodItem(
     val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
   ) : Event()
