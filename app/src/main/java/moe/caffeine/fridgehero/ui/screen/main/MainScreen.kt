@@ -22,9 +22,11 @@ import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.EventHandler
 import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
-import moe.caffeine.fridgehero.ui.overlay.FullScreenItemOverlay
-import moe.caffeine.fridgehero.ui.overlay.ItemSheetOverlay
+import moe.caffeine.fridgehero.ui.overlay.RecipeEditorOverlay
 import moe.caffeine.fridgehero.ui.overlay.ScannerOverlay
+import moe.caffeine.fridgehero.ui.overlay.item.FullScreenItemOverlay
+import moe.caffeine.fridgehero.ui.overlay.item.ItemSearchOverlay
+import moe.caffeine.fridgehero.ui.overlay.item.ItemSheetOverlay
 import moe.caffeine.fridgehero.ui.screen.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +50,15 @@ fun MainScreen(
 
   // states for UI components
 
-  //fullscreen
+  //recipe editor
+  var showRecipeEditor by rememberSaveable { mutableStateOf(false) }
+  var recipeEditorRequest by remember { mutableStateOf(Event.RequestRecipeEditor()) }
+
+  //item search overlay
+  var showItemSearch by rememberSaveable { mutableStateOf(false) }
+  var itemSearchRequest by remember { mutableStateOf(Event.RequestItemFromSearch()) }
+
+  //fullscreen item
   var fullScreenItem by rememberSaveable { mutableStateOf<FoodItem?>(null) }
 
   //date picker
@@ -87,7 +97,15 @@ fun MainScreen(
       itemBottomSheetRequest = it
       scope.launch { itemBottomSheetState.expand() }
     },
-    onFullScreenRequest = { fullScreenItem = it }
+    onFullScreenRequest = { fullScreenItem = it },
+    onRecipeEditorRequest = {
+      recipeEditorRequest = it
+      showRecipeEditor = true
+    },
+    onItemSearchRequest = {
+      itemSearchRequest = it
+      showItemSearch = true
+    }
   )
 
   // Hosts main UI components (FAB, Bars, screens)
@@ -100,6 +118,16 @@ fun MainScreen(
   )
 
   // Composables that overlay the main screen
+
+  RecipeEditorOverlay(
+    visible = showRecipeEditor,
+    prefill = recipeEditorRequest.prefill,
+    emitEvent = emitEvent,
+    onComplete = {
+      showRecipeEditor = false
+      recipeEditorRequest.result.complete(it)
+    }
+  )
 
   FullScreenItemOverlay(
     fullScreenItem = fullScreenItem,
@@ -123,7 +151,6 @@ fun MainScreen(
     },
   )
 
-
   // This is more like a screen, but it overlays the main screen so therefore overlay.
   ItemSheetOverlay(
     sheetState = itemBottomSheetState,
@@ -133,6 +160,15 @@ fun MainScreen(
     onComplete = { result ->
       itemBottomSheetRequest.result.complete(result)
       itemBottomSheetRequest = Event.RequestItemSheet()
+    }
+  )
+
+  ItemSearchOverlay(
+    visible = showItemSearch,
+    foodItems = foodItems,
+    onComplete = {
+      showItemSearch = false
+      itemSearchRequest.result.complete(it)
     }
   )
 }

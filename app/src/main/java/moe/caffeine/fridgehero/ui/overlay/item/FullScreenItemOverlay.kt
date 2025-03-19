@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.overlay
+package moe.caffeine.fridgehero.ui.overlay.item
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.runtime.Composable

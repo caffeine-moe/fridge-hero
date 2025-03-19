@@ -61,7 +61,7 @@ fun MainNavGraph(
       Fridge(foodItems, emitEvent)
     }
     composable(Screen.Recipes.route) {
-      Recipes(recipes)
+      Recipes(recipes, emitEvent)
     }
   }
 }

@@ -92,6 +92,10 @@ class MainViewModel : ViewModel() {
   fun emitEvent(event: Event) = viewModelScope.launch { _eventFlow.emit(event) }
 
   init {
+    viewModelScope.launch {
+      repository.upsertDomainModel(Recipe(name = "ONION SALAD"))
+    }
+
     if (initialisationStage.value == InitialisationStage.None) {
       initialiseRepository()
     }
@@ -111,7 +115,7 @@ class MainViewModel : ViewModel() {
           )
           event.result.complete(result)
         }
-
+        
         //food item
 
         is Event.UpsertFoodItem ->

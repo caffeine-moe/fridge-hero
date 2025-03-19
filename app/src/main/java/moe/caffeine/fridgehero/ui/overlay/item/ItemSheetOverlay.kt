@@ -1,11 +1,14 @@
-package moe.caffeine.fridgehero.ui.overlay
+package moe.caffeine.fridgehero.ui.overlay.item
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -47,10 +50,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.component.ActionRow
+import moe.caffeine.fridgehero.ui.component.FloatingActionBar
 import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemEditor
-import moe.caffeine.fridgehero.ui.component.itemsheet.ActionRow
-import moe.caffeine.fridgehero.ui.component.itemsheet.FloatingActionBar
+import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,17 +244,33 @@ fun ItemSheetOverlay(
           }
         },
         snackbarHost = {
-          FloatingActionBar(
-            visible =
-            sheetState.isVisible &&
-                    sheetState.targetValue == SheetValue.Expanded &&
-                    sheetState.currentValue == SheetValue.Expanded,
-            actions = actions,
-            showScannerButton = !editableFoodItem.isSaved,
-            onScannerRequest = {
-              barcodeAction()
+          val visible = sheetState.isVisible &&
+                  sheetState.targetValue == SheetValue.Expanded &&
+                  sheetState.currentValue == SheetValue.Expanded
+          Column {
+            androidx.compose.animation.AnimatedVisibility(
+              modifier = Modifier
+                .align(Alignment.End)
+                .padding(horizontal = 16.dp),
+              visible = visible && !editableFoodItem.isSaved,
+              enter = slideInVertically(
+                tween(250),
+                initialOffsetY = { 2 * it }) + fadeIn(tween(250)),
+              exit = slideOutHorizontally(tween(250), targetOffsetX = { 2 * it }) + fadeOut(
+                tween(
+                  250
+                )
+              )
+            ) {
+              Column(Modifier.align(Alignment.End)) {
+                ScannerFloatingActionButton(onClick = { barcodeAction() })
+              }
             }
-          )
+            FloatingActionBar(
+              visible = visible,
+              actions = actions
+            )
+          }
         }
       ) {}
     }

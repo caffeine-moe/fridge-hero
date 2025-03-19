@@ -7,7 +7,7 @@ data class Profile(
   override val realmId: String = "",
   val firstName: String = "",
   val lastName: String = "",
-) : MappableModel<Profile, RealmProfile>, DomainModel {
+) : DomainModel, MappableModel<Profile, RealmProfile> {
   val fullName: String
     get() = "$firstName $lastName"
 

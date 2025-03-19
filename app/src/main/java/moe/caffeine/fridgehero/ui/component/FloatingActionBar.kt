@@ -1,11 +1,8 @@
-package moe.caffeine.fridgehero.ui.component.itemsheet
+package moe.caffeine.fridgehero.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,8 +24,6 @@ import androidx.compose.ui.unit.dp
 fun FloatingActionBar(
   visible: Boolean = false,
   actions: List<() -> Unit>,
-  showScannerButton: Boolean,
-  onScannerRequest: () -> Unit
 ) {
   Box {
     Box(
@@ -42,17 +37,6 @@ fun FloatingActionBar(
         modifier = Modifier
           .align(Alignment.Center)
       ) {
-        AnimatedVisibility(
-          modifier = Modifier
-            .align(Alignment.End),
-          visible = visible && showScannerButton,
-          enter = slideInVertically(tween(250), initialOffsetY = { 2 * it }) + fadeIn(tween(250)),
-          exit = slideOutHorizontally(tween(250), targetOffsetX = { 2 * it }) + fadeOut(tween(250))
-        ) {
-          Column(Modifier.align(Alignment.End)) {
-            ScannerFloatingActionButton(onClick = onScannerRequest)
-          }
-        }
         Spacer(Modifier.size(8.dp))
         AnimatedVisibility(
           visible = visible,

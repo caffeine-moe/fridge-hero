@@ -30,7 +30,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -59,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.component.TrailingEditIcon
 import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
 
 @Composable
@@ -76,15 +76,6 @@ fun ItemEditor(
   val barcodeFocusRequester = remember { FocusRequester() }
   var categoryEditorExpanded by rememberSaveable { mutableStateOf(false) }
 
-  val trailingEditIcon = @Composable {
-    if (!readOnly) {
-      Icon(
-        Icons.Outlined.Edit,
-        null,
-        Modifier.size(16.dp)
-      )
-    }
-  }
   //Title Editor
   ElevatedCard {
     Box(Modifier.padding(8.dp)) {
@@ -101,7 +92,7 @@ fun ItemEditor(
             onValueChanged(foodItem.copy(name = it))
           },
           textStyle = MaterialTheme.typography.titleMedium,
-          trailingIcon = trailingEditIcon,
+          trailingIcon = { TrailingEditIcon(!readOnly) },
           placeholder = { Text("Name") },
           keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         )
@@ -215,7 +206,7 @@ fun ItemEditor(
                       editingBarcode = false
                     }
                   ),
-                  trailingIcon = trailingEditIcon
+                  trailingIcon = { TrailingEditIcon(!readOnly) }
                 )
               }
               AnimatedVisibility(!editingBarcode) {
@@ -231,7 +222,7 @@ fun ItemEditor(
                       overflow = TextOverflow.Ellipsis
                     )
                     Spacer(Modifier.size(8.dp))
-                    trailingEditIcon()
+                    TrailingEditIcon(!readOnly)
                   }
                 }
               }

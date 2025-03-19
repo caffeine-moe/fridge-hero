@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui.component.itemsheet
+package moe.caffeine.fridgehero.ui.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

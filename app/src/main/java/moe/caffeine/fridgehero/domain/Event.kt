@@ -20,15 +20,22 @@ sealed class Event {
     val expiryEditorExpanded: Boolean = false,
   ) : Event()
 
+  data class RequestItemFromSearch(
+    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
+  ) : Event()
+
+  //launches the recipe editor
   data class RequestRecipeEditor(
     val prefill: Recipe = Recipe(),
     val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred(),
   ) : Event()
 
+  //retireves a barcode from the barcode scanner
   data class RequestBarcodeFromScanner(
     val result: CompletableDeferred<Result<String>> = CompletableDeferred()
   ) : Event()
 
+  //retrieves a food item domain object from openfoodfacts from a barcode
   data class RequestFoodItemFromBarcode(
     val barcode: String,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
@@ -39,14 +46,10 @@ sealed class Event {
     val foodItem: FoodItem,
   ) : Event()
 
+  //upserts a food item into the database
   data class UpsertFoodItem(
     val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
-  ) : Event()
-
-  data class UpsertRecipe(
-    val recipe: Recipe,
-    val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred()
   ) : Event()
 
   data class DeleteFoodItem(
@@ -58,6 +61,12 @@ sealed class Event {
   data class SoftRemoveFoodItem(
     val foodItem: FoodItem,
     val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
+  ) : Event()
+
+  //upserts a recipe into the database
+  data class UpsertRecipe(
+    val recipe: Recipe,
+    val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred()
   ) : Event()
 
   // Tells the main activity to display a short toast with the message

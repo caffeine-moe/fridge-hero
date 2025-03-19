@@ -14,7 +14,9 @@ fun EventHandler(
   onBarcodeRequest: (request: Event.RequestBarcodeFromScanner) -> Unit,
   onDateRequest: (request: Event.RequestDateFromPicker) -> Unit,
   onItemSheetRequest: (request: Event.RequestItemSheet) -> Unit,
-  onFullScreenRequest: (request: FoodItem) -> Unit
+  onFullScreenRequest: (request: FoodItem) -> Unit,
+  onRecipeEditorRequest: (request: Event.RequestRecipeEditor) -> Unit,
+  onItemSearchRequest: (request: Event.RequestItemFromSearch) -> Unit
 ) {
   LaunchedEffect(Unit) {
     eventFlow.collectLatest { event ->
@@ -24,6 +26,8 @@ fun EventHandler(
         is Event.RequestDateFromPicker -> onDateRequest(event)
         is Event.RequestItemSheet -> onItemSheetRequest(event)
         is Event.RequestItemFullScreen -> onFullScreenRequest(event.foodItem)
+        is Event.RequestRecipeEditor -> onRecipeEditorRequest(event)
+        is Event.RequestItemFromSearch -> onItemSearchRequest(event)
         else -> return@collectLatest
       }
     }

@@ -31,7 +31,7 @@ data class FoodItem(
   val novaGroup: NovaGroup = NovaGroup.UNKNOWN,
   val nutriScore: NutriScore = NutriScore.UNKNOWN,
   val nutriments: Map<Nutriment, String> = mapOf(),
-) : Parcelable, MappableModel<FoodItem, RealmFoodItem>, DomainModel {
+) : DomainModel, MappableModel<FoodItem, RealmFoodItem>, Parcelable {
 
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()
