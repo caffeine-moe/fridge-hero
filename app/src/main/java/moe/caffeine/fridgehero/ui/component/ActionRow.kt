@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ActionRow(
-  saveResetDismissActions: List<() -> Unit>,
+  saveResetDismissActions: List<Pair<String, () -> Unit>>,
 ) {
   Row {
     Box(
@@ -22,23 +22,23 @@ fun ActionRow(
       TextButton(
         modifier = Modifier.align(Alignment.CenterStart),
         onClick = {
-          saveResetDismissActions[2]()
+          saveResetDismissActions[2].second()
         }) {
-        Text("Dismiss")
+        Text(saveResetDismissActions[2].first)
       }
       TextButton(
         onClick = {
-          saveResetDismissActions[1]()
+          saveResetDismissActions[1].second()
         }) {
-        Text("Reset")
+        Text(saveResetDismissActions[1].first)
       }
       TextButton(
         modifier = Modifier.align(Alignment.CenterEnd),
         onClick = {
-          saveResetDismissActions[0]()
+          saveResetDismissActions[0].second()
         }
       ) {
-        Text("Save")
+        Text(saveResetDismissActions[0].first)
       }
     }
   }

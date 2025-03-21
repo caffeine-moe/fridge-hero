@@ -185,15 +185,15 @@ fun RecipeEditorOverlay(
         FloatingActionBar(
           true,
           listOf(
-            {
+            ("Save" to {
               onComplete(Result.success(editableRecipe))
-            },
-            {
+            }),
+            ("Reset" to {
               editableRecipe = prefill
-            },
-            {
+            }),
+            ("Dismiss" to {
               onComplete(Result.failure(Throwable("Dismissed")))
-            }
+            })
           )
         )
       }

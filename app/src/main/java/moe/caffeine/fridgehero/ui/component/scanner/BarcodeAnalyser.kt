@@ -24,6 +24,7 @@ class BarcodeAnalyser(
       //only accept barcodes used for product identification
       val options = BarcodeScannerOptions.Builder()
         .setBarcodeFormats(
+          Barcode.FORMAT_CODE_128, //scan directly from openfoodfacts.org
           Barcode.FORMAT_EAN_13,
           Barcode.FORMAT_EAN_8,
           Barcode.FORMAT_UPC_A,

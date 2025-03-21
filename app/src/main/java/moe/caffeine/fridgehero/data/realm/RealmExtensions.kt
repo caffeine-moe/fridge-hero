@@ -31,7 +31,7 @@ inline fun <reified T : RealmObject> Realm.updateObject(realmObject: T): Result<
 
 inline fun <reified T : RealmObject> Realm.fetchObjectById(objectId: BsonObjectId): Result<T> {
   return try {
-    Result.success(query<T>("_id == $0", objectId).find().first())
+    Result.success(query<T>("realmObjectId == $0", objectId).find().first())
   } catch (e: Exception) {
     Result.failure(e)
   }

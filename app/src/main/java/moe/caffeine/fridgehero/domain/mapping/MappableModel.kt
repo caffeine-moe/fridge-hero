@@ -6,7 +6,7 @@ import org.mongodb.kbson.BsonObjectId
 
 interface MappableModel<DomainType : DomainModel, RealmType : RealmObject> {
   val realmObjectId: BsonObjectId
-    get() = toDomainModel().realmId.let {
+    get() = this.toDomainModel().realmId.let {
       if (it.isBlank()) BsonObjectId() else BsonObjectId.invoke(
         it
       )

@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FloatingActionBar(
   visible: Boolean = false,
-  actions: List<() -> Unit>,
+  actions: List<Pair<String, () -> Unit>>,
 ) {
   Box {
     Box(

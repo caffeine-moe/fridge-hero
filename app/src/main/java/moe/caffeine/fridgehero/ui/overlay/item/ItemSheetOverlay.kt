@@ -94,35 +94,33 @@ fun ItemSheetOverlay(
     }
   }
 
-  val actions = listOf(
-    //save
-    {
-      if (editableFoodItem.name.isBlank()) {
-        Event.DisplayToast("Please enter a name for this item.").apply(emitEvent)
-        return@listOf
-      }
-      scope.launch {
-        sheetState.hide()
-        onComplete(
-          Result.success(
-            editableFoodItem
+  val actions: List<Pair<String, () -> Unit>> = listOf(
+    ("Save" to {
+      run {
+        if (editableFoodItem.name.isBlank()) {
+          Event.DisplayToast("Please enter a name for this item.").apply(emitEvent)
+          return@run
+        }
+        scope.launch {
+          sheetState.hide()
+          onComplete(
+            Result.success(
+              editableFoodItem
+            )
           )
-        )
-        editableFoodItem = FoodItem()
+          editableFoodItem = FoodItem()
+        }
       }
-      Unit
-    },
-    //reset
-    { editableFoodItem = prefill },
-    //dismiss
-    {
+    }),
+    ("Reset" to { editableFoodItem = prefill }),
+    ("Dismiss" to {
       scope.launch {
         sheetState.hide()
         onComplete(Result.failure(Throwable("Dismissed")))
         editableFoodItem = FoodItem()
       }
       Unit
-    }
+    })
   )
   Column {
     AnimatedVisibility(
@@ -230,7 +228,7 @@ fun ItemSheetOverlay(
                       ),
                       onClick = {
                         Event.DeleteFoodItem(editableFoodItem).apply(emitEvent)
-                        actions[2]()
+                        actions[2].second()
                       }
                     ) {
                       Text(

@@ -21,7 +21,7 @@ sealed class Event {
   ) : Event()
 
   data class RequestItemFromSearch(
-    val result: CompletableDeferred<Result<FoodItem>> = CompletableDeferred()
+    val result: CompletableDeferred<Result<List<FoodItem>>> = CompletableDeferred()
   ) : Event()
 
   //launches the recipe editor
