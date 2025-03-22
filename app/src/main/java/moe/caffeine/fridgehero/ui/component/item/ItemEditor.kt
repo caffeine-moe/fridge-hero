@@ -141,9 +141,9 @@ fun ItemEditor(
                   foodItem
                 )
                 androidx.compose.animation.AnimatedVisibility(
-                  visible = !compact && foodItem.barcode.isNotBlank() && foodItem.isSaved,
+                  visible = !compact && foodItem.barcode.isNotBlank(),
                   modifier = Modifier.align(Alignment.BottomEnd),
-                  enter = expandVertically(tween(500, 1000)),
+                  enter = expandVertically(tween(500, 500)),
                   exit = fadeOut(
                     tween(
                       250
@@ -246,41 +246,36 @@ fun ItemEditor(
           }
         }
       }
-      Box(
-        Modifier
-          .matchParentSize()
+      androidx.compose.animation.AnimatedVisibility(
+        visible = !compact && foodItem.barcode.isNotBlank(),
+        modifier = Modifier.align(Alignment.BottomEnd),
+        enter = expandVertically(tween(500, 500)),
+        exit = fadeOut(
+          tween(
+            250
+          )
+        ) + shrinkVertically(tween(250), shrinkTowards = Alignment.Bottom)
       ) {
-        androidx.compose.animation.AnimatedVisibility(
-          visible = !compact && foodItem.barcode.isNotBlank() && foodItem.isSaved,
-          modifier = Modifier.align(Alignment.BottomEnd),
-          enter = expandVertically(tween(500, 1000)),
-          exit = fadeOut(
-            tween(
-              250
-            )
-          ) + shrinkVertically(tween(250), shrinkTowards = Alignment.Bottom)
-        ) {
-          Row(verticalAlignment = Alignment.Bottom) {
-            Spacer(Modifier.size(8.dp))
-            Box {
-              Card(
+        Row(verticalAlignment = Alignment.Bottom) {
+          Spacer(Modifier.size(8.dp))
+          Box {
+            Card(
+              modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(top = 8.dp)
+            ) {
+              Image(
                 modifier = Modifier
-                  .align(Alignment.BottomEnd)
-                  .padding(top = 8.dp)
-              ) {
-                Image(
-                  modifier = Modifier
-                    .width(80.dp)
-                    .aspectRatio(1f),
-                  painter = foodItem.novaGroupVectorPainter,
-                  contentDescription = "Nova Group"
-                )
-              }
+                  .width(80.dp)
+                  .aspectRatio(1f),
+                painter = foodItem.novaGroupVectorPainter,
+                contentDescription = "Nova Group"
+              )
             }
           }
         }
       }
-    }
+    }//
   }
   Spacer(Modifier.size(8.dp))
   //Tags editor

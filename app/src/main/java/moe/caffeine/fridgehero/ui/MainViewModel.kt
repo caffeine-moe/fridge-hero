@@ -22,9 +22,11 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.DomainModel
+import moe.caffeine.fridgehero.domain.model.NutrimentBreakdown
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 
 class MainViewModel : ViewModel() {
@@ -92,10 +94,6 @@ class MainViewModel : ViewModel() {
   fun emitEvent(event: Event) = viewModelScope.launch { _eventFlow.emit(event) }
 
   init {
-    viewModelScope.launch {
-      repository.upsertDomainModel(Recipe(name = "ONION SALAD"))
-    }
-
     if (initialisationStage.value == InitialisationStage.None) {
       initialiseRepository()
     }
@@ -115,8 +113,16 @@ class MainViewModel : ViewModel() {
           )
           event.result.complete(result)
         }
-        
+
         //food item
+
+        is Event.RequestNutrimentBreakdown ->
+          if (event.items.isEmpty())
+            event.result.complete(
+              Result.failure(Throwable("Need to request breakdown of at least one item."))
+            )
+          else
+            event.result.complete(Result.success(breakDownNutriments(event.items)))
 
         is Event.UpsertFoodItem ->
           upsertDomainModelAndComplete(event.foodItem, event.result)
@@ -135,5 +141,26 @@ class MainViewModel : ViewModel() {
         else -> return@onEach
       }
     }.launchIn(viewModelScope)
+  }
+
+  private fun breakDownNutriments(items: List<FoodItem>): NutrimentBreakdown {
+    val totals: MutableMap<Nutriment, String> = mutableMapOf()
+    val getNumber = { x: String -> x.split(" ").firstOrNull()?.toDouble() ?: 0.0 }
+    val getUnit = { x: String -> x.split(" ").lastOrNull() ?: "g" }
+
+    Nutriment.entries.forEach { nutriment ->
+      var total = 0.0
+      var unit = "g"
+      items.forEach { item ->
+        item.nutriments[nutriment]?.let { itemNutriment ->
+          unit = getUnit(itemNutriment)
+          total += getNumber(itemNutriment)
+        }
+      }
+      totals[nutriment] =
+        "${(total.toString().split(".").let { "${it.first()}.${it.last().take(1)}" })} $unit"
+    }
+
+    return NutrimentBreakdown(items, totals)
   }
 }

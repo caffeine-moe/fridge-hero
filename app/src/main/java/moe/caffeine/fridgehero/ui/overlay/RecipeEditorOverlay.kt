@@ -9,15 +9,16 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -80,107 +81,134 @@ fun RecipeEditorOverlay(
       Column(
         Modifier
           .verticalScroll(scrollState)
+          .padding(8.dp)
       ) {
-        Box(
-          Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-        ) {
-          Image(
-            modifier = Modifier.fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-            painter = painterResource(R.drawable.nutriscore_a),
-            colorFilter = ColorFilter.tint(Color.Black.copy(alpha = 0.5f), BlendMode.SrcAtop),
-            contentDescription = null
-          )
-          Box(
-            Modifier
-              .fillMaxSize()
-              .padding(8.dp),
-            contentAlignment = Alignment.BottomStart
-          ) {
-            Text(editableRecipe.name)
+        Spacer(Modifier.size(125.dp))
+        ElevatedCard {
+          Box(Modifier.padding(8.dp)) {
+            Column {
+              OutlinedTextField(
+                isError = editableRecipe.name.isEmpty() && interactedWithName,
+                label = { Text("Name") },
+                modifier = Modifier
+                  .fillMaxWidth(),
+                value = editableRecipe.name,
+                //readOnly = readOnly,
+                onValueChange = {
+                  interactedWithName = true
+                  editableRecipe = editableRecipe.copy(name = it)
+                },
+                textStyle = MaterialTheme.typography.titleMedium,
+                trailingIcon = { TrailingEditIcon() },
+                placeholder = { Text("Name") },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+              )
+            }
           }
         }
 
         Spacer(Modifier.size(8.dp))
 
-        Column(Modifier.padding(8.dp)) {
-
-          ElevatedCard {
-            Box(Modifier.padding(8.dp)) {
-              Column {
-                OutlinedTextField(
-                  isError = editableRecipe.name.isEmpty() && interactedWithName,
-                  label = { Text("Name") },
-                  modifier = Modifier
-                    .fillMaxWidth(),
-                  value = editableRecipe.name,
-                  //readOnly = readOnly,
-                  onValueChange = {
-                    interactedWithName = true
-                    editableRecipe = editableRecipe.copy(name = it)
-                  },
-                  textStyle = MaterialTheme.typography.titleMedium,
-                  trailingIcon = { TrailingEditIcon() },
-                  placeholder = { Text("Name") },
-                  keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                )
-              }
-            }
-          }
-
-          Spacer(Modifier.size(8.dp))
-
-          ElevatedCard {
-            Box(Modifier.padding(8.dp)) {
-              Column {
-                Row {
-                  Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    Text(
-                      modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(8.dp),
-                      text = "Ingredients",
-                      style = MaterialTheme.typography.titleMedium
-                    )
-                    TextButton(
-                      modifier = Modifier.align(Alignment.CenterEnd),
-                      onClick = {
-                        scope.launch {
-                          Event.RequestItemFromSearch().also(emitEvent).result.await().onSuccess {
-                            editableRecipe =
-                              editableRecipe.copy(ingredients = editableRecipe.ingredients + it)
-                          }
+        ElevatedCard {
+          Box(Modifier.padding(8.dp)) {
+            Column {
+              Row {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                  Text(
+                    modifier = Modifier
+                      .align(Alignment.CenterStart)
+                      .padding(8.dp),
+                    text = "Ingredients",
+                    style = MaterialTheme.typography.titleMedium
+                  )
+                  TextButton(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = {
+                      scope.launch {
+                        Event.RequestItemFromSearch().also(emitEvent).result.await().onSuccess {
+                          editableRecipe =
+                            editableRecipe.copy(ingredients = editableRecipe.ingredients + it)
                         }
                       }
-                    ) {
-                      Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add Ingredient"
-                      )
                     }
+                  ) {
+                    Icon(
+                      imageVector = Icons.Filled.Add,
+                      contentDescription = "Add Ingredient"
+                    )
                   }
                 }
-                Column {
-                  editableRecipe.ingredients.forEach {
-                    ActionableSwipeToDismissBox(
-                      startToEndColor = Color.Transparent,
-                      startToEndIcon = null,
-                      onEndToStartAction = {
-                        editableRecipe =
-                          editableRecipe.copy(ingredients = editableRecipe.ingredients - it)
-                      }
-                    ) {
-                      ItemCard(item = it)
+              }
+              Column {
+                editableRecipe.ingredients.forEach {
+                  ActionableSwipeToDismissBox(
+                    startToEndColor = Color.Transparent,
+                    startToEndIcon = null,
+                    onEndToStartAction = {
+                      editableRecipe =
+                        editableRecipe.copy(ingredients = editableRecipe.ingredients - it)
                     }
+                  ) {
+                    ItemCard(item = it)
                   }
                 }
               }
             }
           }
         }
+
+        Spacer(Modifier.size(8.dp))
+
+        ElevatedCard {
+          Box(Modifier.padding(8.dp)) {
+            Column {
+              Text(
+                modifier = Modifier
+                  .padding(8.dp),
+                text = "Instructions",
+                style = MaterialTheme.typography.titleMedium
+              )
+              OutlinedTextField(
+                modifier = Modifier
+                  .padding(8.dp)
+                  .defaultMinSize(minHeight = 80.dp)
+                  .fillMaxWidth(),
+                value = editableRecipe.instructions,
+                onValueChange = {
+                  editableRecipe = editableRecipe.copy(instructions = it)
+                }
+              )
+            }
+          }
+        }
+
+        Spacer(Modifier.size(68.dp))
       }
+
+      Column {
+        Box(
+          Modifier
+            .wrapContentSize()
+            .fillMaxWidth()
+            .height(125.dp)
+        ) {
+          Image(
+            modifier = Modifier
+              .fillMaxWidth(),
+            contentScale = ContentScale.FillWidth,
+            painter = painterResource(R.drawable.nutriscore_a),
+            colorFilter = ColorFilter.tint(Color.Black.copy(alpha = 0.5f), BlendMode.SrcAtop),
+            contentDescription = null
+          )
+          Text(
+            text = editableRecipe.name,
+            modifier = Modifier
+              .align(Alignment.BottomStart)
+              .padding(8.dp)
+          )
+        }
+      }
+
       Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         FloatingActionBar(
           true,

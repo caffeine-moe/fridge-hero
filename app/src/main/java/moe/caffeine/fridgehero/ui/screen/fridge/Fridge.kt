@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,20 +32,19 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
-import moe.caffeine.fridgehero.ui.component.CustomSearchBar
 import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemCard
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Fridge(
+  query: String,
+  searchBarHasFocus: Boolean,
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit,
 ) {
   val fridge by foodItems.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
-  var query by rememberSaveable { mutableStateOf("") }
-  var showHidden by rememberSaveable { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
   BackHandler {
     focusManager.clearFocus()
@@ -57,34 +55,20 @@ fun Fridge(
       .padding(4.dp)
       .animateContentSize(tween(500)),
   ) {
-    stickyHeader {
-      CustomSearchBar(
-        modifier = Modifier.onFocusChanged {
-          showHidden = it.isFocused
-        },
-        query = query,
-        onClear = {
-          if (query.isEmpty()) {
-            focusManager.clearFocus()
-          } else
-            query = ""
-        },
-        onTextChanged = {
-          query = it
-        }
-      )
-    }
     items(
       fridge,
       key = { it.realmId }
     ) { listFoodItem ->
-      val matches by remember {
+      val currentFoodItem by rememberUpdatedState(newValue = listFoodItem)
+      val currentQuery by rememberUpdatedState(newValue = query)
+      val showHidden by rememberUpdatedState(newValue = searchBarHasFocus)
+      val matches by remember(currentQuery) {
         derivedStateOf {
           {
-            if (query.isEmpty())
-              showHidden || !listFoodItem.isRemoved
+            if (currentQuery.isEmpty())
+              showHidden || !currentFoodItem.isRemoved
             else {
-              fuzzyMatch(listFoodItem.name, query)
+              fuzzyMatch(currentFoodItem.name, currentQuery)
             }
           }
         }
@@ -98,7 +82,6 @@ fun Fridge(
           targetOffsetX = { -it },
         ) + fadeOut(tween(500))
       ) {
-        val currentFoodItem by rememberUpdatedState(newValue = listFoodItem)
         ElevatedCard(
           Modifier
             .padding(4.dp)
@@ -127,15 +110,15 @@ fun Fridge(
                     expanded = !expanded
                   },
                   onLongClick = {
-                    Event.RequestItemFullScreen(listFoodItem)
+                    Event.RequestItemFullScreen(currentFoodItem)
                       .apply(emitEvent)
                   }
                 ),
-              item = listFoodItem,
+              item = currentFoodItem,
               expanded = expanded
             ) {
               ExpiryEditor(
-                expiryDates = listFoodItem.expiryDates,
+                expiryDates = currentFoodItem.expiryDates,
                 onRequestExpiry = {
                   Event.RequestDateFromPicker()
                     .apply(emitEvent).result.await()
@@ -143,13 +126,13 @@ fun Fridge(
                 small = true,
                 onShowMore = {
                   scope.launch {
-                    Event.RequestItemSheet(listFoodItem, expiryEditorExpanded = true)
+                    Event.RequestItemSheet(currentFoodItem, expiryEditorExpanded = true)
                       .apply(emitEvent).result.await()
                       .onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
                   }
                 },
                 onListChanged = { changedList ->
-                  Event.UpsertFoodItem(listFoodItem.copy(expiryDates = changedList))
+                  Event.UpsertFoodItem(currentFoodItem.copy(expiryDates = changedList))
                     .apply(emitEvent)
                 }
               )

@@ -96,9 +96,11 @@ fun DatePickerModalOverlay(
 
   Dialog(
     onDismissRequest = { onComplete(Result.failure(Throwable("Dismissed"))) },
-    properties = DialogProperties(usePlatformDefaultWidth = true, decorFitsSystemWindows = true)
+    properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = true)
   ) {
     Surface(
+      Modifier
+        .fillMaxWidth(0.9f),
       shape = MaterialTheme.shapes.medium,
     ) {
       Column(

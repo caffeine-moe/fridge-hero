@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.domain
 
 import kotlinx.coroutines.CompletableDeferred
+import moe.caffeine.fridgehero.domain.model.NutrimentBreakdown
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
@@ -33,6 +34,11 @@ sealed class Event {
   //retireves a barcode from the barcode scanner
   data class RequestBarcodeFromScanner(
     val result: CompletableDeferred<Result<String>> = CompletableDeferred()
+  ) : Event()
+
+  data class RequestNutrimentBreakdown(
+    val items: List<FoodItem>,
+    val result: CompletableDeferred<Result<NutrimentBreakdown>> = CompletableDeferred()
   ) : Event()
 
   //retrieves a food item domain object from openfoodfacts from a barcode

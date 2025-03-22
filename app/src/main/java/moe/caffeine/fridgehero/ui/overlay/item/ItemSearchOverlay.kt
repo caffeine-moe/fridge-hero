@@ -10,9 +10,12 @@ import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +50,10 @@ import moe.caffeine.fridgehero.ui.component.CustomSearchBar
 import moe.caffeine.fridgehero.ui.component.FloatingActionBar
 import moe.caffeine.fridgehero.ui.component.item.ItemCard
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(
+  ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+  ExperimentalLayoutApi::class
+)
 @Composable
 fun ItemSearchOverlay(
   visible: Boolean,
@@ -83,12 +89,13 @@ fun ItemSearchOverlay(
         }
         LazyColumn {
           stickyHeader {
-            Column(Modifier.padding(4.dp)) {
+            Column(
+              Modifier
+                .padding(4.dp)
+                .background(MaterialTheme.colorScheme.surface)
+            ) {
               CustomSearchBar(
                 query = query,
-                onClear = {
-                  query = ""
-                },
                 onTextChanged = {
                   query = it
                 }
@@ -99,31 +106,37 @@ fun ItemSearchOverlay(
                 enter = fadeIn(tween(250)),
                 exit = fadeOut(tween(250))
               ) {
-                ElevatedCard(Modifier.fillMaxWidth()) {
+                ElevatedCard(
+                  Modifier
+                    .fillMaxWidth()
+                ) {
                   if (selectedItems.isNotEmpty()) {
                     Text(
                       style = MaterialTheme.typography.labelLarge,
-                      text = "Selected",
+                      text = "Selected Items",
                       modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                   }
-                  selectedItems.forEach {
-                    androidx.compose.animation.AnimatedVisibility(
-                      visible = selectedItems.contains(it),
-                      enter = expandIn(tween(500), expandFrom = Alignment.Center),
-                      exit = shrinkOut(tween(500), shrinkTowards = Alignment.Center)
-                    ) {
-                      TextButton(
-                        modifier = Modifier.padding(vertical = 0.dp),
-                        onClick = {
-                          selectedItems = selectedItems - it
-                        }) {
-                        Text(it.name)
+                  FlowRow {
+                    selectedItems.forEach {
+                      androidx.compose.animation.AnimatedVisibility(
+                        visible = selectedItems.contains(it),
+                        enter = expandIn(tween(500), expandFrom = Alignment.Center),
+                        exit = shrinkOut(tween(500), shrinkTowards = Alignment.Center)
+                      ) {
+                        TextButton(
+                          modifier = Modifier.padding(vertical = 0.dp),
+                          onClick = {
+                            selectedItems = selectedItems - it
+                          }) {
+                          Text(it.name)
+                        }
                       }
                     }
                   }
                 }
               }
+              Spacer(Modifier.size(8.dp))
             }
           }
           items(searchable) {

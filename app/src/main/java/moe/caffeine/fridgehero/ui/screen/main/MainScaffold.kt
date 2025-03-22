@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -47,11 +48,29 @@ fun MainScaffold(
   var currentScreenIndex by rememberSaveable { mutableIntStateOf(0) }
   var navigatedLeft by rememberSaveable { mutableStateOf(false) }
 
+  var searchBarQuery by rememberSaveable { mutableStateOf("") }
+  var searchBarHasFocus by rememberSaveable { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
+
   Scaffold(
     modifier = Modifier
       .systemBarsPadding()
       .fillMaxSize(),
-    topBar = { MainTopBar(screens, currentScreenIndex) },
+    topBar = {
+      MainTopBar(
+        screens = screens,
+        currentScreenIndex = currentScreenIndex,
+        searchBarQuery = searchBarQuery,
+        onSearchBarFocusState = {
+          searchBarHasFocus = it.isFocused
+        }
+      ) {
+        searchBarQuery = it
+        if (searchBarQuery.isEmpty()) {
+          focusManager.clearFocus()
+        }
+      }
+    },
     floatingActionButton = {
       AnimatedVisibility(
         screens[currentScreenIndex].hasFloatingActionButton,
@@ -103,6 +122,8 @@ fun MainScaffold(
         navigatedLeft,
         profile,
         foodItems,
+        searchBarQuery,
+        searchBarHasFocus,
         recipes,
         emitEvent
       )

@@ -25,9 +25,15 @@ import moe.caffeine.fridgehero.ui.screen.recipe.Recipes
 fun MainNavGraph(
   navController: NavHostController,
   navigatedLeft: Boolean,
+
   profile: Profile,
+
   foodItems: StateFlow<List<FoodItem>>,
+  foodSearchQuery: String,
+  searchBarHasFocus: Boolean,
+
   recipes: StateFlow<List<Recipe>>,
+
   emitEvent: (Event) -> Unit
 ) {
   val slideDirection by remember(navigatedLeft) {
@@ -58,7 +64,7 @@ fun MainNavGraph(
       Home(profile)
     }
     composable(Screen.Fridge.route) {
-      Fridge(foodItems, emitEvent)
+      Fridge(foodSearchQuery, searchBarHasFocus, foodItems, emitEvent)
     }
     composable(Screen.Recipes.route) {
       Recipes(recipes, emitEvent)
