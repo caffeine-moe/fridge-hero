@@ -24,7 +24,9 @@
         tools:targetApi="35">
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.FridgeHero">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

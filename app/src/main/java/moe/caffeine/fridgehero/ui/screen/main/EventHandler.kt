@@ -17,7 +17,6 @@ fun EventHandler(
   onFullScreenRequest: (request: FoodItem) -> Unit,
   onRecipeEditorRequest: (request: Event.RequestRecipeEditor) -> Unit,
   onItemSearchRequest: (request: Event.RequestItemFromSearch) -> Unit,
-  onExternalImageRequest: (request: Event.RequestExternalImage) -> Unit
 ) {
   LaunchedEffect(Unit) {
     eventFlow.collectLatest { event ->
@@ -29,7 +28,6 @@ fun EventHandler(
         is Event.RequestItemFullScreen -> onFullScreenRequest(event.foodItem)
         is Event.RequestRecipeEditor -> onRecipeEditorRequest(event)
         is Event.RequestItemFromSearch -> onItemSearchRequest(event)
-        is Event.RequestExternalImage -> onExternalImageRequest(event)
         else -> return@collectLatest
       }
     }

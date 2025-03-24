@@ -44,7 +44,8 @@ class MainViewModel : ViewModel() {
       initialValue = Result.failure(Throwable("No profile found."))
     )
 
-  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> upsertDomainModelAndComplete(
+  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>>
+          upsertDomainModelAndComplete(
     model: M,
     completable: CompletableDeferred<Result<D>>
   ) {
@@ -53,7 +54,8 @@ class MainViewModel : ViewModel() {
     )
   }
 
-  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> deleteDomainModelAndComplete(
+  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>>
+          deleteDomainModelAndComplete(
     model: M,
     completable: CompletableDeferred<Result<D>>
   ) {

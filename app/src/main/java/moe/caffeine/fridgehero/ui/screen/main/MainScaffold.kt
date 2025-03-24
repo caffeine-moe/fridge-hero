@@ -103,10 +103,11 @@ fun MainScaffold(
     },
     bottomBar = {
       MainBottomBar(
-        navController,
         screens,
         currentScreenIndex,
-        onNavigate = { navigatedIndex ->
+        onNavigate = { screen, navigatedIndex ->
+          navController.popBackStack()
+          navController.navigate(screen.route)
           navigatedLeft = navigatedIndex < currentScreenIndex
           currentScreenIndex = navigatedIndex
         }

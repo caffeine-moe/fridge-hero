@@ -25,15 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import moe.caffeine.fridgehero.ui.screen.Screen
 
 @Composable
 fun MainBottomBar(
-  navController: NavController,
   navBarItems: List<Screen>,
   currentIndex: Int,
-  onNavigate: (index: Int) -> Unit
+  onNavigate: (screen: Screen, index: Int) -> Unit
 ) {
   ElevatedCard(
     shape = MaterialTheme.shapes.medium.copy(
@@ -52,9 +50,7 @@ fun MainBottomBar(
           selected = currentIndex == index,
           onClick = {
             if (currentIndex == index) return@NavigationBarItem
-            navController.popBackStack()
-            navController.navigate(screen.route)
-            onNavigate(index)
+            onNavigate(screen, index)
           },
           icon = {
             Box(
