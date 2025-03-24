@@ -75,8 +75,13 @@ sealed class Event {
     val result: CompletableDeferred<Result<Recipe>> = CompletableDeferred()
   ) : Event()
 
-  // Tells the main activity to display a short toast with the message
+  // Tells the main composable to display a short toast with the message
   data class DisplayToast(
     val message: String,
+  ) : Event()
+
+  // Tells the main composable to ask the user for an image from their camera or gallery
+  data class RequestExternalImage(
+    val result: CompletableDeferred<Result<ByteArray>> = CompletableDeferred()
   ) : Event()
 }

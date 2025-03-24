@@ -77,14 +77,14 @@ class MainViewModel : ViewModel() {
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
     .stateIn(
       viewModelScope,
-      SharingStarted.WhileSubscribed(5000),
+      SharingStarted.Eagerly,
       emptyList()
     )
 
   val recipes: StateFlow<List<Recipe>> = repository.getAllRecipesAsFlow()
     .stateIn(
       viewModelScope,
-      SharingStarted.WhileSubscribed(5000),
+      SharingStarted.Eagerly,
       emptyList()
     )
 

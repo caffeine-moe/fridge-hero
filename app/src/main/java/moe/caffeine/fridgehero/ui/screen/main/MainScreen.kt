@@ -1,6 +1,10 @@
 package moe.caffeine.fridgehero.ui.screen.main
 
+import android.graphics.Bitmap
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -20,7 +24,6 @@ import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
-import moe.caffeine.fridgehero.ui.EventHandler
 import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
 import moe.caffeine.fridgehero.ui.overlay.RecipeEditorOverlay
 import moe.caffeine.fridgehero.ui.overlay.ScannerOverlay
@@ -28,6 +31,7 @@ import moe.caffeine.fridgehero.ui.overlay.item.FullScreenItemOverlay
 import moe.caffeine.fridgehero.ui.overlay.item.ItemSearchOverlay
 import moe.caffeine.fridgehero.ui.overlay.item.ItemSheetOverlay
 import moe.caffeine.fridgehero.ui.screen.Screen
+import java.io.ByteArrayOutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +84,22 @@ fun MainScreen(
       itemBottomSheetState.hide()
   }
 
+  //external image request
+  var externalImageRequest by remember { mutableStateOf(Event.RequestExternalImage()) }
+  val cameraLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.TakePicturePreview()
+  ) { bitmap: Bitmap? ->
+    externalImageRequest.result.complete(
+      bitmap?.let {
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 65, outputStream)
+        Result.success(outputStream.toByteArray()).also {
+          externalImageRequest = Event.RequestExternalImage()
+        }
+      } ?: Result.failure(Throwable("Failed to retrieve image."))
+    )
+  }
+
   // collects events from the event flow and calls their respective lambdas
   // (cleaner than a massive when block being here imo)
   EventHandler(
@@ -105,6 +125,10 @@ fun MainScreen(
     onItemSearchRequest = {
       itemSearchRequest = it
       showItemSearch = true
+    },
+    onExternalImageRequest = {
+      externalImageRequest = it
+      cameraLauncher.launch()
     }
   )
 

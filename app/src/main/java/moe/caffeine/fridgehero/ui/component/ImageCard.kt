@@ -1,5 +1,6 @@
-package moe.caffeine.fridgehero.ui.component.item
+package moe.caffeine.fridgehero.ui.component
 
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,23 +15,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 
 @Composable
-fun ItemImageCard(
-  modifier: Modifier,
-  item: FoodItem,
+fun ImageCard(
+  modifier: Modifier = Modifier,
+  imageByteArray: ByteArray = byteArrayOf(),
+  contentScale: ContentScale = ContentScale.FillBounds
 ) {
-  val imageBitmap by remember(item) {
+  val imageBitmap by remember(imageByteArray) {
     derivedStateOf {
-      if (item.imageByteArray.isNotEmpty()) BitmapPainter(
-        item.imageBitmap
+      if (imageByteArray.isNotEmpty()) BitmapPainter(
+        BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
+          .asImageBitmap()
       )
       else
         null
@@ -46,12 +48,11 @@ fun ItemImageCard(
         ColorFilter.tint(MaterialTheme.colorScheme.outlineVariant)
       } else null,
       modifier = modifier
-        .clip(MaterialTheme.shapes.medium)
         .fillMaxSize(),
       painter = imageBitmap ?: rememberVectorPainter(Icons.Outlined.NoFood),
       alignment = Alignment.Center,
-      contentDescription = "Image of ${item.name}",
-      contentScale = ContentScale.FillBounds
+      contentDescription = null,
+      contentScale = contentScale
     )
   }
 }

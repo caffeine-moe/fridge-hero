@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.ui
+package moe.caffeine.fridgehero.ui.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,7 +16,8 @@ fun EventHandler(
   onItemSheetRequest: (request: Event.RequestItemSheet) -> Unit,
   onFullScreenRequest: (request: FoodItem) -> Unit,
   onRecipeEditorRequest: (request: Event.RequestRecipeEditor) -> Unit,
-  onItemSearchRequest: (request: Event.RequestItemFromSearch) -> Unit
+  onItemSearchRequest: (request: Event.RequestItemFromSearch) -> Unit,
+  onExternalImageRequest: (request: Event.RequestExternalImage) -> Unit
 ) {
   LaunchedEffect(Unit) {
     eventFlow.collectLatest { event ->
@@ -28,6 +29,7 @@ fun EventHandler(
         is Event.RequestItemFullScreen -> onFullScreenRequest(event.foodItem)
         is Event.RequestRecipeEditor -> onRecipeEditorRequest(event)
         is Event.RequestItemFromSearch -> onItemSearchRequest(event)
+        is Event.RequestExternalImage -> onExternalImageRequest(event)
         else -> return@collectLatest
       }
     }

@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.component.ImageCard
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -42,11 +43,11 @@ fun ItemCard(
         .align(Alignment.CenterHorizontally)
     ) {
       Row {
-        ItemImageCard(
+        ImageCard(
           Modifier
             .size(80.dp)
             .align(Alignment.CenterVertically),
-          item
+          item.imageByteArray
         )
         Spacer(Modifier.padding(10.dp))
         Column {

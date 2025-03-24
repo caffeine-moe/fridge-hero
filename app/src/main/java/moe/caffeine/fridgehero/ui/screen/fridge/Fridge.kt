@@ -99,7 +99,8 @@ fun Fridge(
             onEndToStartAction = {
               Event.SoftRemoveFoodItem(currentFoodItem)
                 .apply(emitEvent)
-            }
+            },
+            enableEndToStartDismiss = !currentFoodItem.isRemoved
           ) {
             var expanded by rememberSaveable { mutableStateOf(false) }
             ItemCard(

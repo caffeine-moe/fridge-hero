@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.component.ImageCard
 import moe.caffeine.fridgehero.ui.component.TrailingEditIcon
 import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
 
@@ -67,6 +68,7 @@ fun ItemEditor(
   readOnly: Boolean = false,
   compact: Boolean = false,
   onScannerRequest: suspend () -> Unit = {},
+  onImageRequest: suspend () -> Result<ByteArray>,
   onValueChanged: (FoodItem) -> Unit = {}
 ) {
   val scope = rememberCoroutineScope()
@@ -133,12 +135,20 @@ fun ItemEditor(
               verticalArrangement = Arrangement.Center
             ) {
               Box {
-                ItemImageCard(
+                ImageCard(
                   modifier = Modifier
                     .align(Alignment.Center)
                     .size(animatedWidth, animatedHeight)
-                    .aspectRatio(1f),
-                  foodItem
+                    .aspectRatio(1f)
+                    .clickable {
+
+                      scope.launch {
+                        onImageRequest().onSuccess {
+                          onValueChanged(foodItem.copy(imageByteArray = it))
+                        }
+                      }
+                    },
+                  foodItem.imageByteArray
                 )
                 androidx.compose.animation.AnimatedVisibility(
                   visible = !compact && foodItem.barcode.isNotBlank(),

@@ -1,7 +1,10 @@
 package moe.caffeine.fridgehero.domain.model
 
+import android.graphics.BitmapFactory
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import io.realm.kotlin.ext.toRealmSet
 import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
@@ -15,6 +18,9 @@ data class Recipe(
   val instructions: String = "",
 ) : DomainModel, MappableModel<Recipe, RealmRecipe>, Parcelable {
 
+  val imageBitmap: ImageBitmap
+    get() = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
+      .asImageBitmap()
 
   constructor(parcel: Parcel) : this(
     parcel.readString().toString(),
@@ -32,6 +38,7 @@ data class Recipe(
       name = this@Recipe.name
       ingredients = this@Recipe.ingredients.map { it.toRealmModel() }.toRealmSet()
       instructions = this@Recipe.instructions
+      imageByteArray = this@Recipe.imageByteArray
     }
 
   override fun equals(other: Any?): Boolean {

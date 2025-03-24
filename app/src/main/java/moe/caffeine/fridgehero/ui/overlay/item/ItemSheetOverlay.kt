@@ -173,6 +173,9 @@ fun ItemSheetOverlay(
                   onScannerRequest = {
                     barcodeAction()
                   },
+                  onImageRequest = {
+                    Event.RequestExternalImage().apply(emitEvent).result.await()
+                  },
                   onValueChanged = { editedFoodItem ->
                     editableFoodItem = editedFoodItem
                   }
