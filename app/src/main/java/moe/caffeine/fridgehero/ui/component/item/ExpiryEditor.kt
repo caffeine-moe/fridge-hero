@@ -1,6 +1,7 @@
 package moe.caffeine.fridgehero.ui.component.item
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -28,9 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import moe.caffeine.fridgehero.domain.mapping.daysUntil
-import moe.caffeine.fridgehero.domain.mapping.hoursUntil
-import moe.caffeine.fridgehero.domain.mapping.toReadableDate
+import moe.caffeine.fridgehero.domain.helper.isExpired
+import moe.caffeine.fridgehero.domain.helper.readableDaysUntil
+import moe.caffeine.fridgehero.domain.helper.toReadableDate
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 
 @Composable
@@ -80,9 +79,15 @@ fun ExpiryEditor(
     ) {
       (if (!small) currentExpiryDates else currentExpiryDates.take(3)).forEachIndexed { index, expiryDate ->
         key(expiryDate, index) {
-          val expired by remember { mutableStateOf(expiryDate.daysUntil() <= -1) }
           Box(Modifier.padding(8.dp)) {
             ActionableSwipeToDismissBox(
+              modifier = Modifier.clickable {
+                scope.launch {
+                  onRequestExpiry().onSuccess {
+                    onListChanged(currentExpiryDates.toMutableList().apply { set(index, it) })
+                  }
+                }
+              },
               onStartToEndAction = {
                 if (!readOnly) {
                   onListChanged(currentExpiryDates + expiryDate)
@@ -111,15 +116,8 @@ fun ExpiryEditor(
                   Text(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    text = if (!expired) {
-                      when {
-                        expiryDate == -1L -> "Never."
-                        expiryDate.hoursUntil() in 0..24 -> "Tomorrow."
-                        expiryDate.daysUntil() == 0 -> "Today."
-                        else -> "${expiryDate.daysUntil()}d."
-                      }
-                    } else "Expired.",
-                    color = if (expired) Color.Red else MaterialTheme.colorScheme.onSurface
+                    text = expiryDate.readableDaysUntil(),
+                    color = if (expiryDate.isExpired()) Color.Red else MaterialTheme.colorScheme.onSurface
                   )
                 }
               }

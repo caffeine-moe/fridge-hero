@@ -80,7 +80,7 @@ fun ActionableSwipeToDismissBox(
               Icon(
                 imageVector = endToStartIcon,
                 modifier = Modifier.align(Alignment.CenterEnd),
-                contentDescription = "Swipe to add new"
+                contentDescription = "Swipe to remove"
               )
             }
           }

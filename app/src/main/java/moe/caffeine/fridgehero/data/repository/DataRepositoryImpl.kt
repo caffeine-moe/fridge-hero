@@ -122,7 +122,13 @@ class DataRepositoryImpl(
   override fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>> =
     realm.fetchAllByTypeAsFlow<RealmFoodItem>()
       .distinctUntilChanged()
-      .transform { foodItems -> emit(foodItems.map { it.toDomainModel() }) }
+      .transform { foodItems ->
+        emit(
+          foodItems
+            .map { it.toDomainModel() }
+            .sortedBy { it.name.lowercase() }
+        )
+      }
       .flowOn(Dispatchers.IO)
 
   override suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem> =

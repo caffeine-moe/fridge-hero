@@ -30,7 +30,7 @@ fun OpenFoodFactsProduct.toDomainModel(
     realmId = "",
     name = productName,
     barcode = code,
-    brand = brands,
+    brand = brands.split(",").firstOrNull() ?: brands,
     imageByteArray = thumbnail,
     categories = categoryNames,
     novaGroup = NovaGroup.enumByNumber(novaGroup),

@@ -1,4 +1,4 @@
-package moe.caffeine.fridgehero.domain.mapping
+package moe.caffeine.fridgehero.domain.helper
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -35,3 +35,20 @@ fun Long.daysUntil(): Int =
 
 fun Long.hoursUntil(): Long =
   Clock.System.now().until(this.toInstant(), DateTimeUnit.HOUR)
+
+fun Long.expiryImminent(): Boolean =
+  (this - Clock.System.now().toEpochMilliseconds()).toDate().toEpochDays() in -3..3
+
+fun Long.isExpired(): Boolean =
+  this.toDate().toEpochDays() - Clock.System.now().toEpochMilliseconds().toDate()
+    .toEpochDays() < 0
+
+fun Long.readableDaysUntil(): String =
+  if (!this.isExpired()) {
+    when {
+      this == -1L -> "Never."
+      this.hoursUntil() in 0..24 -> "Tomorrow."
+      this.daysUntil() == 0 -> "Today."
+      else -> "${this.daysUntil()}d."
+    }
+  } else "Expired."

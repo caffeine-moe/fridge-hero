@@ -1,12 +1,14 @@
 package moe.caffeine.fridgehero.ui.overlay
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -67,6 +69,8 @@ fun DatePickerModalOverlay(
     "Year" to ((now.year)..(now.year + 50)).map { it.toString() }
   )
 
+  if (!visible) return
+
   val selectedValues = dropdownData.map {
     remember {
       mutableStateOf(
@@ -91,8 +95,6 @@ fun DatePickerModalOverlay(
   }
 
   val expandedStates = dropdownData.map { remember { mutableStateOf(false) } }
-
-  if (!visible) return
 
   Dialog(
     onDismissRequest = { onComplete(Result.failure(Throwable("Dismissed"))) },
@@ -181,42 +183,46 @@ fun DatePickerModalOverlay(
           Spacer(Modifier.size(8.dp))
 
 
-          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row {
             dropdownData.forEachIndexed { index, (label, items) ->
               ExposedDropdownMenuBox(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                  .weight(1f)
+                  .wrapContentSize(),
                 expanded = expandedStates[index].value,
                 onExpandedChange = {
                   expandedStates[index].value = !expandedStates[index].value
                 }
               ) {
-                OutlinedTextField(
-                  value = selectedValues[index].value,
-                  onValueChange = {},
-                  readOnly = true,
-                  label = { Text(label) },
-                  singleLine = true,
-                  modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true),
-                  trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                      expanded = expandedStates[index].value
-                    )
-                  }
-                )
-                ExposedDropdownMenu(
-                  expanded = expandedStates[index].value,
-                  onDismissRequest = {
-                    expandedStates[index].value = false
-                  }
-                ) {
-                  items.forEach { item ->
-                    DropdownMenuItem(
-                      text = { Text(item) },
-                      onClick = {
-                        selectedValues[index].value = item
-                        expandedStates[index].value = false
-                      }
-                    )
+                Box(contentAlignment = Alignment.Center) {
+                  OutlinedTextField(
+                    value = selectedValues[index].value,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(label) },
+                    singleLine = true,
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true),
+                    trailingIcon = {
+                      ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expandedStates[index].value
+                      )
+                    }
+                  )
+                  ExposedDropdownMenu(
+                    expanded = expandedStates[index].value,
+                    onDismissRequest = {
+                      expandedStates[index].value = false
+                    }
+                  ) {
+                    items.forEach { item ->
+                      DropdownMenuItem(
+                        text = { Text(item) },
+                        onClick = {
+                          selectedValues[index].value = item
+                          expandedStates[index].value = false
+                        }
+                      )
+                    }
                   }
                 }
               }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -19,6 +20,7 @@ import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
 import moe.caffeine.fridgehero.data.repository.deleteDomainModel
 import moe.caffeine.fridgehero.data.repository.upsertDomainModel
 import moe.caffeine.fridgehero.domain.Event
+import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.DomainModel
@@ -28,6 +30,7 @@ import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.domain.repository.DataRepository
+import kotlin.math.abs
 
 class MainViewModel : ViewModel() {
   private val repository: DataRepository = DataRepositoryImpl(
@@ -76,14 +79,29 @@ class MainViewModel : ViewModel() {
       InitialisationStage.None
     )
 
+  private fun sortByExpiry(foodItems: List<FoodItem>): List<FoodItem> {
+    val expiredItems = foodItems.filter { it.isExpired }.sortedBy { it.name }
+    val expiringSoonItems = foodItems.filter { it.expiresSoon }.sortedBy { it.name }
+    val remainingItems =
+      foodItems.filterNot { it.isExpired || it.expiresSoon }.sortedBy { it.name }
+
+    return (expiredItems + expiringSoonItems + remainingItems).toSet().toMutableList()
+  }
+
   val foodItems: StateFlow<List<FoodItem>> = repository.getAllFoodItemsAsFlow()
+    .map { items -> sortByExpiry(items) }
     .stateIn(
       viewModelScope,
       SharingStarted.Eagerly,
       emptyList()
     )
 
+  private fun recipeSort(recipes: List<Recipe>): List<Recipe> =
+    recipes.sortedBy { recipe -> recipe.ingredients.count { it.expiresSoon && !it.isExpired } }
+      .sortedBy { it.name.lowercase() }
+
   val recipes: StateFlow<List<Recipe>> = repository.getAllRecipesAsFlow()
+    .map { recipeSort(it) }
     .stateIn(
       viewModelScope,
       SharingStarted.Eagerly,
@@ -140,10 +158,33 @@ class MainViewModel : ViewModel() {
         is Event.UpsertRecipe ->
           upsertDomainModelAndComplete(event.recipe, event.result)
 
+        is Event.FindPotentialMatches ->
+          event.result.complete(Result.success(findPotentialMatches(event.foodItem)))
+
         else -> return@onEach
       }
     }.launchIn(viewModelScope)
   }
+
+  private fun findPotentialMatches(item: FoodItem): List<FoodItem> =
+    foodItems.value
+      .filterNot { it.isRemoved || it.isExpired }
+      .filter { avaliableItem ->
+        avaliableItem.name
+          .split(" ")
+          .count { avaliableWord ->
+            item.name
+              .split(" ")
+              .any { searchWord ->
+                fuzzyMatch(avaliableWord, searchWord)
+              }
+          } >= (listOf(item.name, avaliableItem.name).min().split(" ").size * 0.5)
+                || (avaliableItem.categories
+          .count { item.categories.contains(it) } >=
+                abs(item.categories.size) * 0.75 &&
+                item.categories.isNotEmpty() &&
+                avaliableItem.categories.isNotEmpty())
+      }
 
   private fun breakDownNutriments(items: List<FoodItem>): NutrimentBreakdown {
     val totals: MutableMap<Nutriment, String> = mutableMapOf()

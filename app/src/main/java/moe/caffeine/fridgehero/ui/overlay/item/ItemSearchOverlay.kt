@@ -43,8 +43,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
-import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.matches
 import moe.caffeine.fridgehero.ui.component.CustomSearchBar
 import moe.caffeine.fridgehero.ui.component.FloatingActionBar
 import moe.caffeine.fridgehero.ui.component.item.ItemCard
@@ -60,6 +60,12 @@ fun ItemSearchOverlay(
   onComplete: (Result<List<FoodItem>>) -> Unit
 ) {
   val searchable by foodItems.collectAsStateWithLifecycle()
+  var query by rememberSaveable { mutableStateOf("") }
+  val filteredItems by remember(searchable, query) {
+    derivedStateOf {
+      searchable.filter { it.matches(query) }
+    }
+  }
   var selectedItems by remember { mutableStateOf(setOf<FoodItem>()) }
   AnimatedVisibility(
     visible = visible,
@@ -70,7 +76,6 @@ fun ItemSearchOverlay(
       selectedItems = setOf()
       onComplete(Result.failure(Throwable("Dismissed")))
     }
-    var query by rememberSaveable { mutableStateOf("") }
     Surface(
       Modifier
         .fillMaxSize()
@@ -138,30 +143,18 @@ fun ItemSearchOverlay(
               Spacer(Modifier.size(8.dp))
             }
           }
-          items(searchable) {
-            val matches by remember {
-              derivedStateOf {
-                when {
-                  query.isEmpty() -> {
-                    true
-                  }
-
-                  else -> fuzzyMatch(it.name, query)
-                }
-              }
-            }
-            AnimatedVisibility(matches) {
-              ElevatedCard(
-                Modifier
-                  .padding(4.dp)
-              ) {
-                ItemCard(
-                  modifier = Modifier.clickable {
-                    selectedItems = selectedItems + it
-                  },
-                  item = it
-                )
-              }
+          items(filteredItems) {
+            ElevatedCard(
+              Modifier
+                .padding(4.dp)
+                .animateItem(tween(500), tween(500), tween(500))
+            ) {
+              ItemCard(
+                modifier = Modifier.clickable {
+                  selectedItems = selectedItems + it
+                },
+                item = it
+              )
             }
           }
         }

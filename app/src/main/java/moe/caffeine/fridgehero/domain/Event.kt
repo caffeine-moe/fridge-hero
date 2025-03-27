@@ -84,4 +84,9 @@ sealed class Event {
   data class RequestExternalImage(
     val result: CompletableDeferred<Result<ByteArray>> = CompletableDeferred()
   ) : Event()
+
+  data class FindPotentialMatches(
+    val foodItem: FoodItem,
+    val result: CompletableDeferred<Result<List<FoodItem>>> = CompletableDeferred()
+  ) : Event()
 }

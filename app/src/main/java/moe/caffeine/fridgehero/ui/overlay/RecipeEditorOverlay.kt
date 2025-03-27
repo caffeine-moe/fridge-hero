@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,11 +20,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Recipe
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 import moe.caffeine.fridgehero.ui.component.FloatingActionBar
 import moe.caffeine.fridgehero.ui.component.ImageCard
@@ -136,17 +143,78 @@ fun RecipeEditorOverlay(
                   }
                 }
               }
-              Column {
-                editableRecipe.ingredients.forEach {
-                  ActionableSwipeToDismissBox(
-                    startToEndColor = Color.Transparent,
-                    startToEndIcon = null,
-                    onEndToStartAction = {
-                      editableRecipe =
-                        editableRecipe.copy(ingredients = editableRecipe.ingredients - it)
+              LazyColumn(Modifier.height(260.dp)) {
+                items(editableRecipe.ingredients.toList(), key = { it.realmId }) { foodItem ->
+                  var expanded by rememberSaveable { mutableStateOf(false) }
+                  var potentialMatches: List<FoodItem> by rememberSaveable {
+                    mutableStateOf(
+                      listOf()
+                    )
+                  }
+                  Box(Modifier.padding(4.dp)) {
+                    ActionableSwipeToDismissBox(
+                      startToEndColor = Color.Transparent,
+                      startToEndIcon = null,
+                      onEndToStartAction = {
+                        potentialMatches = listOf()
+                        expanded = false
+                        editableRecipe =
+                          editableRecipe.copy(ingredients = editableRecipe.ingredients - foodItem)
+                      }
+                    ) {
+                      Box(Modifier.fillMaxSize()) {
+
+                        ItemCard(
+                          elevation = CardDefaults.elevatedCardElevation(4.dp),
+                          item = foodItem, expanded = expanded,
+                          extraContent = {
+                            if (foodItem.isRemoved) {
+                              LaunchedEffect(Unit) {
+                                Event.FindPotentialMatches(foodItem).apply(emitEvent).result.await()
+                                  .onSuccess {
+                                    potentialMatches = it
+                                  }
+                              }
+                              Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
+                                TextButton(
+                                  onClick = {
+                                    if (potentialMatches.isNotEmpty()) {
+                                      expanded = !expanded
+                                    }
+                                  },
+                                ) {
+                                  Icon(Icons.Filled.Warning, null)
+                                  Spacer(Modifier.size(4.dp))
+                                  Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    softWrap = true,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    text = "Item not found in fridge" +
+                                            (if (potentialMatches.isNotEmpty())
+                                              ", click to view potential replacements"
+                                            else "") + "."
+                                  )
+                                }
+                              }
+                            }
+                          }) {
+                          potentialMatches.forEach {
+                            Column {
+                              Box(Modifier.padding(4.dp)) {
+                                ItemCard(item = it)
+                              }
+                            }
+                          }
+                        }
+
+                        Box(
+                          Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxSize()
+                        ) {
+                        }
+                      }
                     }
-                  ) {
-                    ItemCard(item = it)
                   }
                 }
               }

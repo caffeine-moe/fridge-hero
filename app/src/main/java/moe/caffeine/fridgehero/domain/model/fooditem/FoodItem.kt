@@ -13,6 +13,9 @@ import io.realm.kotlin.ext.toRealmSet
 import moe.caffeine.fridgehero.R
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.realm.RealmNutrimentEntry
+import moe.caffeine.fridgehero.domain.helper.expiryImminent
+import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
+import moe.caffeine.fridgehero.domain.helper.isExpired
 import moe.caffeine.fridgehero.domain.mapping.MappableModel
 import moe.caffeine.fridgehero.domain.model.DomainModel
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
@@ -38,6 +41,14 @@ data class FoodItem(
 
   val isSaved: Boolean
     get() = realmId.isNotBlank()
+
+  val isExpired: Boolean
+    get() = expiryDates.filterNot { it == -1L }
+      .any { it.isExpired() }
+
+  val expiresSoon: Boolean
+    get() = expiryDates.filterNot { it == -1L }
+      .any { it.expiryImminent() }
 
   val imageBitmap: ImageBitmap
     get() = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
@@ -169,3 +180,9 @@ data class FoodItem(
     }
 
 }
+
+fun FoodItem.matches(query: String): Boolean =
+  query.isBlank() || (fuzzyMatch(this.name, query) ||
+          this.categories.any {
+            fuzzyMatch(it, query)
+          })

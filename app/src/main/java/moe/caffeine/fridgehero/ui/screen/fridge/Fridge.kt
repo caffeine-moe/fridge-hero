@@ -2,10 +2,8 @@ package moe.caffeine.fridgehero.ui.screen.fridge
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,8 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
-import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.matches
 import moe.caffeine.fridgehero.ui.component.ActionableSwipeToDismissBox
 import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemCard
@@ -44,48 +42,41 @@ fun Fridge(
   emitEvent: (Event) -> Unit,
 ) {
   val fridge by foodItems.collectAsStateWithLifecycle()
+  val currentQuery by rememberUpdatedState(query)
+  val filteredItems by remember(fridge, currentQuery) {
+    derivedStateOf {
+      fridge.filter { it.matches(currentQuery) }
+    }
+  }
   val scope = rememberCoroutineScope()
   val focusManager = LocalFocusManager.current
   BackHandler {
     focusManager.clearFocus()
   }
+
   LazyColumn(
     modifier = Modifier
       .fillMaxSize()
       .padding(4.dp)
-      .animateContentSize(tween(500)),
   ) {
     items(
-      fridge,
+      filteredItems,
       key = { it.realmId }
     ) { listFoodItem ->
       val currentFoodItem by rememberUpdatedState(newValue = listFoodItem)
-      val currentQuery by rememberUpdatedState(newValue = query)
       val showHidden by rememberUpdatedState(newValue = searchBarHasFocus)
-      val matches by remember(currentQuery) {
-        derivedStateOf {
-          {
-            if (currentQuery.isEmpty())
-              showHidden || !currentFoodItem.isRemoved
-            else {
-              fuzzyMatch(currentFoodItem.name, currentQuery)
-            }
-          }
-        }
-      }
+
       AnimatedVisibility(
         modifier = Modifier
           .animateItem(tween(500), tween(500), tween(500)),
-        visible = matches(),
-        exit = slideOutHorizontally(
-          tween(500),
-          targetOffsetX = { -it },
-        ) + fadeOut(tween(500))
+        visible = showHidden || !currentFoodItem.isRemoved,
+        exit = fadeOut(tween(500))
       ) {
         ElevatedCard(
           Modifier
             .padding(4.dp)
         ) {
+          var expanded by rememberSaveable { mutableStateOf(false) }
           ActionableSwipeToDismissBox(
             modifier = Modifier
               .animateItem(tween(500), tween(500), tween(500)),
@@ -97,12 +88,12 @@ fun Fridge(
               }
             },
             onEndToStartAction = {
+              expanded = false
               Event.SoftRemoveFoodItem(currentFoodItem)
                 .apply(emitEvent)
             },
             enableEndToStartDismiss = !currentFoodItem.isRemoved
           ) {
-            var expanded by rememberSaveable { mutableStateOf(false) }
             ItemCard(
               modifier = Modifier
                 .animateItem(tween(500), tween(500), tween(500))
