@@ -186,7 +186,9 @@ fun ItemSheetOverlay(
                   ExpiryEditor(
                     editableFoodItem.expiryDates,
                     onRequestExpiry = {
-                      Event.RequestDateFromPicker().apply(emitEvent)
+                      Event.RequestDateFromPicker {
+                        apply(it)
+                      }.apply(emitEvent)
                     },
                     small = !expiryEditorExpanded,
                     onShowMore = {
