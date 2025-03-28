@@ -83,16 +83,15 @@ fun MainScaffold(
             scope.launch {
               when (currentScreenIndex) {
                 //fridge
-                1 -> Event.RequestItemSheet()
-                  .apply(emitEvent).result.await()
-                  .onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                1 -> Event.RequestItemSheet {
+                  onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                }.apply(emitEvent)
 
                 //recipes
-                2 -> {
-                  Event.RequestRecipeEditor()
-                    .apply(emitEvent).result.await()
-                    .onSuccess { Event.UpsertRecipe(it).apply(emitEvent) }
-                }
+                2 -> Event.RequestRecipeEditor {
+                  onSuccess { Event.UpsertRecipe(it).apply(emitEvent) }
+                }.apply(emitEvent)
+
               }
             }
           }

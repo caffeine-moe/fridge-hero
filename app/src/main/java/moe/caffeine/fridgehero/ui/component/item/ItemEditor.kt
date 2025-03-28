@@ -68,7 +68,7 @@ fun ItemEditor(
   readOnly: Boolean = false,
   compact: Boolean = false,
   onScannerRequest: suspend () -> Unit = {},
-  onImageRequest: suspend () -> Result<ByteArray>,
+  onImageRequest: suspend () -> Unit = {},
   onValueChanged: (FoodItem) -> Unit = {}
 ) {
   val scope = rememberCoroutineScope()
@@ -143,9 +143,9 @@ fun ItemEditor(
                     .clickable {
 
                       scope.launch {
-                        onImageRequest().onSuccess {
+/*                        onImageRequest().onSuccess {
                           onValueChanged(foodItem.copy(imageByteArray = it))
-                        }
+                        }*/
                       }
                     },
                   foodItem.imageByteArray

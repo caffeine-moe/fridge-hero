@@ -131,35 +131,36 @@ class MainViewModel : ViewModel() {
               Result.failure(failure)
             }
           )
-          event.result.complete(result)
+          event.onResult(result)
         }
 
         //food item
 
         is Event.RequestNutrimentBreakdown ->
           if (event.items.isEmpty())
-            event.result.complete(
+            event.onResult(
               Result.failure(Throwable("Need to request breakdown of at least one item."))
             )
           else
-            event.result.complete(Result.success(breakDownNutriments(event.items)))
+            event.onResult(Result.success(breakDownNutriments(event.items)))
 
         is Event.UpsertFoodItem ->
-          upsertDomainModelAndComplete(event.foodItem, event.result)
+          repository.upsertDomainModel(event.foodItem).also { event.onResult(it) }
 
         is Event.SoftRemoveFoodItem ->
-          upsertDomainModelAndComplete(event.foodItem.copy(expiryDates = listOf()), event.result)
+          repository.upsertDomainModel(event.foodItem.copy(expiryDates = listOf()))
+            .also { event.onResult(it) }
 
         is Event.DeleteFoodItem ->
-          deleteDomainModelAndComplete(event.foodItem, event.result)
+          repository.deleteDomainModel(event.foodItem).also { event.onResult(it) }
 
         //recipe
 
         is Event.UpsertRecipe ->
-          upsertDomainModelAndComplete(event.recipe, event.result)
+          repository.upsertDomainModel(event.recipe).also { event.onResult(it) }
 
         is Event.FindPotentialMatches ->
-          event.result.complete(Result.success(findPotentialMatches(event.foodItem)))
+          event.onResult(Result.success(findPotentialMatches(event.foodItem)))
 
         else -> return@onEach
       }

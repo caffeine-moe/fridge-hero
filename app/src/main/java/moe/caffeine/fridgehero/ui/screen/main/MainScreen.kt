@@ -55,7 +55,7 @@ fun MainScreen(
 
   //item search overlay
   var showItemSearch by rememberSaveable { mutableStateOf(false) }
-  var itemSearchRequest by remember { mutableStateOf(Event.RequestItemFromSearch()) }
+  var itemSearchRequest by remember { mutableStateOf(Event.RequestItemsFromSearch()) }
 
   //fullscreen item
   var fullScreenItem by rememberSaveable { mutableStateOf<FoodItem?>(null) }
@@ -124,7 +124,7 @@ fun MainScreen(
     emitEvent = emitEvent,
     onComplete = {
       showRecipeEditor = false
-      recipeEditorRequest.result.complete(it)
+      recipeEditorRequest.onResult(it)
     }
   )
 
@@ -136,7 +136,7 @@ fun MainScreen(
   DatePickerModalOverlay(
     visible = showDatePicker,
     onComplete = { result ->
-      datePickerRequest.result.complete(result)
+      datePickerRequest.onResult(result)
       showDatePicker = false
       datePickerRequest = Event.RequestDateFromPicker()
     }
@@ -145,7 +145,7 @@ fun MainScreen(
   ScannerOverlay(
     visible = barcodeScanRequest != null,
     onComplete = { result ->
-      barcodeScanRequest?.result?.complete(result)
+      barcodeScanRequest?.onResult?.let { it(result) }
       barcodeScanRequest = null
     },
   )
@@ -157,7 +157,7 @@ fun MainScreen(
     emitEvent = emitEvent,
     expiryEditorExpandedInitial = itemBottomSheetRequest.expiryEditorExpanded,
     onComplete = { result ->
-      itemBottomSheetRequest.result.complete(result)
+      itemBottomSheetRequest.onResult(result)
       itemBottomSheetRequest = Event.RequestItemSheet()
     }
   )
@@ -167,7 +167,7 @@ fun MainScreen(
     foodItems = foodItems,
     onComplete = {
       showItemSearch = false
-      itemSearchRequest.result.complete(it)
+      itemSearchRequest.onResult(it)
     }
   )
 }

@@ -129,10 +129,12 @@ fun RecipeEditorOverlay(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     onClick = {
                       scope.launch {
-                        Event.RequestItemFromSearch().also(emitEvent).result.await().onSuccess {
-                          editableRecipe =
-                            editableRecipe.copy(ingredients = editableRecipe.ingredients + it)
-                        }
+                        Event.RequestItemsFromSearch {
+                          onSuccess {
+                            editableRecipe =
+                              editableRecipe.copy(ingredients = editableRecipe.ingredients + it)
+                          }
+                        }.also(emitEvent)
                       }
                     }
                   ) {
@@ -170,10 +172,11 @@ fun RecipeEditorOverlay(
                           extraContent = {
                             if (foodItem.isRemoved) {
                               LaunchedEffect(Unit) {
-                                Event.FindPotentialMatches(foodItem).apply(emitEvent).result.await()
-                                  .onSuccess {
+                                Event.FindPotentialMatches(foodItem) {
+                                  onSuccess {
                                     potentialMatches = it
                                   }
+                                }
                               }
                               Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
                                 TextButton(
@@ -262,8 +265,10 @@ fun RecipeEditorOverlay(
               .fillMaxWidth()
               .clickable {
                 scope.launch {
-                  Event.RequestExternalImage().apply(emitEvent).result.await().onSuccess {
-                    editableRecipe = editableRecipe.copy(imageByteArray = it)
+                  Event.RequestExternalImage {
+                    onSuccess {
+                      editableRecipe = editableRecipe.copy(imageByteArray = it)
+                    }
                   }
                 }
               },

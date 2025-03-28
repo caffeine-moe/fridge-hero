@@ -28,12 +28,11 @@ fun Recipes(
       val currentRecipe by rememberUpdatedState(recipe)
       RecipeCard(currentRecipe) {
         scope.launch {
-          Event.RequestRecipeEditor(currentRecipe)
-            .apply(emitEvent)
-            .result.await()
-            .onSuccess {
+          Event.RequestRecipeEditor(currentRecipe) {
+            onSuccess {
               Event.UpsertRecipe(it).apply(emitEvent)
             }
+          }.apply(emitEvent)
         }
       }
     }

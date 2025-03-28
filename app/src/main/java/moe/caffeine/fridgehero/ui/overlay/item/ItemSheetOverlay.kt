@@ -77,17 +77,20 @@ fun ItemSheetOverlay(
     if (editableFoodItem.isSaved) return
     scope.launch {
       sheetState.hide()
-      Event.RequestFoodItemFromBarcode(
-        (Event.RequestBarcodeFromScanner()
-          .apply(emitEvent).result.await()
-          .also { sheetState.expand() }
-          .onSuccess { barcode ->
-            editableFoodItem = editableFoodItem.copy(barcode = barcode)
-          }.getOrNull() ?: return@launch)
-      ).apply(emitEvent).result.await()
-        .onSuccess { retrievedItem ->
-          editableFoodItem = retrievedItem
-        }
+    }
+    var barcode: String? = null
+    Event.RequestBarcodeFromScanner {
+      also { scope.launch { sheetState.expand() } }
+      onSuccess { barcodeResult ->
+        barcode = barcodeResult
+        editableFoodItem = editableFoodItem.copy(barcode = barcodeResult)
+      }.getOrNull() ?: return@RequestBarcodeFromScanner
+    }.apply(emitEvent)
+
+    Event.RequestFoodItemFromBarcode(barcode ?: return) {
+      onSuccess { retrievedItem ->
+        editableFoodItem = retrievedItem
+      }
     }
   }
 
@@ -173,9 +176,7 @@ fun ItemSheetOverlay(
                   onScannerRequest = {
                     barcodeAction()
                   },
-                  onImageRequest = {
-                    Event.RequestExternalImage().apply(emitEvent).result.await()
-                  },
+                  onImageRequest = {},
                   onValueChanged = { editedFoodItem ->
                     editableFoodItem = editedFoodItem
                   }
@@ -185,7 +186,7 @@ fun ItemSheetOverlay(
                   ExpiryEditor(
                     editableFoodItem.expiryDates,
                     onRequestExpiry = {
-                      Event.RequestDateFromPicker().apply(emitEvent).result.await()
+                      Event.RequestDateFromPicker().apply(emitEvent)
                     },
                     small = !expiryEditorExpanded,
                     onShowMore = {

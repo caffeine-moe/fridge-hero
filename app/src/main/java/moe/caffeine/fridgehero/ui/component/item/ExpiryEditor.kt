@@ -38,7 +38,7 @@ fun ExpiryEditor(
   readOnly: Boolean = false,
   small: Boolean = false,
   onShowMore: () -> Unit,
-  onRequestExpiry: suspend () -> Result<Long>,
+  onRequestExpiry: suspend (Result<Long>.() -> Unit) -> Unit,
   onListChanged: (List<Long>) -> Unit
 ) {
   val scope = rememberCoroutineScope()
@@ -58,8 +58,10 @@ fun ExpiryEditor(
           enabled = !readOnly,
           onClick = {
             scope.launch {
-              onRequestExpiry().onSuccess { date ->
-                onListChanged(currentExpiryDates + date)
+              onRequestExpiry {
+                onSuccess { date ->
+                  onListChanged(currentExpiryDates + date)
+                }
               }
             }
           }
@@ -83,8 +85,10 @@ fun ExpiryEditor(
             ActionableSwipeToDismissBox(
               modifier = Modifier.clickable {
                 scope.launch {
-                  onRequestExpiry().onSuccess {
-                    onListChanged(currentExpiryDates.toMutableList().apply { set(index, it) })
+                  onRequestExpiry {
+                    onSuccess {
+                      onListChanged(currentExpiryDates.toMutableList().apply { set(index, it) })
+                    }
                   }
                 }
               },

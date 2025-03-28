@@ -82,9 +82,10 @@ fun Fridge(
               .animateItem(tween(500), tween(500), tween(500)),
             onStartToEndAction = {
               scope.launch {
-                Event.RequestItemSheet(currentFoodItem)
-                  .apply(emitEvent).result.await()
-                  .onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                Event.RequestItemSheet(currentFoodItem) {
+                  onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                }
+                  .apply(emitEvent)
               }
             },
             onEndToStartAction = {
@@ -113,14 +114,15 @@ fun Fridge(
                 expiryDates = currentFoodItem.expiryDates,
                 onRequestExpiry = {
                   Event.RequestDateFromPicker()
-                    .apply(emitEvent).result.await()
+                    .apply(emitEvent)
                 },
                 small = true,
                 onShowMore = {
                   scope.launch {
-                    Event.RequestItemSheet(currentFoodItem, expiryEditorExpanded = true)
-                      .apply(emitEvent).result.await()
-                      .onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                    Event.RequestItemSheet(currentFoodItem, expiryEditorExpanded = true) {
+                      onSuccess { Event.UpsertFoodItem(it).apply(emitEvent) }
+                    }
+                      .apply(emitEvent)
                   }
                 },
                 onListChanged = { changedList ->

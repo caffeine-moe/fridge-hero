@@ -23,7 +23,10 @@ fun ItemFull(
     Column {
       Text(foodItem.name)
       TextButton(onDismiss) { Text("Back") }
-      ItemEditor(foodItem, readOnly = true, onImageRequest = { Result.failure(Throwable("Ball")) })
+      ItemEditor(
+        foodItem,
+        readOnly = true
+      )
     }
   }
 }
