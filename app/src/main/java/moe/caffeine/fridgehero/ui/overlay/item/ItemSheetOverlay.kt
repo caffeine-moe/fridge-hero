@@ -1,5 +1,6 @@
 package moe.caffeine.fridgehero.ui.overlay.item
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -73,25 +74,30 @@ fun ItemSheetOverlay(
   val visibleButNotExpanded =
     sheetState.isVisible && sheetState.currentValue != SheetValue.Expanded
 
+  BackHandler {
+    scope.launch {
+      sheetState.hide()
+    }
+  }
+
   fun barcodeAction() {
     if (editableFoodItem.isSaved) return
     scope.launch {
       sheetState.hide()
     }
-    var barcode: String? = null
     Event.RequestBarcodeFromScanner {
       also { scope.launch { sheetState.expand() } }
-      onSuccess { barcodeResult ->
-        barcode = barcodeResult
-        editableFoodItem = editableFoodItem.copy(barcode = barcodeResult)
-      }.getOrNull() ?: return@RequestBarcodeFromScanner
+      (onSuccess {
+        editableFoodItem = editableFoodItem.copy(barcode = it)
+      }.getOrNull() ?: return@RequestBarcodeFromScanner)
+        .also { barcode ->
+          Event.RequestFoodItemFromBarcode(barcode) {
+            getOrNull()?.let {
+              editableFoodItem = it
+            } ?: return@RequestFoodItemFromBarcode
+          }.apply(emitEvent)
+        }
     }.apply(emitEvent)
-
-    Event.RequestFoodItemFromBarcode(barcode ?: return) {
-      onSuccess { retrievedItem ->
-        editableFoodItem = retrievedItem
-      }
-    }
   }
 
   val actions: List<Pair<String, () -> Unit>> = listOf(
@@ -185,8 +191,8 @@ fun ItemSheetOverlay(
                 ElevatedCard {
                   ExpiryEditor(
                     editableFoodItem.expiryDates,
-                    onRequestExpiry = {
-                      Event.RequestDateFromPicker {
+                    onRequestExpiry = { prefill, it ->
+                      Event.RequestDateFromPicker(prefill) {
                         apply(it)
                       }.apply(emitEvent)
                     },

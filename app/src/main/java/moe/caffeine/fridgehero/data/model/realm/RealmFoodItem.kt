@@ -20,6 +20,7 @@ import org.mongodb.kbson.BsonObjectId
 class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
   @PrimaryKey
   override var realmObjectId: BsonObjectId = BsonObjectId()
+  var isFromRecipe: Boolean = false
 
   var name: String = ""
   var brand: String = ""
@@ -55,7 +56,8 @@ class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
       nutriScore = NutriScore.enumByLetter(nutriScore),
       nutriments = nutriments.associate {
         Nutriment.valueOf(it.nutriment) to it.value
-      }
+      },
+      isFromRecipe
     )
 
   override fun toRealmModel(): RealmFoodItem = this

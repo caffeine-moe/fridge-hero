@@ -43,6 +43,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import moe.caffeine.fridgehero.domain.helper.toDate
 import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,7 @@ import kotlin.time.Duration.Companion.days
 fun DatePickerModalOverlay(
   modifier: Modifier = Modifier,
   visible: Boolean = false,
+  prefill: Long? = null,
   onComplete: (Result<Long>) -> Unit,
 ) {
   val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -121,6 +123,9 @@ fun DatePickerModalOverlay(
             selectedValues[1].value = updatedDate.monthNumber.toString().padStart(2, '0')
             selectedValues[2].value = updatedDate.year.toString()
           }
+
+          if (prefill != null)
+            updateSelection(prefill.toDate())
 
           @Composable
           fun Preset(days: Int, label: String) {

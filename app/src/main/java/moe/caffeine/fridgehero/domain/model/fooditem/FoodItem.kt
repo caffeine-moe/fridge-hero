@@ -1,11 +1,8 @@
 package moe.caffeine.fridgehero.domain.model.fooditem
 
-import android.graphics.BitmapFactory
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import io.realm.kotlin.ext.toRealmList
@@ -34,6 +31,7 @@ data class FoodItem(
   val novaGroup: NovaGroup = NovaGroup.UNKNOWN,
   val nutriScore: NutriScore = NutriScore.UNKNOWN,
   val nutriments: Map<Nutriment, String> = mapOf(),
+  val isFromRecipe: Boolean = false,
 ) : DomainModel, MappableModel<FoodItem, RealmFoodItem>, Parcelable {
 
   val isRemoved: Boolean
@@ -50,13 +48,8 @@ data class FoodItem(
     get() = expiryDates.filterNot { it == -1L }
       .any { it.expiryImminent() }
 
-  val imageBitmap: ImageBitmap
-    get() = BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.size)
-      .asImageBitmap()
-
-  val novaGroupVectorPainter: Painter
-    @Composable
-    get() = painterResource(
+  val novaGroupPainter: @Composable () -> Painter = @Composable {
+    painterResource(
       when (novaGroup) {
         NovaGroup.UNPROCESSED -> R.drawable.nova_group_1
         NovaGroup.PROCESSED_INGREDIENTS -> R.drawable.nova_group_2
@@ -65,10 +58,10 @@ data class FoodItem(
         else -> R.drawable.nova_group_unknown
       }
     )
+  }
 
-  val nutriScoreVectorPainter: Painter
-    @Composable
-    get() = painterResource(
+  val nutriScorePainter: @Composable () -> Painter = @Composable {
+    painterResource(
       when (nutriScore) {
         NutriScore.A -> R.drawable.nutriscore_a
         NutriScore.B -> R.drawable.nutriscore_b
@@ -78,6 +71,7 @@ data class FoodItem(
         else -> R.drawable.nutriscore_unknown
       }
     )
+  }
 
   override fun toDomainModel() = this
 
@@ -173,7 +167,9 @@ data class FoodItem(
           nutriment = it.key.name
           value = it.value
         }
-      })
+      }
+      )
+      isFromRecipe = this@FoodItem.isFromRecipe
       /*    categories = this@toRealmModel.categories.map {
             it.toRealmModel(realm)
           }.toRealmList()*/

@@ -8,6 +8,7 @@ import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 sealed class Event {
   // Launches a date picker from anywhere
   data class RequestDateFromPicker(
+    val prefill: Long? = null,
     val onResult: Result<Long>.() -> Unit = {}
   ) : Event()
 
@@ -72,6 +73,12 @@ sealed class Event {
   data class UpsertRecipe(
     val recipe: Recipe,
     val onResult: Result<Recipe>.() -> Unit = {}
+  ) : Event()
+
+  //creates a leftover from a recipe
+  data class CreateLeftOver(
+    val recipe: Recipe,
+    val onResult: Result<FoodItem>.() -> Unit = {}
   ) : Event()
 
   // Tells the main composable to display a short toast with the message

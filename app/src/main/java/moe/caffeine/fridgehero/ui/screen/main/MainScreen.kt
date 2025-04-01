@@ -135,6 +135,7 @@ fun MainScreen(
 
   DatePickerModalOverlay(
     visible = showDatePicker,
+    prefill = datePickerRequest.prefill,
     onComplete = { result ->
       datePickerRequest.onResult(result)
       showDatePicker = false

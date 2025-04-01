@@ -281,6 +281,21 @@ fun RecipeEditorOverlay(
               .align(Alignment.BottomStart)
               .padding(8.dp)
           )
+          TextButton(
+            modifier = Modifier
+              .align(Alignment.BottomEnd),
+            onClick = {
+              Event.CreateLeftOver(editableRecipe).apply(emitEvent)
+            }
+          ) {
+            Icon(
+              imageVector = Icons.Filled.Add,
+              contentDescription = "Add to fridge"
+            )
+            Text(
+              "Add to fridge"
+            )
+          }
         }
       }
 

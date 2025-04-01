@@ -167,7 +167,7 @@ fun ItemEditor(
                   ) {
                     Image(
                       modifier = Modifier.fillMaxWidth(0.4f),
-                      painter = foodItem.nutriScoreVectorPainter,
+                      painter = foodItem.nutriScorePainter(),
                       contentDescription = "NutriScore"
                     )
                   }
@@ -278,7 +278,7 @@ fun ItemEditor(
                 modifier = Modifier
                   .width(80.dp)
                   .aspectRatio(1f),
-                painter = foodItem.novaGroupVectorPainter,
+                painter = foodItem.novaGroupPainter(),
                 contentDescription = "Nova Group"
               )
             }

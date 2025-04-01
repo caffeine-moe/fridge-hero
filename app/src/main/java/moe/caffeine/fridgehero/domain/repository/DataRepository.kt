@@ -21,7 +21,7 @@ interface DataRepository {
 
   //initialisation
   suspend fun initialise()
-  
+
   //profile interactions
   fun getProfileAsFlow(): Flow<Result<Profile>?>
 
@@ -33,5 +33,5 @@ interface DataRepository {
 
   //recipe interactions
   fun getAllRecipesAsFlow(): Flow<List<Recipe>>
-  suspend fun getRecipeById(objectId: BsonObjectId): Result<Recipe>
+  fun getLeftOverFromRecipe(recipe: Recipe): Result<FoodItem>
 }

@@ -206,9 +206,10 @@ class DataRepositoryImpl(
       .transform { recipes -> emit(recipes.map { it.toDomainModel() }) }
       .flowOn(Dispatchers.IO)
 
-  override suspend fun getRecipeById(objectId: BsonObjectId): Result<Recipe> {
-    TODO("Not yet implemented")
-  }
+  override fun getLeftOverFromRecipe(recipe: Recipe): Result<FoodItem> =
+    Result.success(
+      recipe.toRealmModel().leftOver(realm).toDomainModel()
+    )
 }
 
 suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>> DataRepository.upsertDomainModel(

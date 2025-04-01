@@ -112,8 +112,8 @@ fun Fridge(
             ) {
               ExpiryEditor(
                 expiryDates = currentFoodItem.expiryDates,
-                onRequestExpiry = {
-                  Event.RequestDateFromPicker {
+                onRequestExpiry = { prefill, it ->
+                  Event.RequestDateFromPicker(prefill) {
                     apply(it)
                   }.apply(emitEvent)
                 },

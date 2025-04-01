@@ -92,7 +92,7 @@ fun ItemCard(
               ) {
                 Image(
                   modifier = Modifier.width(50.dp),
-                  painter = item.nutriScoreVectorPainter,
+                  painter = item.nutriScorePainter(),
                   contentDescription = "NutriScore"
                 )
               }

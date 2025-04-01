@@ -2,8 +2,6 @@ package moe.caffeine.fridgehero.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.realm.kotlin.types.RealmObject
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +12,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.plus
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
 import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
@@ -21,9 +22,8 @@ import moe.caffeine.fridgehero.data.repository.deleteDomainModel
 import moe.caffeine.fridgehero.data.repository.upsertDomainModel
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
+import moe.caffeine.fridgehero.domain.helper.toInstant
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
-import moe.caffeine.fridgehero.domain.mapping.MappableModel
-import moe.caffeine.fridgehero.domain.model.DomainModel
 import moe.caffeine.fridgehero.domain.model.NutrimentBreakdown
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
@@ -46,26 +46,6 @@ class MainViewModel : ViewModel() {
       started = SharingStarted.WhileSubscribed(5000),
       initialValue = Result.failure(Throwable("No profile found."))
     )
-
-  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>>
-          upsertDomainModelAndComplete(
-    model: M,
-    completable: CompletableDeferred<Result<D>>
-  ) {
-    completable.complete(
-      repository.upsertDomainModel(model)
-    )
-  }
-
-  private suspend inline fun <D : DomainModel, reified R : RealmObject, M : MappableModel<D, R>>
-          deleteDomainModelAndComplete(
-    model: M,
-    completable: CompletableDeferred<Result<D>>
-  ) {
-    completable.complete(
-      repository.deleteDomainModel(model)
-    )
-  }
 
   fun upsertProfile(profile: Profile) =
     viewModelScope.launch { repository.upsertDomainModel(profile) }
@@ -144,12 +124,22 @@ class MainViewModel : ViewModel() {
           else
             event.onResult(Result.success(breakDownNutriments(event.items)))
 
-        is Event.UpsertFoodItem ->
+        is Event.UpsertFoodItem -> {
+          if (event.foodItem.isFromRecipe && event.foodItem.expiryDates.isEmpty()) {
+            repository.deleteDomainModel(event.foodItem).also { event.onResult(it) }
+            return@onEach
+          }
           repository.upsertDomainModel(event.foodItem).also { event.onResult(it) }
+        }
 
-        is Event.SoftRemoveFoodItem ->
+        is Event.SoftRemoveFoodItem -> {
+          if (event.foodItem.isFromRecipe) {
+            repository.deleteDomainModel(event.foodItem).also { event.onResult(it) }
+            return@onEach
+          }
           repository.upsertDomainModel(event.foodItem.copy(expiryDates = listOf()))
             .also { event.onResult(it) }
+        }
 
         is Event.DeleteFoodItem ->
           repository.deleteDomainModel(event.foodItem).also { event.onResult(it) }
@@ -158,6 +148,25 @@ class MainViewModel : ViewModel() {
 
         is Event.UpsertRecipe ->
           repository.upsertDomainModel(event.recipe).also { event.onResult(it) }
+
+        is Event.CreateLeftOver -> {
+          val threeDays = Clock.System.now()
+            .toEpochMilliseconds()
+            .toInstant()
+            .plus((24 * 3), DateTimeUnit.HOUR)
+          repository.getLeftOverFromRecipe(event.recipe).onSuccess {
+            repository.upsertDomainModel(
+              it.copy(
+                expiryDates = it.expiryDates + threeDays.toEpochMilliseconds()
+              )
+            )
+          }
+          emitEvent(
+            Event.DisplayToast(
+              "Added ${event.recipe.name} to fridge."
+            )
+          )
+        }
 
         is Event.FindPotentialMatches ->
           event.onResult(Result.success(findPotentialMatches(event.foodItem)))
