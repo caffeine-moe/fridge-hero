@@ -17,11 +17,12 @@ import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.screen.home.component.AvailableRecipes
 import moe.caffeine.fridgehero.ui.screen.home.component.ExpiringSoon
 import moe.caffeine.fridgehero.ui.screen.home.component.Greeting
+import moe.caffeine.fridgehero.ui.screen.home.component.stats.HeroStats
 
 @Composable
 fun Home(
   profile: Profile,
-  foodItems: StateFlow<List<FoodItem>>,
+  foodItemsFlow: StateFlow<List<FoodItem>>,
   recipesFlow: StateFlow<List<Recipe>>
 ) {
   val scrollState = rememberScrollState()
@@ -34,7 +35,8 @@ fun Home(
     horizontalAlignment = Alignment.Start
   ) {
     Greeting(profile.firstName)
-    ExpiringSoon(foodItems)
+    ExpiringSoon(foodItemsFlow)
     AvailableRecipes(recipesFlow)
+    HeroStats(foodItemsFlow, recipesFlow)
   }
 }

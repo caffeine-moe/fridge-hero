@@ -23,7 +23,7 @@ fun AvailableRecipes(
   if (recipes.isEmpty()) return
   val scrollState = rememberScrollState()
   Text(
-    modifier = Modifier.padding(top = 10.dp),
+    modifier = Modifier.padding(vertical = 8.dp),
     style = Typography.titleMedium,
     text = "Available Recipes"
   )
