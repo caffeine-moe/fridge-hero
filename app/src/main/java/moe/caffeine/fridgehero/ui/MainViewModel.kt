@@ -254,7 +254,7 @@ class MainViewModel(context: Context) : ViewModel() {
 
     workManager.enqueueUniquePeriodicWork(
       "daily_expiry_check",
-      ExistingPeriodicWorkPolicy.KEEP,
+      ExistingPeriodicWorkPolicy.UPDATE,
       request
     )
   }

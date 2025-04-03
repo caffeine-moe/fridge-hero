@@ -48,7 +48,7 @@ fun Long.readableDaysUntil(): String =
     when {
       this == -1L -> "Never."
       this.hoursUntil() in 0..24 -> "Tomorrow."
-      this.daysUntil() == 0 -> "Today."
+      this.daysUntil() == 1 -> "Today."
       else -> "${this.daysUntil()}d."
     }
   } else "Expired."
