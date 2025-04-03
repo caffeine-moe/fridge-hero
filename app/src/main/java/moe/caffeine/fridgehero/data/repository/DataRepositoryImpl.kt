@@ -131,6 +131,9 @@ class DataRepositoryImpl(
       }
       .flowOn(Dispatchers.IO)
 
+  override fun getAllFoodItemsAsList(): List<FoodItem> =
+    realm.fetchAllByType<RealmFoodItem>().map { it.toDomainModel() }
+
   override suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem> =
     withContext(Dispatchers.IO) {
       realm.fetchObjectById<RealmFoodItem>(objectId).fold(

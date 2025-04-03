@@ -27,6 +27,7 @@ interface DataRepository {
 
   //food item interactions
   fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>>
+  fun getAllFoodItemsAsList(): List<FoodItem>
   suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem>
   suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem>
   suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem>

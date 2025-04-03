@@ -31,7 +31,7 @@ fun Long.toReadableDate(): String =
     }
 
 fun Long.daysUntil(): Int =
-  Clock.System.now().daysUntil(this.toInstant(), TimeZone.currentSystemDefault())
+  Clock.System.now().daysUntil(this.toInstant(), TimeZone.currentSystemDefault()) + 1
 
 fun Long.hoursUntil(): Long =
   Clock.System.now().until(this.toInstant(), DateTimeUnit.HOUR)

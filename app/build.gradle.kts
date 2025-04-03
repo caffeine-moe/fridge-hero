@@ -51,6 +51,11 @@ android {
 }
 
 dependencies {
+  implementation(libs.androidx.espresso.core)
+  implementation(libs.androidx.work.runtime.ktx)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.androidx.appcompat)
+  implementation(libs.androidx.appcompat)
   coreLibraryDesugaring(libs.desugar.jdk.libs)
   implementation(libs.library.base) //mongodb realm
   implementation(libs.kotlinx.serialization.json)

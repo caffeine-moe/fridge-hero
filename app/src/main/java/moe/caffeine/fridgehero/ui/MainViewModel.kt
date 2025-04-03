@@ -1,7 +1,11 @@
 package moe.caffeine.fridgehero.ui
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +25,8 @@ import moe.caffeine.fridgehero.data.repository.DataRepositoryImpl
 import moe.caffeine.fridgehero.data.repository.deleteDomainModel
 import moe.caffeine.fridgehero.data.repository.upsertDomainModel
 import moe.caffeine.fridgehero.domain.Event
+import moe.caffeine.fridgehero.domain.ExpiryCheckWorker
+import moe.caffeine.fridgehero.domain.NotificationHelper
 import moe.caffeine.fridgehero.domain.helper.fuzzyMatch
 import moe.caffeine.fridgehero.domain.helper.toInstant
 import moe.caffeine.fridgehero.domain.initialisation.InitialisationStage
@@ -30,14 +36,19 @@ import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.domain.repository.DataRepository
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class MainViewModel : ViewModel() {
+class MainViewModel(context: Context) : ViewModel() {
   private val repository: DataRepository = DataRepositoryImpl(
     realmProvider = RealmProvider,
     openFoodFactsApi = OpenFoodFactsApi,
     viewModelScope
   )
+
+  private val workManager: WorkManager = WorkManager.getInstance(context)
+
 
   val profile: StateFlow<Result<Profile>?> = repository.getProfileAsFlow()
     .onStart { emit(null) }
@@ -97,6 +108,10 @@ class MainViewModel : ViewModel() {
     if (initialisationStage.value == InitialisationStage.None) {
       initialiseRepository()
     }
+    NotificationHelper(context).showExpiryNotification(
+      repository.getAllFoodItemsAsList()
+    )
+    scheduleDailyExpiryChecks()
     eventFlow.onEach { event ->
       when (event) {
         is Event.RequestFoodItemFromBarcode -> {
@@ -215,5 +230,32 @@ class MainViewModel : ViewModel() {
     }
 
     return NutrimentBreakdown(items, totals)
+  }
+
+  private fun calculateMillisTillMorning(): Long {
+    val now = Calendar.getInstance()
+    val morning = Calendar.getInstance().apply {
+      set(Calendar.HOUR_OF_DAY, 8)
+      set(Calendar.MINUTE, 0)
+    }
+
+    if (now.after(morning)) {
+      morning.add(Calendar.DAY_OF_MONTH, 1)
+    }
+
+    return morning.timeInMillis - now.timeInMillis
+  }
+
+  private fun scheduleDailyExpiryChecks() {
+    val request = PeriodicWorkRequestBuilder<ExpiryCheckWorker>(24, TimeUnit.HOURS)
+      .setInitialDelay(calculateMillisTillMorning(), TimeUnit.MILLISECONDS)
+      .addTag(ExpiryCheckWorker.WORK_TAG)
+      .build()
+
+    workManager.enqueueUniquePeriodicWork(
+      "daily_expiry_check",
+      ExistingPeriodicWorkPolicy.KEEP,
+      request
+    )
   }
 }
