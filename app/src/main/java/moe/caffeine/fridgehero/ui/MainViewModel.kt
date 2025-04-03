@@ -109,7 +109,7 @@ class MainViewModel(context: Context) : ViewModel() {
       initialiseRepository()
     }
     NotificationHelper(context).showExpiryNotification(
-      repository.getAllFoodItemsAsList()
+      repository.getAllFoodItemsAsList().filter { it.expiresSoon }
     )
     scheduleDailyExpiryChecks()
     eventFlow.onEach { event ->

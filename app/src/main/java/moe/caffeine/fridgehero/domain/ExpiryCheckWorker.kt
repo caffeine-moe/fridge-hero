@@ -36,9 +36,7 @@ class ExpiryCheckWorker(
     val toNotify =
       items.filter { it.expiresSoon && it.expiryDates.any { expiry -> expiry.expiryImminent() } }
 
-    notificationHelper.showExpiryNotification(
-      toNotify.filter { it.expiryDates.any { it.expiryImminent() } }
-    )
+    notificationHelper.showExpiryNotification(toNotify)
   }
 
   companion object {
