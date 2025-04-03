@@ -61,7 +61,7 @@ fun MainNavGraph(
   ) {
 
     composable(Screen.Home.route) {
-      Home(profile)
+      Home(profile, foodItems, recipes)
     }
     composable(Screen.Fridge.route) {
       Fridge(foodSearchQuery, searchBarHasFocus, foodItems, emitEvent)

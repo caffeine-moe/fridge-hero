@@ -6,8 +6,10 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.until
+import java.util.Calendar
 
 
 fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)
@@ -43,11 +45,21 @@ fun Long.isExpired(): Boolean =
   this.toDate().toEpochDays() - Clock.System.now().toEpochMilliseconds().toDate()
     .toEpochDays() < 0
 
+private fun hoursTillMidnight() =
+  Clock.System.now().until(
+    Calendar.getInstance().apply {
+      set(Calendar.HOUR_OF_DAY, 0)
+      set(Calendar.MINUTE, 0)
+      add(Calendar.DAY_OF_MONTH, 1)
+    }.toInstant().toKotlinInstant(),
+    DateTimeUnit.HOUR
+  )
+
 fun Long.readableDaysUntil(): String =
   if (!this.isExpired()) {
     when {
       this == -1L -> "Never."
-      this.hoursUntil() in 0..24 -> "Tomorrow."
+      this.hoursUntil() in 0..hoursTillMidnight() -> "Tomorrow."
       this.daysUntil() == 1 -> "Today."
       else -> "${this.daysUntil()}d."
     }

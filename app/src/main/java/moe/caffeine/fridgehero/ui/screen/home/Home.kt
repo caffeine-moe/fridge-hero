@@ -10,11 +10,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.StateFlow
 import moe.caffeine.fridgehero.domain.model.Profile
+import moe.caffeine.fridgehero.domain.model.Recipe
+import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.ui.screen.home.component.AvailableRecipes
+import moe.caffeine.fridgehero.ui.screen.home.component.ExpiringSoon
 import moe.caffeine.fridgehero.ui.screen.home.component.Greeting
 
 @Composable
-fun Home(profile: Profile) {
+fun Home(
+  profile: Profile,
+  foodItems: StateFlow<List<FoodItem>>,
+  recipesFlow: StateFlow<List<Recipe>>
+) {
   val scrollState = rememberScrollState()
   Column(
     modifier = Modifier
@@ -25,7 +34,7 @@ fun Home(profile: Profile) {
     horizontalAlignment = Alignment.Start
   ) {
     Greeting(profile.firstName)
-    //ExpiringSoon()
-    //AvailableRecipes()
+    ExpiringSoon(foodItems)
+    AvailableRecipes(recipesFlow)
   }
 }
