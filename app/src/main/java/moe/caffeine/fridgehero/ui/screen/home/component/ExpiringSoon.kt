@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,10 +26,19 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
 fun ExpiringSoon(
-  items: StateFlow<List<FoodItem>>
+  items: StateFlow<List<FoodItem>>,
+  onItemClick: (FoodItem) -> Unit
 ) {
   val fridge by items.collectAsStateWithLifecycle()
-  if (fridge.isEmpty()) return
+  val filteredFridge by remember {
+    derivedStateOf {
+      fridge
+        .filter { it.expiresSoon || it.isExpired }
+        .sortedBy { foodItem -> foodItem.expiryDates.filter { it != -1L }.min() }
+    }
+  }
+  if (fridge.isEmpty())
+    return
   val scrollState = rememberScrollState()
   Text(
     modifier = Modifier.padding(vertical = 8.dp),
@@ -37,14 +48,13 @@ fun ExpiringSoon(
   Row(
     modifier = Modifier.horizontalScroll(scrollState)
   ) {
-    fridge
-      .filter { it.expiresSoon && !it.isExpired }
-      .sortedBy { it.expiryDates.filter { it != -1L }.min() }
+    filteredFridge
       .forEach { item ->
         val date = item.expiryDates.min()
-        Card(
+        ElevatedCard(
           modifier = Modifier
-            .padding(8.dp)
+            .padding(8.dp),
+          onClick = { onItemClick(item) }
         ) {
           Box(
             Modifier

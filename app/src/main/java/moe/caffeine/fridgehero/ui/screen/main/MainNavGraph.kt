@@ -59,9 +59,8 @@ fun MainNavGraph(
       ) + fadeOut(tween(250))
     },
   ) {
-
     composable(Screen.Home.route) {
-      Home(profile, foodItems, recipes)
+      Home(profile, foodItems, recipes, emitEvent)
     }
     composable(Screen.Fridge.route) {
       Fridge(foodSearchQuery, searchBarHasFocus, foodItems, emitEvent)

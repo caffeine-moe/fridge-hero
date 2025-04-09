@@ -212,6 +212,8 @@ class MainViewModel(context: Context) : ViewModel() {
       }
 
   private fun breakDownNutriments(items: List<FoodItem>): NutrimentBreakdown {
+    val filtered =
+      items.filterNot { item -> item.nutriments.isEmpty() || item.nutriments.values.all { it.isEmpty() } }
     val totals: MutableMap<Nutriment, String> = mutableMapOf()
     val getNumber = { x: String -> x.split(" ").firstOrNull()?.toDouble() ?: 0.0 }
     val getUnit = { x: String -> x.split(" ").lastOrNull() ?: "g" }
@@ -219,7 +221,7 @@ class MainViewModel(context: Context) : ViewModel() {
     Nutriment.entries.forEach { nutriment ->
       var total = 0.0
       var unit = "g"
-      items.forEach { item ->
+      filtered.forEach { item ->
         item.nutriments[nutriment]?.let { itemNutriment ->
           unit = getUnit(itemNutriment)
           total += getNumber(itemNutriment)
@@ -229,7 +231,7 @@ class MainViewModel(context: Context) : ViewModel() {
         "${(total.toString().split(".").let { "${it.first()}.${it.last().take(1)}" })} $unit"
     }
 
-    return NutrimentBreakdown(items, totals)
+    return NutrimentBreakdown(filtered, totals)
   }
 
   private fun calculateMillisTillMorning(): Long {

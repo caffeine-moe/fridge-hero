@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +20,7 @@ fun RecipeCard(
   recipe: Recipe,
   onClick: () -> Unit
 ) {
-  Card(
+  ElevatedCard(
     modifier = Modifier
       .padding(8.dp)
       .clickable {
