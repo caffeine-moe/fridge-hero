@@ -34,6 +34,9 @@ data class FoodItem(
   val isFromRecipe: Boolean = false,
 ) : DomainModel, MappableModel<FoodItem, RealmFoodItem>, Parcelable {
 
+  val realExpiryDates: List<Long>
+    get() = expiryDates.filterNot { it == -1L }
+
   val isRemoved: Boolean
     get() = expiryDates.isEmpty()
 
@@ -41,12 +44,10 @@ data class FoodItem(
     get() = realmId.isNotBlank()
 
   val isExpired: Boolean
-    get() = expiryDates.filterNot { it == -1L }
-      .any { it.isExpired() }
+    get() = realExpiryDates.any { it.isExpired() }
 
   val expiresSoon: Boolean
-    get() = expiryDates.filterNot { it == -1L }
-      .any { it.expiryImminent() }
+    get() = realExpiryDates.any { it.expiryImminent() }
 
   val novaGroupPainter: @Composable () -> Painter = resolveNovaGroupPainter(novaGroup)
 

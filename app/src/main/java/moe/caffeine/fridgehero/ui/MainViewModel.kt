@@ -237,7 +237,7 @@ class MainViewModel(context: Context) : ViewModel() {
   private fun calculateMillisTillMorning(): Long {
     val now = Calendar.getInstance()
     val morning = Calendar.getInstance().apply {
-      set(Calendar.HOUR_OF_DAY, 8)
+      set(Calendar.HOUR_OF_DAY, 0)
       set(Calendar.MINUTE, 0)
     }
 
@@ -250,7 +250,7 @@ class MainViewModel(context: Context) : ViewModel() {
 
   private fun scheduleDailyExpiryChecks() {
     val request = PeriodicWorkRequestBuilder<ExpiryCheckWorker>(24, TimeUnit.HOURS)
-      .setInitialDelay(calculateMillisTillMorning(), TimeUnit.MILLISECONDS)
+      .setNextScheduleTimeOverride(calculateMillisTillMorning())
       .addTag(ExpiryCheckWorker.WORK_TAG)
       .build()
 

@@ -35,7 +35,7 @@ class NotificationHelper(private val context: Context) {
 
     val summary = NotificationCompat.Builder(context, "expiry_channel")
       .setSmallIcon(R.drawable.ic_launcher_foreground)
-      .setContentTitle("${items.size} items Expiring Soon!")
+      .setContentTitle("Attention needed!")
       .setGroup(items.hashCode().toString())
       .setGroupSummary(true)
       .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -45,7 +45,7 @@ class NotificationHelper(private val context: Context) {
       .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
       .setStyle(
         NotificationCompat.InboxStyle()
-          .setSummaryText("${items.size} items expiring soon")
+          .setSummaryText("${items.size} items are in need of attention.")
       )
       .build()
 
@@ -55,7 +55,7 @@ class NotificationHelper(private val context: Context) {
 
       val dismissIntent = Intent(context, ExpiryActionReceiver::class.java).apply {
         putExtra("ITEM_ID", item.realmId)
-        putExtra("EXPIRY_DATE", item.expiryDates.filter { it != -1L }.minOrNull() ?: return@forEach)
+        putExtra("EXPIRY_DATE", item.realExpiryDates.minOrNull() ?: return@forEach)
         action = "ACTION_DISMISS_EXPIRY_${item.realmId}"
       }
 
@@ -89,12 +89,12 @@ class NotificationHelper(private val context: Context) {
         .setContentTitle("Expiring Soon: ${item.name}")
         .setContentText(
           "Expiry: ${
-            item.expiryDates.filter { it != -1L }.min().readableDaysUntil()
+            item.realExpiryDates.min().readableDaysUntil()
           }"
         )
         .addAction(R.drawable.close, "Remove Item", dismissPendingIntent)
         .setGroup(items.hashCode().toString())
-        .setSortKey(item.expiryDates.filter { it != -1L }.min().toString())
+        .setSortKey(item.realExpiryDates.min().toString())
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)

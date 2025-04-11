@@ -34,7 +34,7 @@ fun ExpiringSoon(
     derivedStateOf {
       fridge
         .filter { it.expiresSoon || it.isExpired }
-        .sortedBy { foodItem -> foodItem.expiryDates.filter { it != -1L }.min() }
+        .sortedBy { foodItem -> foodItem.realExpiryDates.min() }
     }
   }
   if (fridge.isEmpty())
