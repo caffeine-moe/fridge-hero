@@ -176,7 +176,7 @@ fun RecipeEditorOverlay(
                                   onSuccess {
                                     potentialMatches = it
                                   }
-                                }
+                                }.also(emitEvent)
                               }
                               Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
                                 TextButton(
