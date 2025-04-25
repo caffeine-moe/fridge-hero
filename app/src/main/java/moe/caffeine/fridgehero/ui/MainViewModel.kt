@@ -213,22 +213,17 @@ class MainViewModel(context: Context) : ViewModel() {
 
   private fun breakDownNutriments(items: List<FoodItem>): NutrimentBreakdown {
     val filtered =
-      items.filterNot { item -> item.nutriments.isEmpty() || item.nutriments.values.all { it.isEmpty() } }
-    val totals: MutableMap<Nutriment, String> = mutableMapOf()
-    val getNumber = { x: String -> x.split(" ").firstOrNull()?.toDouble() ?: 0.0 }
-    val getUnit = { x: String -> x.split(" ").lastOrNull() ?: "g" }
+      items.filterNot { item -> item.nutriments.isEmpty() || item.nutriments.values.all { it == 0.0 } }
+    val totals: MutableMap<Nutriment, Double> = mutableMapOf()
 
     Nutriment.entries.forEach { nutriment ->
       var total = 0.0
-      var unit = "g"
       filtered.forEach { item ->
         item.nutriments[nutriment]?.let { itemNutriment ->
-          unit = getUnit(itemNutriment)
-          total += getNumber(itemNutriment)
+          total += itemNutriment * (item.realExpiryDates.size)
         }
       }
-      totals[nutriment] =
-        "${(total.toString().split(".").let { "${it.first()}.${it.last().take(1)}" })} $unit"
+      totals[nutriment] = total
     }
 
     return NutrimentBreakdown(filtered, totals)

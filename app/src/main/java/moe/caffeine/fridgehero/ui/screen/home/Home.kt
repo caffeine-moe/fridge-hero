@@ -70,6 +70,7 @@ fun Home(
         }
       }.apply(emitEvent)
     }
-    HeroStats(foodItems, recipes, nutrimentBreakdown)
+    HeroStats(foodItems, recipes, nutrimentBreakdown, profile)
   }
+
 }

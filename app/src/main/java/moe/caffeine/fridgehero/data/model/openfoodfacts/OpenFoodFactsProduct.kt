@@ -76,5 +76,6 @@ data class OpenFoodFactsProduct(
   val productName: String = "",
   @SerialName("product_name_en")
   val productNameEnglish: String = "",
-  val quantity: String = "", //weight
+  @SerialName("product_quantity")
+  val productQuantity: Double = 0.0, //weight in grams
 )

@@ -4,5 +4,5 @@ import io.realm.kotlin.types.RealmObject
 
 class RealmNutrimentEntry : RealmObject {
   var nutriment: String = ""
-  var value: String = ""
+  var value: Double = 0.0
 }

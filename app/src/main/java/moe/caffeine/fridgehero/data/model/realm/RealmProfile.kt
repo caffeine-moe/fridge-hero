@@ -13,7 +13,16 @@ class RealmProfile : RealmObject, MappableModel<Profile, RealmProfile> {
 
   var firstName: String = ""
   var lastName: String = ""
+  var adultsInHouse: Int = 0
+  var childrenInHouse: Int = 0
 
-  override fun toDomainModel() = Profile(realmObjectId.toHexString(), firstName, lastName)
+  override fun toDomainModel() =
+    Profile(
+      realmObjectId.toHexString(),
+      firstName,
+      lastName,
+      (adultsInHouse to childrenInHouse)
+    )
+
   override fun toRealmModel(): RealmProfile = this
 }

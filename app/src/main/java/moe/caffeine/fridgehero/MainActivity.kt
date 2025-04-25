@@ -66,11 +66,12 @@ class MainActivity : ComponentActivity() {
                     enter = fadeIn(tween(500)),
                     exit = fadeOut(tween(500))
                   ) {
-                    OOBE { firstName, lastName ->
+                    OOBE { firstName, lastName, householdComposition ->
                       viewModel.upsertProfile(
                         Profile(
                           firstName = firstName,
-                          lastName = lastName
+                          lastName = lastName,
+                          householdComposition = householdComposition
                         )
                       )
                     }

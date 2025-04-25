@@ -290,10 +290,10 @@ fun RecipeEditorOverlay(
           ) {
             Icon(
               imageVector = Icons.Filled.Add,
-              contentDescription = "Add to fridge"
+              contentDescription = "Create Leftover"
             )
             Text(
-              "Add to fridge"
+              "Create Leftover"
             )
           }
         }

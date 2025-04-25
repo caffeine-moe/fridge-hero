@@ -2,6 +2,7 @@ package moe.caffeine.fridgehero.ui.screen.home.component
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -53,31 +54,33 @@ fun ExpiringSoon(
         val date = item.expiryDates.min()
         ElevatedCard(
           modifier = Modifier
-            .padding(8.dp),
+            .padding(4.dp),
           onClick = { onItemClick(item) }
         ) {
           Box(
             Modifier
               .align(Alignment.CenterHorizontally)
+              .padding(8.dp)
           ) {
-            ImageCard(
-              modifier = Modifier
-                .size(120.dp)
-                .padding(4.dp),
-              imageByteArray = item.imageByteArray
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+              ImageCard(
+                modifier = Modifier
+                  .size(120.dp)
+                  .padding(4.dp),
+                imageByteArray = item.imageByteArray
+              )
+
+              Spacer(Modifier.width(10.dp))
+              Text(
+                text = item.name
+              )
+              Spacer(Modifier.width(10.dp))
+              Text(
+                text = "Expires: ${date.readableDaysUntil()}"
+              )
+              Spacer(Modifier.width(10.dp))
+            }
           }
-          Spacer(Modifier.width(10.dp))
-          Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = item.name
-          )
-          Spacer(Modifier.width(10.dp))
-          Text(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "Expires: ${date.readableDaysUntil()}"
-          )
-          Spacer(Modifier.width(10.dp))
         }
       }
   }

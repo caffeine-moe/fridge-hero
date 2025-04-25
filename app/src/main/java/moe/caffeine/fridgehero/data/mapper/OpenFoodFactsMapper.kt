@@ -8,18 +8,19 @@ import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
+import kotlin.math.round
 
-fun OpenFoodFactsNutriments.toDomainModel(): Map<Nutriment, String> =
+fun OpenFoodFactsNutriments.toDomainModel(productQuantity: Double): Map<Nutriment, Double> =
   mapOf(
-    Nutriment.FAT to "$fat $fatUnit",
-    Nutriment.SALT to "$salt $saltUnit",
-    Nutriment.FIBER to "$fiber $fiberUnit",
-    Nutriment.ENERGY to "$energyKcal $energyKcalUnit",
-    Nutriment.SODIUM to "$sodium $sodiumUnit",
-    Nutriment.CARBOHYDRATES to "$carbohydrates $carbohydratesUnit",
-    Nutriment.PROTEINS to "$proteins $proteinsUnit",
-    Nutriment.SATURATED_FAT to "$saturatedFat $saturatedFatUnit",
-    Nutriment.SUGARS to "$sugars $sugarsUnit"
+    Nutriment.FAT to round(fat100g * (productQuantity / 100)),
+    Nutriment.SALT to round(salt100g * (productQuantity / 100)),
+    Nutriment.FIBER to round(fiber100g * (productQuantity / 100)),
+    Nutriment.ENERGY to round(energyKcal100g * (productQuantity / 100)),
+    Nutriment.SODIUM to round(sodium100g * (productQuantity / 100)),
+    Nutriment.CARBOHYDRATES to round(carbohydrates100g * (productQuantity / 100)),
+    Nutriment.PROTEINS to round(proteins100g * (productQuantity / 100)),
+    Nutriment.SATURATED_FAT to round(saturatedFat100g * (productQuantity / 100)),
+    Nutriment.SUGARS to round(sugars100g * (productQuantity / 100))
   )
 
 fun OpenFoodFactsProduct.toDomainModel(
@@ -35,7 +36,7 @@ fun OpenFoodFactsProduct.toDomainModel(
     categories = categoryNames,
     novaGroup = NovaGroup.enumByNumber(novaGroup),
     nutriScore = NutriScore.enumByLetter(nutriscoreGrade),
-    nutriments = nutriments.toDomainModel()
+    nutriments = nutriments.toDomainModel(productQuantity)
   )
 
 fun OpenFoodFactsTaxonomyNode.toRealmModel(): RealmFoodCategory =

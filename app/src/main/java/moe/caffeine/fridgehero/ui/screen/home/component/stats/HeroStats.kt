@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import moe.caffeine.fridgehero.domain.model.NutrimentBreakdown
+import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
@@ -19,7 +20,8 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 fun HeroStats(
   foodItems: List<FoodItem>,
   recipes: List<Recipe>,
-  nutrimentBreakdown: NutrimentBreakdown?
+  nutrimentBreakdown: NutrimentBreakdown?,
+  profile: Profile
 ) {
   Text(
     modifier = Modifier.padding(vertical = 8.dp),
@@ -27,14 +29,16 @@ fun HeroStats(
     text = "Hero Stats"
   )
   Column {
-    QuickStats(foodItems, recipes.size)
+    QuickStats(foodItems, recipes.size, nutrimentBreakdown, profile)
     Spacer(Modifier.size(8.dp))
     ElevatedCard {
       if (nutrimentBreakdown != null) {
         if (nutrimentBreakdown.items.isNotEmpty())
-          PieChart(nutrimentBreakdown.totals.mapValues { it.value.split(" ").first().toDouble() }
-            .filterNot { it.key == Nutriment.ENERGY },
-            nutrimentBreakdown.items.size, foodItems.filter { it.isRemoved }.size
+          PieChart(
+            data = nutrimentBreakdown.totals
+              .filterNot { it.key == Nutriment.ENERGY },
+            itemsCalculated = nutrimentBreakdown.items.size,
+            itemsTotal = foodItems.filterNot { it.isRemoved }.size
           )
       }
     }

@@ -107,6 +107,8 @@ fun MainScaffold(
         onNavigate = { screen, navigatedIndex ->
           navController.popBackStack()
           navController.navigate(screen.route)
+          if (screen.route != Screen.Fridge.route)
+            searchBarQuery = ""
           navigatedLeft = navigatedIndex < currentScreenIndex
           currentScreenIndex = navigatedIndex
         }

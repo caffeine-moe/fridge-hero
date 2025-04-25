@@ -30,7 +30,7 @@ data class FoodItem(
   val categories: List<String> = listOf(),
   val novaGroup: NovaGroup = NovaGroup.UNKNOWN,
   val nutriScore: NutriScore = NutriScore.UNKNOWN,
-  val nutriments: Map<Nutriment, String> = mapOf(),
+  val nutriments: Map<Nutriment, Double> = mapOf(),
   val isFromRecipe: Boolean = false,
 ) : DomainModel, MappableModel<FoodItem, RealmFoodItem>, Parcelable {
 

@@ -22,14 +22,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import moe.caffeine.fridgehero.ui.theme.Typography
 
 @Composable
-fun OOBE(onCreateProfile: (String, String) -> Unit) {
+fun OOBE(onCreateProfile: (String, String, Pair<Int, Int>) -> Unit) {
   var firstName by rememberSaveable { mutableStateOf("") }
   var lastName by rememberSaveable { mutableStateOf("") }
+  var adults by rememberSaveable { mutableStateOf("1") }
+  var children by rememberSaveable { mutableStateOf("0") }
   var clicked by rememberSaveable { mutableStateOf(false) }
   Surface {
     Column(
@@ -82,6 +86,26 @@ fun OOBE(onCreateProfile: (String, String) -> Unit) {
         isError = lastName.isEmpty() && clicked
       )
 
+      OutlinedTextField(
+        value = adults.toString(),
+        onValueChange = {
+          if (!it.isDigitsOnly()) return@OutlinedTextField
+          adults = it
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        label = { Text("Adults in House") }
+      )
+
+      OutlinedTextField(
+        value = children.toString(),
+        onValueChange = {
+          if (!it.isDigitsOnly()) return@OutlinedTextField
+          children = it
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        label = { Text("Children in House") }
+      )
+
       Button(
         modifier = Modifier.padding(10.dp),
         onClick = {
@@ -89,7 +113,11 @@ fun OOBE(onCreateProfile: (String, String) -> Unit) {
           when (firstName.isEmpty() || lastName.isEmpty()) {
             true -> return@Button
             else -> {
-              onCreateProfile(firstName, lastName)
+              onCreateProfile(
+                firstName,
+                lastName,
+                ((adults.toIntOrNull() ?: 0) to (children.toIntOrNull() ?: 0))
+              )
             }
           }
         }
