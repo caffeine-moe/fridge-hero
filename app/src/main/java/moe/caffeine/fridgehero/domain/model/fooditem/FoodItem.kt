@@ -96,7 +96,7 @@ data class FoodItem(
     parcel.createByteArray() ?: byteArrayOf(),
     parcel.createLongArray()?.toList() ?: listOf(),
     parcel.createStringArray()?.toList() ?: listOf(),
-    novaGroup = NovaGroup.enumByNumber(parcel.readInt()),
+    novaGroup = NovaGroup.entries.getOrNull(parcel.readInt()) ?: NovaGroup.UNKNOWN,
     nutriScore = NutriScore.enumByLetter(parcel.readString() ?: "")
   )
 
@@ -108,7 +108,7 @@ data class FoodItem(
     parcel.writeByteArray(imageByteArray)
     parcel.writeLongArray(expiryDates.toLongArray())
     parcel.writeStringArray(categories.toTypedArray())
-    parcel.writeInt(novaGroup.number)
+    parcel.writeInt(novaGroup.ordinal)
     parcel.writeString(nutriScore.letter)
   }
 
@@ -140,7 +140,7 @@ data class FoodItem(
       imageByteArray = this@FoodItem.imageByteArray
       expiryDates = this@FoodItem.expiryDates.toRealmList()
       categoryNames = this@FoodItem.categories.toRealmSet()
-      novaGroup = this@FoodItem.novaGroup.number
+      novaGroup = this@FoodItem.novaGroup.ordinal
       nutriScore = this@FoodItem.nutriScore.letter
       nutriments.addAll(this@FoodItem.nutriments.map {
         RealmNutrimentEntry().apply {

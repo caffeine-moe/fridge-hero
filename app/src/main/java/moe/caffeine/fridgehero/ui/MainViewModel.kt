@@ -34,11 +34,14 @@ import moe.caffeine.fridgehero.domain.model.NutrimentBreakdown
 import moe.caffeine.fridgehero.domain.model.Profile
 import moe.caffeine.fridgehero.domain.model.Recipe
 import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.domain.repository.DataRepository
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.round
 
 class MainViewModel(context: Context) : ViewModel() {
   private val repository: DataRepository = DataRepositoryImpl(
@@ -226,7 +229,39 @@ class MainViewModel(context: Context) : ViewModel() {
       totals[nutriment] = total
     }
 
-    return NutrimentBreakdown(filtered, totals)
+    val nutriScoreHavers =
+      items.filterNot { it.novaGroup == NovaGroup.UNKNOWN }
+
+    val avgNutriScore =
+      if (nutriScoreHavers.isEmpty())
+        NutriScore.UNKNOWN
+      else
+        (nutriScoreHavers.sumOf { it.nutriScore.ordinal }
+          .toDouble() / nutriScoreHavers.size.toDouble())
+          .let {
+            round(it.toDouble()).toInt()
+          }
+          .coerceIn(1, 5)
+          .let { avgNutriScoreOrdinal ->
+            NutriScore.entries.toTypedArray().first { it.ordinal == avgNutriScoreOrdinal }
+          }
+    val novaGroupHavers =
+      items.filterNot { it.novaGroup == NovaGroup.UNKNOWN }
+
+    val avgNovaGroup = if (novaGroupHavers.isEmpty())
+      NovaGroup.UNKNOWN
+    else
+      (novaGroupHavers.sumOf { it.novaGroup.ordinal }
+        .toDouble() / novaGroupHavers.size.toDouble())
+        .let {
+          round(it.toDouble()).toInt()
+        }
+        .coerceIn(1, 4)
+        .let { avgNovaGroupOrdinal ->
+          NovaGroup.entries.toTypedArray().first { it.ordinal == avgNovaGroupOrdinal }
+        }
+
+    return NutrimentBreakdown(filtered, totals, avgNutriScore, avgNovaGroup)
   }
 
   private fun calculateMillisTillMorning(): Long {

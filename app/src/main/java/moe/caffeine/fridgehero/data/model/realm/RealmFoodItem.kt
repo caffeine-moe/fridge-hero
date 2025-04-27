@@ -52,7 +52,7 @@ class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
       imageByteArray,
       expiryDates.toList(),
       categoryNames.toList(),
-      novaGroup = NovaGroup.enumByNumber(novaGroup),
+      novaGroup = NovaGroup.entries.getOrNull(novaGroup) ?: NovaGroup.UNKNOWN,
       nutriScore = NutriScore.enumByLetter(nutriScore),
       nutriments = nutriments.associate {
         Nutriment.valueOf(it.nutriment) to it.value

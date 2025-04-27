@@ -37,8 +37,8 @@ fun HeroStats(
           PieChart(
             data = nutrimentBreakdown.totals
               .filterNot { it.key == Nutriment.ENERGY },
-            itemsCalculated = nutrimentBreakdown.items.size,
-            itemsTotal = foodItems.filterNot { it.isRemoved }.size
+            itemsCalculated = nutrimentBreakdown.items.sumOf { it.expiryDates.size },
+            itemsTotal = foodItems.sumOf { it.expiryDates.size }
           )
       }
     }

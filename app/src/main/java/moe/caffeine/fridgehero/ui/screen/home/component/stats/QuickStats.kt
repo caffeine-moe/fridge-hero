@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -32,7 +33,6 @@ import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.ui.component.item.resolveNovaGroupPainter
 import moe.caffeine.fridgehero.ui.component.item.resolveNutriScorePainter
 import moe.caffeine.fridgehero.ui.theme.Typography
-import kotlin.math.round
 
 @Composable
 fun QuickStats(
@@ -64,23 +64,10 @@ fun QuickStats(
           Text("${foodItems.size}", style = MaterialTheme.typography.headlineLarge)
         }
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-          val avgNutriScore by remember(foodItems) {
-            derivedStateOf {
-              val nutriscoreHavers =
-                foodItems.filterNot { it.nutriScore == NutriScore.UNKNOWN || it.isRemoved }
-              if (nutriscoreHavers.isEmpty())
-                NutriScore.UNKNOWN
-              else
-                (nutriscoreHavers.sumOf { it.nutriScore.ordinal }
-                  .toDouble() / nutriscoreHavers.size.toDouble())
-                  .let {
-                    round(it.toDouble()).toInt()
-                  }
-                  .coerceIn(1, 5)
-                  .let { avgNutriScoreOrdinal ->
-                    NutriScore.entries.toTypedArray().first { it.ordinal == avgNutriScoreOrdinal }
-                  }
-            }
+          val avgNutriScore by remember(nutrimentBreakdown) {
+            mutableStateOf(
+              nutrimentBreakdown?.averageNutriScore ?: NutriScore.UNKNOWN
+            )
           }
           Text(
             modifier = Modifier.padding(2.dp),
@@ -95,23 +82,10 @@ fun QuickStats(
           )
         }
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-          val avgNovaGroup by remember(foodItems) {
-            derivedStateOf {
-              val novaGroupHavers =
-                foodItems.filterNot { it.novaGroup == NovaGroup.UNKNOWN || it.isRemoved }
-              if (novaGroupHavers.isEmpty())
-                NovaGroup.UNKNOWN
-              else
-                (novaGroupHavers.sumOf { it.novaGroup.number }
-                  .toDouble() / novaGroupHavers.size.toDouble())
-                  .let {
-                    round(it.toDouble()).toInt()
-                  }
-                  .coerceIn(1, 4)
-                  .let { avgNovaGroupOrdinal ->
-                    NovaGroup.entries.toTypedArray().first { it.ordinal == avgNovaGroupOrdinal }
-                  }
-            }
+          val avgNovaGroup by remember(nutrimentBreakdown) {
+            mutableStateOf(
+              nutrimentBreakdown?.averageNovaGroup ?: NovaGroup.UNKNOWN
+            )
           }
           Text(
             modifier = Modifier.padding(2.dp),
@@ -122,7 +96,7 @@ fun QuickStats(
             modifier = Modifier
               .size(60.dp),
             painter = resolveNovaGroupPainter(avgNovaGroup)(),
-            contentDescription = avgNovaGroup.number.toString()
+            contentDescription = avgNovaGroup.ordinal.toString()
           )
         }
 

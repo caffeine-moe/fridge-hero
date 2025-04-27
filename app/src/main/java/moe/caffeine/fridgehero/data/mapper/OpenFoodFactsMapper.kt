@@ -34,7 +34,7 @@ fun OpenFoodFactsProduct.toDomainModel(
     brand = brands.split(",").firstOrNull() ?: brands,
     imageByteArray = thumbnail,
     categories = categoryNames,
-    novaGroup = NovaGroup.enumByNumber(novaGroup),
+    novaGroup = NovaGroup.entries.getOrNull(novaGroup) ?: NovaGroup.UNKNOWN,
     nutriScore = NutriScore.enumByLetter(nutriscoreGrade),
     nutriments = nutriments.toDomainModel(productQuantity)
   )

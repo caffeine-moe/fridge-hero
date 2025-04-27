@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
 import moe.caffeine.fridgehero.ui.theme.Typography
-import java.util.Locale
 
 @Composable
 fun PieChart(
@@ -35,16 +34,18 @@ fun PieChart(
   itemsCalculated: Int,
   itemsTotal: Int
 ) {
+  val sortedData = data.entries.sortedByDescending { it.value }
+
   Text(
     modifier = Modifier.padding(8.dp),
     style = Typography.titleMedium,
     text = "NutriVision"
   )
-  val totalSum = data.values.sum()
+  val totalSum = sortedData.sumOf { it.value }
   val floatValue = mutableListOf<Float>()
 
-  data.values.forEachIndexed { index, values ->
-    floatValue.add(index, 360 * values.toFloat() / totalSum.toFloat())
+  sortedData.forEachIndexed { index, entry ->
+    floatValue.add(index, 360 * entry.value.toFloat() / totalSum.toFloat())
   }
 
   val colours = listOf(
@@ -57,7 +58,6 @@ fun PieChart(
     MaterialTheme.colorScheme.tertiary,
     MaterialTheme.colorScheme.secondary,
   )
-
 
   var lastValue = 0f
 
@@ -91,7 +91,7 @@ fun PieChart(
     }
 
     PieChartDetails(
-      data = data,
+      data = sortedData,
       colours = colours
     )
 
@@ -101,7 +101,7 @@ fun PieChart(
 
 @Composable
 fun PieChartDetails(
-  data: Map<Nutriment, Double>,
+  data: List<Map.Entry<Nutriment, Double>>,
   colours: List<Color>
 ) {
   Column(
@@ -109,9 +109,9 @@ fun PieChartDetails(
       .padding(top = 24.dp)
       .fillMaxWidth()
   ) {
-    data.values.forEachIndexed { index, value ->
+    data.forEachIndexed { index, entry ->
       DetailsPieChartItem(
-        data = Pair(data.keys.elementAt(index), value),
+        data = Pair(entry.key.title, entry.value),
         colour = colours[index]
       )
     }
@@ -121,7 +121,7 @@ fun PieChartDetails(
 
 @Composable
 fun DetailsPieChartItem(
-  data: Pair<Nutriment, Double>,
+  data: Pair<String, Double>,
   height: Dp = 45.dp,
   colour: Color
 ) {
@@ -149,18 +149,18 @@ fun DetailsPieChartItem(
       Column(modifier = Modifier.fillMaxWidth()) {
         Text(
           modifier = Modifier.padding(start = 15.dp),
-          text = data.first.name.lowercase()
+          text = data.first/*.lowercase()
             .split("_")
             .joinToString(" ") {
               it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-            },
+            }*/,
           fontWeight = FontWeight.Medium,
           fontSize = 22.sp,
           color = MaterialTheme.colorScheme.onSurface
         )
         Text(
           modifier = Modifier.padding(start = 15.dp),
-          text = data.second.toString() + " ${data.first.unit}",
+          text = "${data.second} g",
           fontWeight = FontWeight.Medium,
           fontSize = 22.sp,
           color = Color.Gray
