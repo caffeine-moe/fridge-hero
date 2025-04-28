@@ -38,6 +38,7 @@ sealed class Event {
 
   data class RequestNutrimentBreakdown(
     val items: List<FoodItem>,
+    val usingExpiryDates: Boolean,
     val onResult: Result<NutrimentBreakdown>.() -> Unit = {}
   ) : Event()
 

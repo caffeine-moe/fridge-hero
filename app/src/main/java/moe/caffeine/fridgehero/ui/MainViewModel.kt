@@ -140,7 +140,7 @@ class MainViewModel(context: Context) : ViewModel() {
               Result.failure(Throwable("Need to request breakdown of at least one item."))
             )
           else
-            event.onResult(Result.success(breakDownNutriments(event.items)))
+            event.onResult(Result.success(breakDownNutriments(event.items, event.usingExpiryDates)))
 
         is Event.UpsertFoodItem -> {
           if (event.foodItem.isFromRecipe && event.foodItem.expiryDates.isEmpty()) {
@@ -214,7 +214,10 @@ class MainViewModel(context: Context) : ViewModel() {
                 avaliableItem.categories.isNotEmpty())
       }
 
-  private fun breakDownNutriments(items: List<FoodItem>): NutrimentBreakdown {
+  private fun breakDownNutriments(
+    items: List<FoodItem>,
+    usingExpiryDates: Boolean
+  ): NutrimentBreakdown {
     val filtered =
       items.filterNot { item -> item.nutriments.isEmpty() || item.nutriments.values.all { it == 0.0 } }
     val totals: MutableMap<Nutriment, Double> = mutableMapOf()
@@ -223,7 +226,7 @@ class MainViewModel(context: Context) : ViewModel() {
       var total = 0.0
       filtered.forEach { item ->
         item.nutriments[nutriment]?.let { itemNutriment ->
-          total += itemNutriment * (item.realExpiryDates.size)
+          total += itemNutriment * (if (usingExpiryDates) item.realExpiryDates.size else 1)
         }
       }
       totals[nutriment] = total

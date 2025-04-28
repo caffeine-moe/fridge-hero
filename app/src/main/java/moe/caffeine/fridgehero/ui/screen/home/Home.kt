@@ -40,7 +40,7 @@ fun Home(
   var nutrimentBreakdown: NutrimentBreakdown? by remember { mutableStateOf(null) }
   LaunchedEffect(foodItems) {
     Event.RequestNutrimentBreakdown(
-      foodItems.filterNot { it.isRemoved }
+      foodItems.filterNot { it.isRemoved }, true
     ) {
       onSuccess {
         nutrimentBreakdown = it
