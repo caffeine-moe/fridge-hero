@@ -41,11 +41,7 @@ fun Home(
   LaunchedEffect(foodItems) {
     Event.RequestNutrimentBreakdown(
       foodItems.filterNot { it.isRemoved }, true
-    ) {
-      onSuccess {
-        nutrimentBreakdown = it
-      }
-    }.apply(emitEvent)
+    ) { nutrimentBreakdown = getOrNull() }.apply(emitEvent)
   }
   Column(
     modifier = Modifier
