@@ -78,7 +78,7 @@ fun Fridge(
             Event.SoftRemoveFoodItem(currentFoodItem)
               .apply(emitEvent)
           },
-          enableEndToStartDismiss = !currentFoodItem.isRemoved
+          enableEndToStartDismiss = !currentFoodItem.isRemoved && !showHidden
         ) {
           ItemCard(
             modifier = Modifier
