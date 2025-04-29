@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,8 +38,10 @@ fun MainTopBar(
   screens: List<Screen>,
   currentScreenIndex: Int,
   searchBarQuery: String,
+  showHidden: Boolean,
   onSearchBarFocusState: (FocusState) -> Unit,
-  onQueryChanged: (String) -> Unit
+  onQueryChanged: (String) -> Unit,
+  onShowHiddenState: (Boolean) -> Unit
 ) {
   ElevatedCard(
     modifier = Modifier
@@ -83,17 +89,35 @@ fun MainTopBar(
       }
     }
     AnimatedVisibility(
-      visible = screens[currentScreenIndex].hasSearchBar,
+      visible = screens[currentScreenIndex] == Screen.Fridge,
       enter = expandVertically(tween(250), expandFrom = Alignment.Top) + fadeIn(tween(250)),
       exit = shrinkVertically(tween(250), shrinkTowards = Alignment.Top) + fadeOut(tween(250))
     ) {
-      CustomSearchBar(
-        query = searchBarQuery,
-        onFocusState = {
-          onSearchBarFocusState(it)
-        }
+      Row(
+        Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        onQueryChanged(it)
+        CustomSearchBar(
+          modifier = Modifier.weight(1f),
+          query = searchBarQuery,
+          onFocusState = {
+            onSearchBarFocusState(it)
+          }
+        ) {
+          onQueryChanged(it)
+        }
+        Spacer(Modifier.size(16.dp))
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Checkbox(
+            checked = showHidden, onCheckedChange = onShowHiddenState
+          )
+          Text(
+            "Show all",
+            style = MaterialTheme.typography.labelSmall
+          )
+        }
       }
     }
   }

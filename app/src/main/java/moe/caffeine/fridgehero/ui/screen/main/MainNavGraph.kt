@@ -31,6 +31,7 @@ fun MainNavGraph(
   foodItems: StateFlow<List<FoodItem>>,
   foodSearchQuery: String,
   searchBarHasFocus: Boolean,
+  showHiddenToggle: Boolean,
 
   recipes: StateFlow<List<Recipe>>,
 
@@ -63,7 +64,7 @@ fun MainNavGraph(
       Home(profile, foodItems, recipes, emitEvent)
     }
     composable(Screen.Fridge.route) {
-      Fridge(foodSearchQuery, searchBarHasFocus, foodItems, emitEvent)
+      Fridge(foodSearchQuery, (searchBarHasFocus || showHiddenToggle), foodItems, emitEvent)
     }
     composable(Screen.Recipes.route) {
       Recipes(recipes, emitEvent)

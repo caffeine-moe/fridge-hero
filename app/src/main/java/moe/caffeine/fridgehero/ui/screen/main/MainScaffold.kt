@@ -48,6 +48,7 @@ fun MainScaffold(
   var currentScreenIndex by rememberSaveable { mutableIntStateOf(0) }
   var navigatedLeft by rememberSaveable { mutableStateOf(false) }
 
+  var showHidden by rememberSaveable { mutableStateOf(false) }
   var searchBarQuery by rememberSaveable { mutableStateOf("") }
   var searchBarHasFocus by rememberSaveable { mutableStateOf(false) }
   val focusManager = LocalFocusManager.current
@@ -61,15 +62,20 @@ fun MainScaffold(
         screens = screens,
         currentScreenIndex = currentScreenIndex,
         searchBarQuery = searchBarQuery,
+        showHidden,
+        onShowHiddenState = {
+          showHidden = it
+        },
+        onQueryChanged = {
+          searchBarQuery = it
+          if (searchBarQuery.isEmpty()) {
+            focusManager.clearFocus()
+          }
+        },
         onSearchBarFocusState = {
           searchBarHasFocus = it.isFocused
         }
-      ) {
-        searchBarQuery = it
-        if (searchBarQuery.isEmpty()) {
-          focusManager.clearFocus()
-        }
-      }
+      )
     },
     floatingActionButton = {
       AnimatedVisibility(
@@ -126,6 +132,7 @@ fun MainScaffold(
         foodItems,
         searchBarQuery,
         searchBarHasFocus,
+        showHidden,
         recipes,
         emitEvent
       )

@@ -37,7 +37,7 @@ import moe.caffeine.fridgehero.ui.component.item.ItemCard
 @Composable
 fun Fridge(
   query: String,
-  searchBarHasFocus: Boolean,
+  showHidden: Boolean,
   foodItems: StateFlow<List<FoodItem>>,
   emitEvent: (Event) -> Unit,
 ) {
@@ -64,7 +64,6 @@ fun Fridge(
       key = { it.realmId }
     ) { listFoodItem ->
       val currentFoodItem by rememberUpdatedState(newValue = listFoodItem)
-      val showHidden by rememberUpdatedState(newValue = searchBarHasFocus)
 
       AnimatedVisibility(
         modifier = Modifier

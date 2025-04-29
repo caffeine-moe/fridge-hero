@@ -1,7 +1,5 @@
 package moe.caffeine.fridgehero.ui.component
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -18,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,9 +31,7 @@ fun CustomSearchBar(
       .onFocusChanged {
         showClearIcon = it.isFocused
         onFocusState(it)
-      }
-      .fillMaxWidth()
-      .padding(8.dp),
+      },
     shape = SearchBarDefaults.inputFieldShape,
     expanded = false,
     inputField = {
