@@ -49,11 +49,6 @@ sealed class Event {
     val onImageData: Result<ByteArray>.() -> Unit = {}
   ) : Event()
 
-  // Opens a full screen view of an item
-  data class RequestItemFullScreen(
-    val foodItem: FoodItem,
-  ) : Event()
-
   //upserts a food item into the database
   data class UpsertFoodItem(
     val foodItem: FoodItem,

@@ -23,7 +23,6 @@ import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.ui.overlay.DatePickerModalOverlay
 import moe.caffeine.fridgehero.ui.overlay.RecipeEditorOverlay
 import moe.caffeine.fridgehero.ui.overlay.ScannerOverlay
-import moe.caffeine.fridgehero.ui.overlay.item.FullScreenItemOverlay
 import moe.caffeine.fridgehero.ui.overlay.item.ItemSearchOverlay
 import moe.caffeine.fridgehero.ui.overlay.item.ItemSheetOverlay
 import moe.caffeine.fridgehero.ui.screen.Screen
@@ -56,9 +55,6 @@ fun MainScreen(
   //item search overlay
   var showItemSearch by rememberSaveable { mutableStateOf(false) }
   var itemSearchRequest by remember { mutableStateOf(Event.RequestItemsFromSearch()) }
-
-  //fullscreen item
-  var fullScreenItem by rememberSaveable { mutableStateOf<FoodItem?>(null) }
 
   //date picker
   var showDatePicker by rememberSaveable { mutableStateOf(false) }
@@ -96,7 +92,6 @@ fun MainScreen(
       itemBottomSheetRequest = it
       scope.launch { itemBottomSheetState.expand() }
     },
-    onFullScreenRequest = { fullScreenItem = it },
     onRecipeEditorRequest = {
       recipeEditorRequest = it
       showRecipeEditor = true
@@ -126,11 +121,6 @@ fun MainScreen(
       showRecipeEditor = false
       recipeEditorRequest.onResult(it)
     }
-  )
-
-  FullScreenItemOverlay(
-    fullScreenItem = fullScreenItem,
-    onDismiss = { fullScreenItem = null }
   )
 
   DatePickerModalOverlay(
