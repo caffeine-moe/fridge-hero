@@ -120,10 +120,11 @@ class MainViewModel(context: Context) : ViewModel() {
         is Event.RequestFoodItemFromBarcode -> {
           emitEvent(Event.DisplayToast("Processing barcode ${event.barcode}, please wait..."))
           repository.retrieveFoodItemCachedFirst(event.barcode).fold(
-            onSuccess = { pair ->
-              emitEvent(Event.DisplayToast("Successfully retrieved ${pair.first.name}"))
-              event.onItemData(Result.success(pair.first))
-              event.onImageData(Result.success(pair.second.await()))
+            onSuccess = { result ->
+              emitEvent(Event.DisplayToast("Successfully retrieved ${result.name}"))
+              event.onItemData(Result.success(result))
+              if (result.imageByteArray.isEmpty())
+                event.onImageData(repository.retrieveItemImage(result.barcode))
             },
             onFailure = { failure ->
               emitEvent(Event.DisplayToast("ERROR: ${failure.message}"))

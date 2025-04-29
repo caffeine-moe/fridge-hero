@@ -1,6 +1,5 @@
 package moe.caffeine.fridgehero.domain.repository
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,8 +29,9 @@ interface DataRepository {
   fun getAllFoodItemsAsFlow(): Flow<List<FoodItem>>
   fun getAllFoodItemsAsList(): List<FoodItem>
   suspend fun getFoodItemById(objectId: BsonObjectId): Result<FoodItem>
-  suspend fun fetchFoodItemFromApi(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>>
-  suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>>
+  suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem>
+  suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem>
+  suspend fun retrieveItemImage(barcode: String): Result<ByteArray>
 
   //recipe interactions
   fun getAllRecipesAsFlow(): Flow<List<Recipe>>

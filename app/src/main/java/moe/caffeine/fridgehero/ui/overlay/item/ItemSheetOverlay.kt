@@ -76,6 +76,7 @@ fun ItemSheetOverlay(
 
   BackHandler {
     scope.launch {
+      onComplete(Result.failure(Throwable("Dismissed")))
       sheetState.hide()
     }
   }

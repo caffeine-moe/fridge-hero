@@ -19,7 +19,6 @@ import moe.caffeine.fridgehero.data.model.realm.RealmProfile
 import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
 import moe.caffeine.fridgehero.data.openfoodfacts.local.OpenFoodFactsTaxonomyParser
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi
-import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.fetchImageAsByteArrayFromURL
 import moe.caffeine.fridgehero.data.openfoodfacts.remote.OpenFoodFactsApi.fetchProductByBarcode
 import moe.caffeine.fridgehero.data.realm.RealmProvider
 import moe.caffeine.fridgehero.data.realm.deleteObjectById
@@ -143,47 +142,49 @@ class DataRepositoryImpl(
       )
     }
 
-  override suspend fun fetchFoodItemFromApi(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>> =
+  override suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem> =
     withContext(Dispatchers.IO) {
+      CompletableDeferred<ByteArray>()
       fetchProductByBarcode(barcode).fold(
         onSuccess = { product ->
           Result.success(
-            Pair(
-              product.toDomainModel(
-                product.categoriesHierarchy
-                  .filter { it.startsWith(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION) }
-                  .map { category ->
-                    category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
-                      .split("-")
-                      .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
-                  }
-              ),
-              CompletableDeferred(
-                fetchImageAsByteArrayFromURL(product.imageThumbUrl).getOrNull() ?: byteArrayOf()
-              )
+            product.toDomainModel(
+              product.categoriesHierarchy
+                .filter { it.startsWith(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION) }
+                .map { category ->
+                  category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
+                    .split("-")
+                    .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
+                }
             )
           )
         },
         onFailure = {
-          Result.failure(it)
+          return@withContext Result.failure(it)
         }
       )
     }
 
-  override suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>> =
+  override suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem> =
     withContext(Dispatchers.IO) {
       realm.fetchAllByType<RealmFoodItem>()
         .firstOrNull { it.barcode == barcode }?.let {
-          Result.success(Pair(it.toDomainModel(), CompletableDeferred(it.imageByteArray)))
+          Result.success(it.toDomainModel())
         } ?: fetchFoodItemFromApi(
         barcode
-      ).fold(
-        onSuccess = { success ->
-          Result.success(success)
-        },
-        onFailure = { failure ->
-          Result.failure(failure)
-        }
+      )
+    }
+
+  override suspend fun retrieveItemImage(barcode: String): Result<ByteArray> =
+    withContext(Dispatchers.IO) {
+      realm.fetchAllByType<RealmFoodItem>()
+        .firstOrNull { it.barcode == barcode }?.let {
+          Result.success(it.toDomainModel().imageByteArray)
+        } ?: openFoodFactsApi.fetchProductByBarcode(
+        barcode
+      ).getOrNull()?.let { openFoodFactsApi.fetchImageAsByteArrayFromURL(it.imageThumbUrl) }
+      ?: Result.failure(
+        Throwable("Failed to fetch image from api")
       )
     }
 
