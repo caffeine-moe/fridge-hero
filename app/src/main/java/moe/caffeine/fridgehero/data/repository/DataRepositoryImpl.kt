@@ -1,8 +1,7 @@
 package moe.caffeine.fridgehero.data.repository
 
-import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmObject
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -13,11 +12,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.caffeine.fridgehero.data.mapper.toDomainModel
-import moe.caffeine.fridgehero.data.mapper.toRealmModel
-import moe.caffeine.fridgehero.data.model.realm.RealmFoodCategory
 import moe.caffeine.fridgehero.data.model.realm.RealmFoodItem
 import moe.caffeine.fridgehero.data.model.realm.RealmProfile
 import moe.caffeine.fridgehero.data.model.realm.RealmRecipe
@@ -56,48 +52,49 @@ class DataRepositoryImpl(
   override suspend fun initialise() {
     withContext(Dispatchers.IO) {
       _initialisationStageFlow.emit(InitialisationStage.Started)
-      when {
-        realm.fetchAllByType<RealmFoodCategory>().isNotEmpty() -> {
-          _initialisationStageFlow.emit(InitialisationStage.Finished)
-        }
+      /*      when {
+              realm.fetchAllByType<RealmFoodCategory>().isNotEmpty() -> {
+                _initialisationStageFlow.emit(InitialisationStage.Finished)
+              }
 
-        else -> {
-          val stage = InitialisationStage.TaxonomyInitialisation
-          _initialisationStageFlow.emit(stage)
-          initialiseTaxonomies(stage.progress).fold(
-            onSuccess = {
-              _initialisationStageFlow.emit(InitialisationStage.Finished)
-            },
-            onFailure = {
-              _initialisationStageFlow.emit(InitialisationStage.Error)
-              throw it //gently
-            }
-          )
-        }
-      }
+              else -> {
+                val stage = InitialisationStage.TaxonomyInitialisation
+                _initialisationStageFlow.emit(stage)
+                initialiseTaxonomies(stage.progress).fold(
+                  onSuccess = {
+                    _initialisationStageFlow.emit(InitialisationStage.Finished)
+                  },
+                  onFailure = {
+                    _initialisationStageFlow.emit(InitialisationStage.Error)
+                    throw it //gently
+                  }
+                )
+              }
+            }*/
+      _initialisationStageFlow.emit(InitialisationStage.Finished)
     }
   }
 
-  private suspend fun initialiseTaxonomies(progressFlow: MutableStateFlow<Float>): Result<Nothing?> {
-    val taxonomyNodes =
-      OpenFoodFactsTaxonomyParser.parse()
-        .getOrElse { return Result.failure(it) }
+  /*  private suspend fun initialiseTaxonomies(progressFlow: MutableStateFlow<Float>): Result<Nothing?> {
+      val taxonomyNodes =
+        OpenFoodFactsTaxonomyParser.parse()
+          .getOrElse { return Result.failure(it) }
 
-    realm.write {
-      //write all nodes
-      taxonomyNodes.onEachIndexed { index, node ->
-        coroutineScope.launch {
-          progressFlow.emit(index / taxonomyNodes.keys.size.toFloat())
-        }
-        node.value.toRealmModel().also {
-          it.children += node.value.children.map { child ->
-            child.value.toRealmModel()
-          }.toRealmList()
-          copyToRealm(it, UpdatePolicy.ALL)
+      realm.write {
+        //write all nodes
+        taxonomyNodes.onEachIndexed { index, node ->
+          coroutineScope.launch {
+            progressFlow.emit(index / taxonomyNodes.keys.size.toFloat())
+          }
+          node.value.toRealmModel().also {
+            it.children += node.value.children.map { child ->
+              child.value.toRealmModel()
+            }.toRealmList()
+            copyToRealm(it, UpdatePolicy.ALL)
+          }
         }
       }
-    }
-    /*    realm.fetchAllByType<RealmFoodCategory>().takeLast(20).forEach {
+      *//*    realm.fetchAllByType<RealmFoodCategory>().takeLast(20).forEach {
           println(
             "${it.name} \n|| PARENTS: ${
               it.parentsMap.values.joinToString(", ") { it.name }
@@ -105,9 +102,9 @@ class DataRepositoryImpl(
               it.childrenMap.values.joinToString(", ") { it.name }
             } \n|| LEVEL: ${it.findTrees().lastOrNull()?.values?.map { it.name }}"
           )
-        }*/
+        }*//*
     return Result.success(null)
-  }
+  }*/
 
   override fun getProfileAsFlow(): Flow<Result<Profile>?> =
     realm.fetchAllByTypeAsFlow<RealmProfile>()
@@ -146,37 +143,24 @@ class DataRepositoryImpl(
       )
     }
 
-  /*  override suspend fun upsertFoodItem(foodItem: FoodItem): Result<FoodItem> =
-      withContext(Dispatchers.IO) {
-        realm.updateObject(
-          foodItem.toRealmModel()
-        ).fold(
-          onSuccess = {
-            Result.success(it.toDomainModel())
-          },
-          onFailure = {
-            Result.failure(it)
-          }
-        )
-      }*/
-
-  override suspend fun fetchFoodItemFromApi(barcode: String): Result<FoodItem> =
+  override suspend fun fetchFoodItemFromApi(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>> =
     withContext(Dispatchers.IO) {
       fetchProductByBarcode(barcode).fold(
         onSuccess = { product ->
           Result.success(
-            product.toDomainModel(
-              fetchImageAsByteArrayFromURL(product.imageThumbUrl).fold(
-                onSuccess = { value -> value },
-                onFailure = { byteArrayOf() }
+            Pair(
+              product.toDomainModel(
+                product.categoriesHierarchy
+                  .filter { it.startsWith(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION) }
+                  .map { category ->
+                    category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
+                      .split("-")
+                      .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
+                  }
               ),
-              product.categoriesHierarchy
-                .filter { it.startsWith(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION) }
-                .map { category ->
-                  category.removePrefix(OpenFoodFactsTaxonomyParser.Constants.NODE_DEFINITION)
-                    .split("-")
-                    .joinToString(" ").replaceFirstChar { char -> char.titlecase() }
-                }
+              CompletableDeferred(
+                fetchImageAsByteArrayFromURL(product.imageThumbUrl).getOrNull() ?: byteArrayOf()
+              )
             )
           )
         },
@@ -186,11 +170,11 @@ class DataRepositoryImpl(
       )
     }
 
-  override suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<FoodItem> =
+  override suspend fun retrieveFoodItemCachedFirst(barcode: String): Result<Pair<FoodItem, CompletableDeferred<ByteArray>>> =
     withContext(Dispatchers.IO) {
       realm.fetchAllByType<RealmFoodItem>()
         .firstOrNull { it.barcode == barcode }?.let {
-          Result.success(it.toDomainModel())
+          Result.success(Pair(it.toDomainModel(), CompletableDeferred(it.imageByteArray)))
         } ?: fetchFoodItemFromApi(
         barcode
       ).fold(

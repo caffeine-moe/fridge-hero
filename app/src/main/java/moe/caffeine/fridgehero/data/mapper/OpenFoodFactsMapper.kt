@@ -24,7 +24,6 @@ fun OpenFoodFactsNutriments.toDomainModel(productQuantity: Double): Map<Nutrimen
   )
 
 fun OpenFoodFactsProduct.toDomainModel(
-  thumbnail: ByteArray,
   categoryNames: List<String>,
 ): FoodItem =
   FoodItem(
@@ -32,7 +31,7 @@ fun OpenFoodFactsProduct.toDomainModel(
     name = productName,
     barcode = code,
     brand = brands.split(",").firstOrNull() ?: brands,
-    imageByteArray = thumbnail,
+    imageByteArray = byteArrayOf(),
     categories = categoryNames,
     novaGroup = NovaGroup.entries.getOrNull(novaGroup) ?: NovaGroup.UNKNOWN,
     nutriScore = NutriScore.enumByLetter(nutriscoreGrade),

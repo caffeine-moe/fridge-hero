@@ -45,7 +45,8 @@ sealed class Event {
   //retrieves a food item domain object from openfoodfacts from a barcode
   data class RequestFoodItemFromBarcode(
     val barcode: String,
-    val onResult: Result<FoodItem>.() -> Unit = {}
+    val onItemData: Result<FoodItem>.() -> Unit = {},
+    val onImageData: Result<ByteArray>.() -> Unit = {}
   ) : Event()
 
   // Opens a full screen view of an item

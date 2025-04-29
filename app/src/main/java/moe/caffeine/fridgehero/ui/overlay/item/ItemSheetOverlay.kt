@@ -91,11 +91,19 @@ fun ItemSheetOverlay(
         editableFoodItem = editableFoodItem.copy(barcode = it)
       }.getOrNull() ?: return@RequestBarcodeFromScanner)
         .also { barcode ->
-          Event.RequestFoodItemFromBarcode(barcode) {
-            getOrNull()?.let {
-              editableFoodItem = it
-            } ?: return@RequestFoodItemFromBarcode
-          }.apply(emitEvent)
+          Event.RequestFoodItemFromBarcode(
+            barcode,
+            onImageData = {
+              getOrNull()?.let {
+                editableFoodItem = editableFoodItem.copy(imageByteArray = it)
+              }
+            },
+            onItemData = {
+              getOrNull()?.let {
+                editableFoodItem = it
+              } ?: return@RequestFoodItemFromBarcode
+            }
+          ).apply(emitEvent)
         }
     }.apply(emitEvent)
   }
