@@ -46,9 +46,7 @@ fun Fridge(
   }
   val scope = rememberCoroutineScope()
   val focusManager = LocalFocusManager.current
-  BackHandler {
-    focusManager.clearFocus()
-  }
+  BackHandler { focusManager.clearFocus() }
 
   LazyColumn(
     modifier = Modifier

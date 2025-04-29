@@ -69,6 +69,22 @@ fun ItemCard(
         .fillMaxSize()
         .background(tint.copy(alpha = 0.1f))
     ) {
+      if (item.expiryDates.isNotEmpty()) {
+        Box(
+          Modifier
+            .fillMaxSize()
+            .align(Alignment.BottomEnd)
+        ) {
+          Text(
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+            style = Typography.headlineLarge,
+            text = "x${item.expiryDates.size}",
+            modifier = Modifier
+              .align(Alignment.BottomEnd)
+              .padding(4.dp)
+          )
+        }
+      }
       Column(
         modifier = Modifier
           .fillMaxWidth()
