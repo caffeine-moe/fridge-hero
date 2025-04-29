@@ -12,8 +12,6 @@ import kotlinx.coroutines.launch
 import moe.caffeine.fridgehero.domain.Event
 import moe.caffeine.fridgehero.domain.model.Recipe
 
-var persistentRecipes = listOf("ONION SALAD")
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Recipes(
