@@ -14,7 +14,6 @@ sealed class Screen(
   val selectedIcon: ImageVector,
   val unselectedIcon: ImageVector,
   val hasFloatingActionButton: Boolean = false,
-  val hasSearchBar: Boolean = false,
 ) {
   val title: String
     get() = route.replaceFirstChar { it.titlecaseChar() }
@@ -30,7 +29,6 @@ sealed class Screen(
     Icons.Filled.Kitchen,
     Icons.Outlined.Kitchen,
     true,
-    true
   )
 
   data object Recipes : Screen(
