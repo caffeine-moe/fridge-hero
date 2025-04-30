@@ -26,24 +26,25 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Clock.System.now
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
-import moe.caffeine.fridgehero.domain.helper.toDate
+import java.util.Calendar
 import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +55,12 @@ fun DatePickerModalOverlay(
   prefill: Long? = null,
   onComplete: (Result<Long>) -> Unit,
 ) {
-  val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+  var calendar = Calendar.getInstance()
+  val today = now().toLocalDateTime(TimeZone.currentSystemDefault())
+  calendar.timeInMillis = prefill ?: now().toEpochMilliseconds()
+
+  fun time() =
+    calendar.toInstant().toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault())
 
   val presetOptions = listOf(
     "1 Day" to 1,
@@ -66,37 +72,52 @@ fun DatePickerModalOverlay(
   )
 
   val dropdownData = listOf(
-    "Day" to (1..31).map { it.toString().padStart(2, '0') },
+    "Day" to (1..time().month.maxLength()).map { it.toString().padStart(2, '0') },
     "Month" to (1..12).map { it.toString().padStart(2, '0') },
-    "Year" to ((now.year)..(now.year + 50)).map { it.toString() }
+    "Year" to (((today.year))..(today.year + 50)).map { it.toString() }
   )
 
   if (!visible) return
 
-  val selectedValues = dropdownData.map {
-    remember {
-      mutableStateOf(
-        when (it.first) {
-          "Day" -> now.dayOfMonth.toString().padStart(2, '0')
-          "Month" -> now.monthNumber.toString().padStart(2, '0')
-          "Year" -> now.year.toString()
-          else -> it.second[0]
-        }
-      )
-    }
+  var displayDay by remember {
+    mutableStateOf(
+      calendar.get(Calendar.DAY_OF_MONTH).toString()
+    )
+  }
+  var displayMonth by remember {
+    mutableStateOf(
+      (calendar.get(Calendar.MONTH) + 1).toString()
+    )
+  } // Calendar month is 0-based
+  var displayYear by remember {
+    mutableStateOf(calendar.get(Calendar.YEAR).toString())
   }
 
-  val selectedDate by remember(selectedValues) {
-    derivedStateOf {
-      LocalDate(
-        selectedValues[2].value.toInt(),
-        selectedValues[1].value.toInt(),
-        selectedValues[0].value.toInt()
-      )
-    }
+  fun updateDisplayDate() {
+    displayDay = calendar.get(Calendar.DAY_OF_MONTH).toString()
+    displayMonth = (calendar.get(Calendar.MONTH) + 1).toString()
+    displayYear = calendar.get(Calendar.YEAR).toString()
   }
 
   val expandedStates = dropdownData.map { remember { mutableStateOf(false) } }
+
+  fun updateSelection(updatedDate: LocalDate) {
+    calendar.apply {
+      set(Calendar.YEAR, updatedDate.year)
+      set(Calendar.DAY_OF_YEAR, updatedDate.dayOfYear)
+    }
+    updateDisplayDate()
+  }
+
+  fun updateDateFromLabel(label: String, value: String) {
+    when (label) {
+      "Day" -> calendar.apply { set(Calendar.DAY_OF_MONTH, value.toIntOrNull() ?: 1) }
+      "Month" -> calendar.apply { set(Calendar.MONTH, value.toIntOrNull()?.minus(1) ?: 1) }
+      "Year" -> calendar.apply { set(Calendar.YEAR, value.toIntOrNull() ?: 1970) }
+      else -> return
+    }
+    updateDisplayDate()
+  }
 
   Dialog(
     onDismissRequest = { onComplete(Result.failure(Throwable("Dismissed"))) },
@@ -117,16 +138,6 @@ fun DatePickerModalOverlay(
         )
 
         Column {
-
-          fun updateSelection(updatedDate: LocalDate) {
-            selectedValues[0].value = updatedDate.dayOfMonth.toString().padStart(2, '0')
-            selectedValues[1].value = updatedDate.monthNumber.toString().padStart(2, '0')
-            selectedValues[2].value = updatedDate.year.toString()
-          }
-
-          if (prefill != null)
-            updateSelection(prefill.toDate())
-
           @Composable
           fun Preset(days: Int, label: String) {
             Row(
@@ -143,10 +154,9 @@ fun DatePickerModalOverlay(
                 Row {
                   IconButton(
                     onClick = {
-                      updateSelection(selectedDate.minus(days, DateTimeUnit.DAY))
+                      updateSelection(time().date.minus(days, DateTimeUnit.DAY))
                     },
-
-                    ) {
+                  ) {
                     Icon(
                       Icons.Filled.Remove,
                       "Remove ${days.days.inWholeDays} days off of date."
@@ -154,7 +164,7 @@ fun DatePickerModalOverlay(
                   }
                   IconButton(
                     onClick = {
-                      updateSelection(selectedDate.plus(days, DateTimeUnit.DAY))
+                      updateSelection(time().date.plus(days, DateTimeUnit.DAY))
                     },
                   ) {
                     Icon(
@@ -201,7 +211,12 @@ fun DatePickerModalOverlay(
               ) {
                 Box(contentAlignment = Alignment.Center) {
                   OutlinedTextField(
-                    value = selectedValues[index].value,
+                    value = when (label) {
+                      "Day" -> displayDay.toString().padStart(2, '0')
+                      "Month" -> displayMonth.toString().padStart(2, '0')
+                      "Year" -> displayYear.toString()
+                      else -> "0" // Should not happen
+                    },
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(label) },
@@ -223,7 +238,7 @@ fun DatePickerModalOverlay(
                       DropdownMenuItem(
                         text = { Text(item) },
                         onClick = {
-                          selectedValues[index].value = item
+                          updateDateFromLabel(label, item)
                           expandedStates[index].value = false
                         }
                       )
@@ -254,7 +269,9 @@ fun DatePickerModalOverlay(
             Button(
               onClick = {
                 val timestamp = runCatching {
-                  selectedDate.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+                  time()
+                    .date.atStartOfDayIn(TimeZone.currentSystemDefault())
+                    .toEpochMilliseconds()
                 }.getOrDefault(-1L)
                 onComplete(Result.success(timestamp))
               },

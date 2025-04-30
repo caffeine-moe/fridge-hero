@@ -201,9 +201,9 @@ fun ItemSheetOverlay(
                 ElevatedCard {
                   ExpiryEditor(
                     editableFoodItem.expiryDates,
-                    onRequestExpiry = { prefill, it ->
+                    onRequestExpiry = { prefill, onResult ->
                       Event.RequestDateFromPicker(prefill) {
-                        apply(it)
+                        onResult()
                       }.apply(emitEvent)
                     },
                     small = !expiryEditorExpanded,
