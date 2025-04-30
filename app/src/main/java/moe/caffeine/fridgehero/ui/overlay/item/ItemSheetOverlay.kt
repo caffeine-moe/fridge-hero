@@ -53,6 +53,7 @@ import moe.caffeine.fridgehero.ui.component.FloatingActionBar
 import moe.caffeine.fridgehero.ui.component.item.ExpiryEditor
 import moe.caffeine.fridgehero.ui.component.item.ItemEditor
 import moe.caffeine.fridgehero.ui.component.itemsheet.ScannerFloatingActionButton
+import moe.caffeine.fridgehero.ui.screen.home.component.stats.PieChart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -213,6 +214,18 @@ fun ItemSheetOverlay(
                       editableFoodItem = editableFoodItem.copy(expiryDates = it)
                     }
                   )
+                }
+                Spacer(Modifier.size(8.dp))
+                if (editableFoodItem.nutriments.isNotEmpty() && !editableFoodItem.nutriments.all { it.value == 0.0 }) {
+                  ElevatedCard {
+                    Box(Modifier.padding(8.dp)) {
+                      PieChart(
+                        editableFoodItem.nutriments,
+                        1,
+                        1
+                      )
+                    }
+                  }
                 }
                 Spacer(Modifier.size(8.dp))
                 ElevatedCard(

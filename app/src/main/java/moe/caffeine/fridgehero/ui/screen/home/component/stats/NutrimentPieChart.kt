@@ -57,6 +57,7 @@ fun PieChart(
     MaterialTheme.colorScheme.tertiaryContainer,
     MaterialTheme.colorScheme.tertiary,
     MaterialTheme.colorScheme.secondary,
+    MaterialTheme.colorScheme.inversePrimary
   )
 
   var lastValue = 0f
