@@ -31,8 +31,7 @@ import moe.caffeine.fridgehero.ui.theme.Typography
 @Composable
 fun PieChart(
   data: Map<Nutriment, Double>,
-  itemsCalculated: Int,
-  itemsTotal: Int
+  middleText: String = ""
 ) {
   val sortedData = data.entries.sortedByDescending { it.value }
 
@@ -72,7 +71,7 @@ fun PieChart(
     Box(
       contentAlignment = Alignment.Center
     ) {
-      Text("For $itemsCalculated of $itemsTotal items.")
+      Text(middleText)
       Canvas(
         modifier = Modifier
           .align(Alignment.Center)
@@ -112,7 +111,7 @@ fun PieChartDetails(
   ) {
     data.forEachIndexed { index, entry ->
       DetailsPieChartItem(
-        data = Pair(entry.key.title, entry.value),
+        data = Triple(entry.key.title, entry.value, entry.key.unit),
         colour = colours[index]
       )
     }
@@ -122,7 +121,7 @@ fun PieChartDetails(
 
 @Composable
 fun DetailsPieChartItem(
-  data: Pair<String, Double>,
+  data: Triple<String, Double, String>,
   height: Dp = 45.dp,
   colour: Color
 ) {
@@ -150,18 +149,14 @@ fun DetailsPieChartItem(
       Column(modifier = Modifier.fillMaxWidth()) {
         Text(
           modifier = Modifier.padding(start = 15.dp),
-          text = data.first/*.lowercase()
-            .split("_")
-            .joinToString(" ") {
-              it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-            }*/,
+          text = data.first,
           fontWeight = FontWeight.Medium,
           fontSize = 22.sp,
           color = MaterialTheme.colorScheme.onSurface
         )
         Text(
           modifier = Modifier.padding(start = 15.dp),
-          text = "${data.second} g",
+          text = "${data.second} ${data.third}",
           fontWeight = FontWeight.Medium,
           fontSize = 22.sp,
           color = Color.Gray

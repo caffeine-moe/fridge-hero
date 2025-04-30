@@ -16,6 +16,7 @@ import moe.caffeine.fridgehero.domain.model.DomainModel
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutrimentAvailability
 import moe.caffeine.fridgehero.ui.component.item.resolveNovaGroupPainter
 import moe.caffeine.fridgehero.ui.component.item.resolveNutriScorePainter
 import org.mongodb.kbson.BsonObjectId
@@ -32,6 +33,7 @@ data class FoodItem(
   val nutriScore: NutriScore = NutriScore.UNKNOWN,
   val nutriments: Map<Nutriment, Double> = mapOf(),
   val isFromRecipe: Boolean = false,
+  val nutrimentAvailability: NutrimentAvailability = NutrimentAvailability.UNAVALIABLE
 ) : DomainModel, MappableModel<FoodItem, RealmFoodItem>, Parcelable {
 
   val realExpiryDates: List<Long>
@@ -53,6 +55,11 @@ data class FoodItem(
 
   val nutriScorePainter: @Composable () -> Painter = resolveNutriScorePainter(nutriScore)
 
+  val hasNutritionalData: Boolean
+    get() = nutrimentAvailability != NutrimentAvailability.UNAVALIABLE
+            || (nutriments.isNotEmpty()
+            && !nutriments.all { it.value == 0.0 })
+
   override fun toDomainModel() = this
 
   //auto generated because of ByteArray
@@ -72,6 +79,8 @@ data class FoodItem(
     if (nutriments != other.nutriments) return false
     if (novaGroup != other.novaGroup) return false
     if (nutriScore != other.nutriScore) return false
+    if (isFromRecipe != other.isFromRecipe) return false
+    if (nutrimentAvailability != other.nutrimentAvailability) return false
 
     return true
   }
@@ -84,6 +93,12 @@ data class FoodItem(
     result = 31 * result + imageByteArray.contentHashCode()
     result = 31 * result + expiryDates.hashCode()
     result = 31 * result + categories.hashCode()
+    result = 31 * result + novaGroup.hashCode()
+    result = 31 * result + nutriScore.hashCode()
+    result = 31 * result + nutriments.hashCode()
+    result = 31 * result + isFromRecipe.hashCode()
+    result = 31 * result + nutrimentAvailability.hashCode()
+
     return result
   }
 
@@ -96,8 +111,8 @@ data class FoodItem(
     parcel.createByteArray() ?: byteArrayOf(),
     parcel.createLongArray()?.toList() ?: listOf(),
     parcel.createStringArray()?.toList() ?: listOf(),
-    novaGroup = NovaGroup.entries.getOrNull(parcel.readInt()) ?: NovaGroup.UNKNOWN,
-    nutriScore = NutriScore.enumByLetter(parcel.readString() ?: "")
+    NovaGroup.entries.getOrNull(parcel.readInt()) ?: NovaGroup.UNKNOWN,
+    NutriScore.enumByLetter(parcel.readString() ?: ""),
   )
 
   override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -150,6 +165,7 @@ data class FoodItem(
       }
       )
       isFromRecipe = this@FoodItem.isFromRecipe
+      nutrimentAvailability = this@FoodItem.nutrimentAvailability.ordinal
       /*    categories = this@toRealmModel.categories.map {
             it.toRealmModel(realm)
           }.toRealmList()*/

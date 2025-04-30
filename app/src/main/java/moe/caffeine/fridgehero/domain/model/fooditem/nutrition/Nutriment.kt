@@ -1,8 +1,8 @@
 package moe.caffeine.fridgehero.domain.model.fooditem.nutrition
 
-enum class Nutriment(val title: String) {
+enum class Nutriment(val title: String, val unit: String = "g") {
   CARBOHYDRATES("Carbohydrates"),
-  ENERGY("Energy"),
+  ENERGY("Energy", "kcal"),
   FAT("Fat"),
   FIBER("Fiber"),
   PROTEINS("Proteins"),

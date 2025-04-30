@@ -15,6 +15,7 @@ import moe.caffeine.fridgehero.domain.model.fooditem.FoodItem
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NovaGroup
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutriScore
 import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.Nutriment
+import moe.caffeine.fridgehero.domain.model.fooditem.nutrition.NutrimentAvailability
 import org.mongodb.kbson.BsonObjectId
 
 class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
@@ -31,6 +32,7 @@ class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
   var novaGroup: Int = 0
   var nutriScore: String = ""
   var nutriments: RealmList<RealmNutrimentEntry> = realmListOf()
+  var nutrimentAvailability = NutrimentAvailability.UNAVALIABLE.ordinal
 
   @Ignore
   val categories: (Realm) -> Map<String, RealmFoodCategory>
@@ -57,7 +59,9 @@ class RealmFoodItem : RealmObject, MappableModel<FoodItem, RealmFoodItem> {
       nutriments = nutriments.associate {
         Nutriment.valueOf(it.nutriment) to it.value
       },
-      isFromRecipe
+      isFromRecipe,
+      NutrimentAvailability.entries.getOrNull(nutrimentAvailability)
+        ?: NutrimentAvailability.UNAVALIABLE
     )
 
   override fun toRealmModel(): RealmFoodItem = this

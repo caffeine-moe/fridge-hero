@@ -37,8 +37,7 @@ fun HeroStats(
           PieChart(
             data = nutrimentBreakdown.totals
               .filterNot { it.key == Nutriment.ENERGY },
-            itemsCalculated = nutrimentBreakdown.items.sumOf { it.expiryDates.size },
-            itemsTotal = foodItems.sumOf { it.expiryDates.size }
+            middleText = "For ${nutrimentBreakdown.items.sumOf { it.expiryDates.size }} of ${foodItems.sumOf { it.expiryDates.size }} items.",
           )
       }
     }

@@ -221,7 +221,7 @@ class MainViewModel(context: Context) : ViewModel() {
     usingExpiryDates: Boolean
   ): NutrimentBreakdown {
     val filtered =
-      items.filterNot { item -> item.nutriments.isEmpty() || item.nutriments.values.all { it == 0.0 } }
+      items.filterNot { item -> item.hasNutritionalData }
     val totals: MutableMap<Nutriment, Double> = mutableMapOf()
 
     Nutriment.entries.forEach { nutriment ->

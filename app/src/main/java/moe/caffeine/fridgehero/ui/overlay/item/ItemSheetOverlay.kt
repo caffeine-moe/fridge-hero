@@ -216,13 +216,12 @@ fun ItemSheetOverlay(
                   )
                 }
                 Spacer(Modifier.size(8.dp))
-                if (editableFoodItem.nutriments.isNotEmpty() && !editableFoodItem.nutriments.all { it.value == 0.0 }) {
+                if (editableFoodItem.hasNutritionalData) {
                   ElevatedCard {
                     Box(Modifier.padding(8.dp)) {
                       PieChart(
                         editableFoodItem.nutriments,
-                        1,
-                        1
+                        "Per ${editableFoodItem.nutrimentAvailability.title}."
                       )
                     }
                   }
