@@ -117,8 +117,10 @@ fun ItemEditor(
             .fillMaxWidth()
         ) {
           BoxWithConstraints(Modifier.fillMaxWidth(0.5f)) {
-            val targetWidth = if (!compact) maxWidth.coerceAtMost(800.dp) else 80.dp
-            val targetHeight = if (!compact) maxWidth.coerceAtMost(800.dp) else 80.dp
+            val targetWidth =
+              if (!compact) this.constraints.maxWidth.dp.coerceAtMost(800.dp) else 80.dp
+            val targetHeight =
+              if (!compact) this.constraints.maxWidth.dp.coerceAtMost(800.dp) else 80.dp
 
             val animatedWidth by animateDpAsState(
               targetValue = targetWidth,
@@ -298,11 +300,12 @@ fun ItemEditor(
     ) {
       Column(Modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth()) {
-          Box(Modifier
-            .fillMaxWidth()
-            .clickable {
-              categoryEditorExpanded = !categoryEditorExpanded
-            }) {
+          Box(
+            Modifier
+              .fillMaxWidth()
+              .clickable {
+                categoryEditorExpanded = !categoryEditorExpanded
+              }) {
             Text(
               modifier = Modifier
                 .align(Alignment.CenterStart)
