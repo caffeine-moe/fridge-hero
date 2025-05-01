@@ -38,7 +38,7 @@ fun ExpiringSoon(
         .sortedBy { foodItem -> foodItem.realExpiryDates.min() }
     }
   }
-  if (fridge.isEmpty())
+  if (filteredFridge.isEmpty())
     return
   val scrollState = rememberScrollState()
   Text(
