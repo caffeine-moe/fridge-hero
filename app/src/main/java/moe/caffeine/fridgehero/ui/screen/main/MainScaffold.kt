@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -51,7 +50,6 @@ fun MainScaffold(
   var showHidden by rememberSaveable { mutableStateOf(false) }
   var searchBarQuery by rememberSaveable { mutableStateOf("") }
   var searchBarHasFocus by rememberSaveable { mutableStateOf(false) }
-  val focusManager = LocalFocusManager.current
 
   Scaffold(
     modifier = Modifier
@@ -68,9 +66,6 @@ fun MainScaffold(
         },
         onQueryChanged = {
           searchBarQuery = it
-          if (searchBarQuery.isEmpty()) {
-            focusManager.clearFocus()
-          }
         },
         onSearchBarFocusState = {
           searchBarHasFocus = it.isFocused

@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +27,7 @@ fun CustomSearchBar(
   onTextChanged: (String) -> Unit,
 ) {
   var showClearIcon by rememberSaveable { mutableStateOf(false) }
+  val focusManager = LocalFocusManager.current
   SearchBar(
     modifier = modifier
       .onFocusChanged {
@@ -47,7 +49,10 @@ fun CustomSearchBar(
           if (!showClearIcon) return@InputField
           IconButton(
             onClick = {
-              onTextChanged("")
+              if (query == "")
+                focusManager.clearFocus()
+              else
+                onTextChanged("")
             }
           ) {
             Icon(
