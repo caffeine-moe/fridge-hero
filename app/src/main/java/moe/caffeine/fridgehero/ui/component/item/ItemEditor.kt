@@ -14,7 +14,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -116,11 +115,11 @@ fun ItemEditor(
           Modifier
             .fillMaxWidth()
         ) {
-          BoxWithConstraints(Modifier.fillMaxWidth(0.5f)) {
+          Box(Modifier.fillMaxWidth(0.5f)) {
             val targetWidth =
-              if (!compact) this.constraints.maxWidth.dp.coerceAtMost(800.dp) else 80.dp
+              if (!compact) 240.dp else 80.dp
             val targetHeight =
-              if (!compact) this.constraints.maxWidth.dp.coerceAtMost(800.dp) else 80.dp
+              if (!compact) 240.dp else 80.dp
 
             val animatedWidth by animateDpAsState(
               targetValue = targetWidth,
