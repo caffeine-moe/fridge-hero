@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,6 +46,17 @@ fun ExpiryEditor(
 ) {
   val scope = rememberCoroutineScope()
   val currentExpiryDates by rememberUpdatedState(expiryDates)
+
+  fun edit(index: Int, expiryDate: Long) {
+    scope.launch {
+      onRequestExpiry(expiryDate) {
+        onSuccess {
+          onListChanged(currentExpiryDates.toMutableList().apply { set(index, it) })
+        }
+      }
+    }
+  }
+
   Column(Modifier.padding(8.dp)) {
     Row(Modifier.fillMaxWidth()) {
       Box(Modifier.fillMaxWidth()) {
@@ -84,13 +98,7 @@ fun ExpiryEditor(
           Box(Modifier.padding(8.dp)) {
             ActionableSwipeToDismissBox(
               modifier = Modifier.clickable {
-                scope.launch {
-                  onRequestExpiry(expiryDate) {
-                    onSuccess {
-                      onListChanged(currentExpiryDates.toMutableList().apply { set(index, it) })
-                    }
-                  }
-                }
+                edit(index, expiryDate)
               },
               onStartToEndAction = {
                 if (!readOnly) {
@@ -105,24 +113,55 @@ fun ExpiryEditor(
               },
             ) {
               Card {
-                Column(
-                  Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                ) {
-                  Text(
-                    softWrap = true,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    text = expiryDate.toReadableDate()
-                  )
-                  Spacer(Modifier.size(4.dp))
-                  Text(
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    text = expiryDate.readableDaysUntil(),
-                    color = if (expiryDate.isExpired()) Color.Red else MaterialTheme.colorScheme.onSurface
-                  )
+                Box(Modifier.fillMaxWidth()) {
+                  Column(
+                    Modifier
+                      .fillMaxWidth()
+                      .padding(8.dp)
+                  ) {
+                    Text(
+                      softWrap = true,
+                      style = MaterialTheme.typography.titleLarge,
+                      fontWeight = FontWeight.Bold,
+                      text = expiryDate.toReadableDate().takeUnless { expiryDate == -1L }
+                        ?: "Never."
+                    )
+                    if (expiryDate != -1L) {
+                      Spacer(Modifier.size(4.dp))
+                      Text(
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        text = expiryDate.readableDaysUntil(),
+                        color = if (expiryDate.isExpired()) Color.Red else MaterialTheme.colorScheme.onSurface
+                      )
+                    }
+                  }
+                  Row(
+                    Modifier
+                      .align(Alignment.CenterEnd)
+                      .padding(8.dp)
+                  ) {
+                    IconButton(
+                      onClick = {
+                        edit(index, expiryDate)
+                      }
+                    ) {
+                      Icon(
+                        Icons.Default.Edit,
+                        "Edit Expiry Date"
+                      )
+                    }
+                    IconButton(
+                      onClick = {
+                        onListChanged(currentExpiryDates - expiryDate)
+                      }
+                    ) {
+                      Icon(
+                        Icons.Default.Delete,
+                        "Delete Expiry Date"
+                      )
+                    }
+                  }
                 }
               }
             }
