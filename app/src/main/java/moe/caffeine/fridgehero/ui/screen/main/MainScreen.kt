@@ -1,5 +1,7 @@
 package moe.caffeine.fridgehero.ui.screen.main
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
@@ -13,6 +15,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,7 +32,7 @@ import moe.caffeine.fridgehero.ui.overlay.item.ItemSearchOverlay
 import moe.caffeine.fridgehero.ui.overlay.item.ItemSheetOverlay
 import moe.caffeine.fridgehero.ui.screen.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
   profile: Profile,
@@ -74,6 +79,21 @@ fun MainScreen(
     if (barcodeScanRequest != null && itemBottomSheetState.isVisible)
       itemBottomSheetState.hide()
   }
+
+
+  //request notifications permission (api >= 33)
+  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    val notificationsPermissionState =
+      rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+    LaunchedEffect(notificationsPermissionState) {
+      when {
+        !notificationsPermissionState.status.isGranted -> {
+          notificationsPermissionState.launchPermissionRequest()
+        }
+      }
+    }
+  }
+
 
   // collects events from the event flow and calls their respective lambdas
   // (cleaner than a massive when block being here imo)
